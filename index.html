@@ -626,7 +626,7 @@ table.fin tfoot td{font-weight:700;color:var(--navy);border-bottom:0}
     </section>
     <section>
       <h3>Sócios</h3>
-      <table class="cfg"><thead><tr><th>Nome</th><th>Empresa</th><th>Cargo</th><th>E-mail</th><th>Telefone</th><th title="Assina por padrão">Assina</th><th></th></tr></thead><tbody id="cfgSocios"></tbody></table>
+      <table class="cfg"><thead><tr><th>Nome</th><th>Empresa</th><th>Cargo</th><th>E-mail</th><th>Telefone</th><th title="Assina por padrão">Assina</th><th title="PIN cadastrado no Apps Script">PIN</th><th></th></tr></thead><tbody id="cfgSocios"></tbody></table>
       <button class="btn sm" id="btnAddSocio" style="margin-top:6px">+ Sócio</button>
       <p class="hint">Toda proposta precisa da aprovação de todos os sócios desta lista, menos de quem a elaborou.</p>
     </section>
@@ -962,6 +962,7 @@ const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','ag
 const dataExtenso = s => { const [y,m,d] = String(s || today()).split('-'); return `${d} de ${MESES[+m-1]} de ${y}`; };
 const fmtDT = iso => { if(!iso) return '—'; const d = new Date(iso); return isNaN(d) ? iso : d.toLocaleString('pt-BR', {dateStyle:'short', timeStyle:'short'}); };
 const daysTo = s => { if(!s) return null; const a = new Date(today()+'T00:00:00'), b = new Date(String(s).slice(0,10)+'T00:00:00'); return Math.round((b - a) / 864e5); };
+const normNome = n => String(n || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim().toLowerCase();
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,8);
 const clone = o => JSON.parse(JSON.stringify(o));
 const num = v => { const n = parseFloat(String(v).replace(',', '.')); return isNaN(n) ? 0 : n; };
@@ -990,14 +991,40 @@ const docPadrao = () => state.config.docPadrao || DEFAULT_DOC;
 const mergeCfg = c => { const o = Object.assign(clone(DEFAULT_CONFIG), c || {}); o.rodape = Object.assign(clone(DEFAULT_CONFIG.rodape), (c && c.rodape) || {}); o.rateio = Object.assign(clone(DEFAULT_CONFIG.rateio), (c && c.rateio) || {}); o.pagar = Object.assign(clone(DEFAULT_CONFIG.pagar), (c && c.pagar) || {}); return o; };
 
 /* ================== Armazenamento ================== */
-async function api(payload){
-  const r = await fetch(state.settings.api, {
-    method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
-    body: JSON.stringify({...payload, token: state.settings.token})
-  });
-  const j = await r.json();
-  if(!j.ok && !j.conflict) throw new Error(j.error || 'Erro no servidor');
-  return j;
+/* Chamada ao Apps Script com novas tentativas automáticas quando o Google responde com uma página de erro */
+let apiBusy = 0;
+async function api(payload, opts){
+  const tries = (opts && opts.tries) || 3;
+  let last = null;
+  for(let t = 0; t < tries; t++){
+    if(t) await new Promise(r => setTimeout(r, t === 1 ? 1200 : 3500));
+    apiBusy++;
+    try{
+      const r = await fetch(state.settings.api, {
+        method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+        body: JSON.stringify({...payload, token: state.settings.token})
+      });
+      const txt = await r.text();
+      let j;
+      try{ j = JSON.parse(txt); }
+      catch(e){ last = new Error(htmlErro(txt)); continue; }     // página do Google: tenta de novo
+      if(!j.ok && j.retry){ last = new Error(j.error || 'Servidor ocupado'); continue; }
+      if(!j.ok && !j.conflict) throw Object.assign(new Error(j.error || 'Erro no servidor'), {final: true});
+      return j;
+    }catch(e){
+      if(e.final) throw e;
+      last = e.message && /Failed to fetch|NetworkError|Load failed/i.test(e.message) ? new Error('Sem internet ou o Google não respondeu.') : e;
+    }finally{ apiBusy--; }
+  }
+  throw last || new Error('O Google não respondeu.');
+}
+/* Traduz a página de erro do Google numa orientação */
+function htmlErro(html){
+  const h = String(html || '').toLowerCase();
+  if(/accounts\.google|signin|fazer login|sign in/.test(h)) return 'A implantação pede login: em Gerenciar implantações, deixe “Quem pode acessar: Qualquer pessoa”.';
+  if(/autoriza|authorization/.test(h)) return 'O script precisa ser autorizado: rode “configurarPlanilha” no editor do Apps Script.';
+  if(/unable to open|não foi possível abrir|nao foi possivel abrir/.test(h)) return 'O Google não abriu o script agora (URL incorreta ou instabilidade). Tente ⟳ Atualizar.';
+  return 'O Google não respondeu direito agora. Tente ⟳ Atualizar em instantes.';
 }
 
 async function loadAll(silent){
@@ -1025,6 +1052,7 @@ async function loadAll(silent){
     setSync('ok');
   }catch(e){
     console.error(e);
+    if(silent && state.items.length){ setSync('ok'); $('#sync span:last-child').textContent = 'Sem atualização agora — mostrando os últimos dados · ' + new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}); return; }
     const c = LS.get('pp_cache', null);
     if(c && !state.items.length){ state.items = c.items; state.recebiveis = c.recebiveis || []; state.pagamentos = c.pagamentos || []; state.assinaturas = c.assinaturas || {}; state.config = mergeCfg(c.config); }
     setSync('err', e.message);
@@ -1831,7 +1859,7 @@ function renderSocioEditor(list){
   $('#cfgSocios').innerHTML = list.map((s, i) => `<tr><td><input class="sn" value="${esc(s.nome)}"></td>
     <td><select class="se">${emps.map(e => `<option value="${esc(e.id)}" ${e.id === s.empresa ? 'selected' : ''}>${esc(e.sigla || e.razao)}</option>`).join('')}</select></td>
     <td><input class="sc" value="${esc(s.cargo)}" style="width:80px"></td><td><input class="sm_" value="${esc(s.email)}"></td><td><input class="st" value="${esc(s.telefone)}" style="width:130px"></td>
-    <td style="text-align:center"><input type="checkbox" class="sa" ${s.assina ? 'checked' : ''} style="width:auto"></td><td><button class="btn sm ghost" data-delsoc="${i}">✕</button></td></tr>`).join('');
+    <td style="text-align:center"><input type="checkbox" class="sa" ${s.assina ? 'checked' : ''} style="width:auto"></td><td style="text-align:center;white-space:nowrap">${!useApi() ? '<span class="sub">—</span>' : (state.pins || []).some(k => normNome(k) === normNome(s.nome)) ? '<span style="color:var(--ok);font-weight:700" title="PIN cadastrado">✓</span>' : '<span style="color:var(--danger);font-weight:700" title="Sem PIN na propriedade PINS do Apps Script">sem PIN</span>'}</td><td><button class="btn sm ghost" data-delsoc="${i}">✕</button></td></tr>`).join('');
 }
 function readSocioEditor(){ return $$('#cfgSocios tr').map(tr => ({nome: tr.querySelector('.sn').value.trim(), empresa: tr.querySelector('.se').value, cargo: tr.querySelector('.sc').value.trim(), email: tr.querySelector('.sm_').value.trim(), telefone: tr.querySelector('.st').value.trim(), assina: tr.querySelector('.sa').checked})); }
 function renderTplEditor(list){
@@ -2666,8 +2694,13 @@ document.addEventListener('keydown', e => {
   }
 });
 window.addEventListener('beforeunload', e => { if(isDirty()){ e.preventDefault(); e.returnValue = ''; } });
-setInterval(() => { if(useApi() && !state.draft && !document.hidden) loadAll(true); }, 60000);
-window.addEventListener('focus', () => { if(useApi() && !state.draft) loadAll(true); });
+let lastAuto = 0;
+function autoRefresh(){
+  if(!useApi() || state.draft || document.hidden || apiBusy > 0 || Date.now() - lastAuto < 20000) return;
+  lastAuto = Date.now(); loadAll(true);
+}
+setInterval(autoRefresh, 60000);
+window.addEventListener('focus', autoRefresh);
 
 /* --- visões --- */
 $('#views').onclick = e => {
