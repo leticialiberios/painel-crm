@@ -8,7 +8,7 @@
  * Veja o LEIAME.md para o passo a passo.
  */
 
-const VERSAO_BACKEND = 3;   // o painel confere este número para saber se a implantação está atualizada
+const VERSAO_BACKEND = 4;   // o painel confere este número para saber se a implantação está atualizada
 const SHEET_ITEMS = 'Propostas';
 const SHEET_CONFIG = 'Config';
 const SHEET_REC = 'Recebiveis';
@@ -307,9 +307,18 @@ function contentHash(it) {
 /* ----- Financeiro ----- */
 function numBR(v) { var n = parseFloat(String(v === undefined || v === null ? '' : v).replace(',', '.')); return isNaN(n) ? 0 : n; }
 function round2(v) { return Math.round(v * 100) / 100; }
+function docSubtotal(doc) { return ((doc && doc.itens) || []).reduce(function (a, r) { return a + numBR(r.valor); }, 0); }
+/* desconto: {tipo:'pct'|'valor', valor, motivo} */
+function docDescontoValor(doc) {
+  var d = doc && doc.desconto;
+  if (!d || !numBR(d.valor)) return 0;
+  var s = docSubtotal(doc);
+  var v = d.tipo === 'valor' ? numBR(d.valor) : s * numBR(d.valor) / 100;
+  return round2(Math.min(v, s));
+}
+function docTotalLiquido(doc) { return round2(docSubtotal(doc) - docDescontoValor(doc)); }
 function propostaTotal(it) {
-  var itens = (it.doc && it.doc.itens) || [];
-  var t = itens.reduce(function (a, r) { return a + numBR(r.valor); }, 0);
+  var t = docTotalLiquido(it.doc || {});
   return t || numBR(it.valor);
 }
 /* Gera os recebíveis (um por parcela) de uma proposta aceita. */

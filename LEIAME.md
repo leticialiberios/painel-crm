@@ -18,6 +18,7 @@ Painel em um único arquivo (`index.html`), código aberto e sem dependências. 
 
 **5. Parcelas e pagamento** — Na aba **Proposta**, defina as parcelas: percentual e condição, por exemplo "no aceite da proposta" e "na conclusão do processo".
 - O texto da forma de pagamento é gerado sozinho a partir das parcelas.
+- **Desconto:** abaixo dos itens, informe o desconto em % ou em R$ e o motivo (ex.: "1º projeto"). O PDF mostra o SUBTOTAL e o "TOTAL (APLICADO DESCONTO DE 10% - 1º PROJETO)". O desconto já vale para as parcelas e para os recebíveis.
 - Na aba **Financeiro** da proposta, informe o serviço (nome curto), a captação (quem trouxe o cliente), a competência (quem emite a NF), o imposto, a previsão de cada parcela e eventuais desembolsos.
 - A divisão do líquido segue a regra da captação. Em caso de exceção, marque "Exceção" e informe o motivo. A captação e a divisão entram na aprovação dos sócios.
 
