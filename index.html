@@ -1100,6 +1100,7 @@ async function persistItem(item){
     if(j.conflict) throw new Error('Conflito persistente; atualize a página.');
   }
   upsertLocal(j.item);
+  state.lastNotif = j.notif || null;
   if(j.recebiveis && j.recebiveis.length){ j.recebiveis.forEach(upsertRecLocal); state.lastGenerated = true; }
   setSync('ok');
   return j.item;
@@ -1552,6 +1553,7 @@ function renderApproval(){
     acts.push(`<button class="btn okb" id="apOk">✓ Aprovar</button>`, `<button class="btn warnb" id="apAdj">Solicitar ajustes</button>`);
   }
   if(ap.estado === 'pendente' && ap.autor === me()) acts.push(`<button class="btn sm" id="apCancel">Cancelar envio</button>`);
+  if(ap.estado === 'pendente' && useApi()) acts.push(`<button class="btn sm" id="apRemind">✉ Reenviar e-mail a quem falta</button>`);
   if(ap.estado === 'aprovada') acts.push(`<button class="btn primary" id="apPdf">📄 Gerar PDF final</button>`);
   if(ap.estado === 'aprovada'){
     const sg = (d.signatarios || []), sem = sg.filter(n => !state.assinaturas[n]);
@@ -1569,6 +1571,7 @@ function renderApproval(){
   const on = (id, fn) => { const el = $('#' + id); if(el) el.onclick = fn; };
   on('apSubmit', submitForApproval);
   on('apCancel', cancelApproval);
+  on('apRemind', remindApprovers);
   on('apOk', () => openVote('aprovado'));
   on('apAdj', () => openVote('ajustes'));
   on('apPdf', () => openPreview());
@@ -1589,14 +1592,45 @@ async function submitForApproval(){
   if(Math.abs(somaDiv - 100) > 0.01){ showTab('financeiro'); toast(`A divisão soma ${fmtPct(somaDiv)}; precisa somar 100%.`); return; }
   const req = requiredApprovers(state.config, me());
   if(!req.length){ toast('Cadastre os sócios em Configurações.'); return; }
-  if(!confirm(`Enviar a proposta ${d.codigo} para aprovação de ${req.join(' e ')}?`)) return;
+  let aviso = '';
+  if(useApi() && state.config.notificarEmail !== false){
+    const semEmail = req.filter(n => !(state.config.socios.find(s => normNome(s.nome) === normNome(n)) || {}).email);
+    if(semEmail.length) aviso += `\n\n⚠ Sem e-mail cadastrado (não serão avisados): ${semEmail.join(', ')}.`;
+    if(!state.config.urlPainel) aviso += `\n\n⚠ O “Link do painel” não está preenchido em Configurações — o e-mail irá sem o botão para abrir a proposta.`;
+  }
+  if(!confirm(`Enviar a proposta ${d.codigo} para aprovação de ${req.join(' e ')}?${aviso}`)) return;
+  state.lastNotif = null;
   const pa = apOf(state.items.find(x => x.id === d.id) || d);
   d.aprovacao = {estado:'pendente', rodada: (pa.rodada || 0) + 1, autor: me(), enviadoEm:'', hash:'', votos:{}};
   d.log.push({data: new Date().toISOString(), autor: me(), texto: `Enviou para aprovação (rodada ${d.aprovacao.rodada})`});
   // grava direto, sem passar pelo aviso de anulação
   state.original = '';
   const ok = await saveDraftRaw();
-  if(ok) { toast(useApi() && state.config.notificarEmail !== false ? 'Enviada para aprovação — os sócios serão avisados por e-mail.' : 'Enviada para aprovação.'); showTab('aprovacao'); }
+  if(ok) { toast(notifMsg(state.lastNotif, 'Enviada para aprovação.'), 7000); showTab('aprovacao'); }
+}
+
+/* Resumo do envio de e-mails devolvido pelo servidor */
+function notifMsg(n, prefixo){
+  if(!useApi()) return prefixo + ' (modo local: sem e-mail)';
+  if(!n) return prefixo + ' Não houve confirmação de e-mail — atualize o Code.gs no Apps Script para a versão mais recente.';
+  const partes = [prefixo];
+  if(n.enviados && n.enviados.length) partes.push('E-mail enviado para ' + n.enviados.join(' e ') + '.');
+  if(n.semEmail && n.semEmail.length) partes.push('Sem e-mail cadastrado: ' + n.semEmail.join(', ') + ' (⚙ Configurações › Sócios).');
+  if(n.erro) partes.push('Falha no e-mail: ' + n.erro);
+  return partes.join(' ');
+}
+async function remindApprovers(){
+  const d = state.draft;
+  try{
+    const b = $('#apRemind'); if(b) b.disabled = true;
+    setSync('loading');
+    const j = await api({action:'remind', id: d.id, user: me()});
+    setSync('ok');
+    toast(notifMsg(j.notif, 'Lembrete enviado.'), 7000);
+  }catch(e){
+    setSync('ok');
+    toast(/Ação desconhecida/i.test(e.message) ? 'Para reenviar e-mails, atualize o Code.gs no Apps Script (publique uma Nova versão).' : e.message, 7000);
+  }finally{ const b = $('#apRemind'); if(b) b.disabled = false; }
 }
 
 async function cancelApproval(){
@@ -1858,7 +1892,7 @@ function renderSocioEditor(list){
   const emps = readEmpEditor().length ? readEmpEditor() : state.config.empresas;
   $('#cfgSocios').innerHTML = list.map((s, i) => `<tr><td><input class="sn" value="${esc(s.nome)}"></td>
     <td><select class="se">${emps.map(e => `<option value="${esc(e.id)}" ${e.id === s.empresa ? 'selected' : ''}>${esc(e.sigla || e.razao)}</option>`).join('')}</select></td>
-    <td><input class="sc" value="${esc(s.cargo)}" style="width:80px"></td><td><input class="sm_" value="${esc(s.email)}"></td><td><input class="st" value="${esc(s.telefone)}" style="width:130px"></td>
+    <td><input class="sc" value="${esc(s.cargo)}" style="width:80px"></td><td><input class="sm_" value="${esc(s.email)}" placeholder="necessário p/ avisos" style="${s.nome && !s.email ? 'border-color:#f04438' : ''}"></td><td><input class="st" value="${esc(s.telefone)}" style="width:130px"></td>
     <td style="text-align:center"><input type="checkbox" class="sa" ${s.assina ? 'checked' : ''} style="width:auto"></td><td style="text-align:center;white-space:nowrap">${!useApi() ? '<span class="sub">—</span>' : (state.pins || []).some(k => normNome(k) === normNome(s.nome)) ? '<span style="color:var(--ok);font-weight:700" title="PIN cadastrado">✓</span>' : '<span style="color:var(--danger);font-weight:700" title="Sem PIN na propriedade PINS do Apps Script">sem PIN</span>'}</td><td><button class="btn sm ghost" data-delsoc="${i}">✕</button></td></tr>`).join('');
 }
 function readSocioEditor(){ return $$('#cfgSocios tr').map(tr => ({nome: tr.querySelector('.sn').value.trim(), empresa: tr.querySelector('.se').value, cargo: tr.querySelector('.sc').value.trim(), email: tr.querySelector('.sm_').value.trim(), telefone: tr.querySelector('.st').value.trim(), assina: tr.querySelector('.sa').checked})); }
@@ -2795,7 +2829,17 @@ $('#sigFile').onchange = async e => {
 $('#sgOk').onclick = saveSig;
 
 /* ================== Início ================== */
-loadAll().then(() => { if(!me()) setTimeout(() => { toast('Bem-vindo! Escolha quem é você em Configurações.'); openSettings(); }, 400); });
+function openFromHash(){
+  const m = /[#&]p=([^&]+)/.exec(location.hash || '');
+  if(!m) return;
+  const id = decodeURIComponent(m[1]);
+  history.replaceState(null, '', location.pathname + location.search);
+  if(!me()) return;
+  if(state.items.some(x => x.id === id)){ $('[data-view=prop]').click(); openDrawer(id); }
+  else toast('Proposta do link não encontrada — clique em ⟳ Atualizar.');
+}
+window.addEventListener('hashchange', () => { if(!state.draft) openFromHash(); });
+loadAll().then(() => { openFromHash(); if(!me()) setTimeout(() => { toast('Bem-vindo! Escolha quem é você em Configurações.'); openSettings(); }, 400); });
 </script>
 </body>
 </html>
