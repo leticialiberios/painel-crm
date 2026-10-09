@@ -842,6 +842,22 @@ function applyVote(item, cfg, socio, decisao, comentario, hash, now) {
   item.atualizadoEm = now; item.atualizadoPor = socio;
   return { item: item };
 }
+/* Recalcula a situação de uma aprovação pendente com a configuração atual
+   (ex.: todos os aprovadores já votaram, mas a situação não foi fechada). */
+function recalcApproval(item, cfg, now) {
+  var ap = item.aprovacao;
+  if (!ap || ap.estado !== 'pendente') return { changed: false, item: item };
+  var req = requiredApprovers(cfg, ap.autor);
+  var est = computeApprovalState(ap, req);
+  if (est === 'pendente') return { changed: false, item: item };
+  ap.estado = est;
+  if (est === 'aprovada' && item.status === 'revisao') item.status = 'liberada';
+  if (est === 'ajustes' && (item.status === 'revisao' || item.status === 'liberada')) item.status = 'elaboracao';
+  item.log = item.log || [];
+  item.log.push({ data: now, autor: 'Painel', texto: est === 'aprovada' ? 'Aprovação concluída — todos os sócios aprovaram.' : 'Ajustes solicitados.' });
+  item.atualizadoEm = now;
+  return { changed: true, item: item };
+}
 /* ===== fim do bloco compartilhado ===== */
 
 </script>
@@ -924,7 +940,7 @@ const DEFAULT_CONFIG = {
   socios: [
     {nome:'Letícia Libério',   empresa:'mannare', cargo:'Sócia', email:'leticia@mannare.com.br', telefone:'(85) 9.8642-5886', assina:true},
     {nome:'Bruno Montenegro',  empresa:'bmm',     cargo:'Sócio', email:'bruno@bmmadv.com.br',   telefone:'(85) 9.9118-3030', assina:true},
-    {nome:'Rafael Lucas Russo Daniel', empresa:'vertis', cargo:'Sócio', email:'',               telefone:'',                 assina:false}
+    {nome:'Rafael Russo', empresa:'vertis', cargo:'Sócio', email:'',               telefone:'',                 assina:false}
   ],
   pagar: {
     centros: ['BMM','MANNARE'],
@@ -1043,7 +1059,7 @@ async function loadAll(silent){
     const t0 = Date.now();
     const sigVer = LS.get('pp_sigver', '');
     const j = await api({action:'list', sigVer});
-    state.lastMs = Date.now() - t0;
+    state.lastMs = Date.now() - t0; state.lastVersaoBackend = j.versaoBackend || 1;
     state.items = j.items || [];
     state.recebiveis = j.recebiveis || [];
     state.pagamentos = j.pagamentos || [];
@@ -1057,6 +1073,7 @@ async function loadAll(silent){
       state.config.urlPainel = location.origin + location.pathname; persistConfig().catch(() => {});
     }
     state.backendOk = (j.versaoBackend || 1) >= VERSAO_BACKEND_ESPERADA;
+    fecharAprovacoes();
     $('#backendBanner').hidden = state.backendOk;
     LS.set('pp_cache', {items: state.items, config: state.config, recebiveis: state.recebiveis, pagamentos: state.pagamentos});
     setSync('ok');
@@ -1068,6 +1085,18 @@ async function loadAll(silent){
     setSync('err', e.message);
   }
   renderAll();
+}
+
+/* Se todos os aprovadores já votaram mas a proposta ficou "aguardando", pede ao servidor para fechar a aprovação */
+const recalcFeito = new Set();
+function fecharAprovacoes(){
+  if(!useApi() || (state.lastVersaoBackend || 0) < 9) return;
+  state.items.forEach(x => {
+    const {ap, req, ok} = apProgress(x);
+    if(ap.estado !== 'pendente' || !req.length || ok < req.length || recalcFeito.has(x.id)) return;
+    recalcFeito.add(x.id);
+    api({action:'recalc', id: x.id}).then(j => { if(j.changed && j.item){ upsertLocal(j.item); renderAll(); } }).catch(() => {});
+  });
 }
 
 function storeLocal(item){
@@ -1928,6 +1957,10 @@ async function saveSettings(){
   const socios = readSocioEditor().filter(s => s.nome);
   const nomes = socios.map(s => s.nome);
   if(new Set(nomes).size !== nomes.length){ toast('Há sócios com o mesmo nome.'); return; }
+  const antigos = (state.config.socios || []).map(s => s.nome);
+  const trocas = [];
+  socios.forEach((s, i) => { const a = antigos[i]; if(a && a !== s.nome && !nomes.includes(a) && !antigos.includes(s.nome)) trocas.push([a, s.nome]); });
+  if(trocas.length && !confirm(trocas.map(([a, b]) => `“${a}” → “${b}”`).join('\n') + '\n\nO nome será trocado também em todas as propostas, votos, assinatura e financeiro. Confirmar?')) return;
   const prevApi = state.settings.api, prevTok = state.settings.token;
   state.settings = {nome: $('#s_nome').value, api: $('#s_api').value.trim(), token: $('#s_token').value};
   LS.set('pp_settings', state.settings);
@@ -1948,9 +1981,27 @@ async function saveSettings(){
     if(!state.settings.api) { Object.assign(state.config, newCfg); }
     else { toast('Conectado à planilha. Configurações carregadas da planilha.'); renderAll(); return; }
   } else Object.assign(state.config, newCfg);
+  trocas.forEach(([a, b]) => { if(state.settings.nome === a) state.settings.nome = b; });
+  LS.set('pp_settings', state.settings);
   if(state.settings.nome && !state.config.socios.some(s => s.nome === state.settings.nome)) { state.settings.nome = ''; LS.set('pp_settings', state.settings); }
-  try{ await persistConfig(); toast('Configurações salvas'); }
-  catch(e){ toast('Salvas neste computador; falha ao enviar à planilha: ' + e.message, 5000); }
+  try{
+    await persistConfig();
+    for(const [a, b] of trocas){
+      if(useApi()){
+        if((state.lastVersaoBackend || 0) < 10) throw new Error('atualize o Code.gs no Apps Script para trocar nomes de sócios');
+        await api({action:'renameSocio', de: a, para: b});
+      } else {
+        const q = JSON.stringify(a), qn = JSON.stringify(b);
+        state.items = state.items.map(x => JSON.parse(JSON.stringify(x).split(q).join(qn)));
+        state.recebiveis = state.recebiveis.map(x => JSON.parse(JSON.stringify(x).split(q).join(qn)));
+        LS.set('pp_items', state.items); LS.set('pp_rec', state.recebiveis);
+        if(state.assinaturas[a]){ state.assinaturas[b] = state.assinaturas[a]; delete state.assinaturas[a]; LS.set('pp_sigs', state.assinaturas); }
+      }
+    }
+    if(trocas.length && useApi()) await loadAll(true);
+    toast(trocas.length ? 'Configurações salvas e nome trocado em todos os registros.' : 'Configurações salvas');
+  }
+  catch(e){ toast('Salvas neste computador; falha ao enviar à planilha: ' + e.message, 6000); }
   renderAll();
 }
 
