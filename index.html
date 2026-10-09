@@ -214,6 +214,7 @@ table.fin tfoot td{font-weight:700;color:var(--navy);border-bottom:0}
 .segm{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
 .segm button{border:0;background:#fff;padding:6px 12px;cursor:pointer;font-weight:500}
 .segm button.on{background:var(--navy);color:#fff}
+#recBody tr.tot td,#pgBody tr.tot td,#foBody tr.tot td{background:var(--indigo-soft);color:var(--navy);cursor:default;font-size:13px}
 </style>
 </head>
 <body>
@@ -2204,49 +2205,57 @@ const MES_ABR = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','no
 const fmtMes = ym => { const [y, m] = ym.split('-'); return `${MES_ABR[+m - 1]}/${y}`; };
 
 function renderFin(){
-  const R = state.recebiveis, keys = rateioKeys();
+  const RT = state.recebiveis, keys = rateioKeys();
+  const ff = state.finFilter;
   const sum = (arr, f) => arr.reduce((a, r) => a + f(r), 0);
+  const qq = ff.q.trim().toLowerCase();
+  // busca, competência e mês valem também para os quadros
+  const passa = (r, semMes) => {
+    if(ff.comp && r.competencia !== ff.comp) return false;
+    if(!semMes && ff.mes && (r.previsao || '').slice(0, 7) !== ff.mes) return false;
+    if(qq && ![r.cliente, r.servico, r.empreendimento, r.codigo, r.nf, r.obs].join(' ').toLowerCase().includes(qq)) return false;
+    return true;
+  };
+  const R = RT.filter(r => passa(r)), RsemMes = RT.filter(r => passa(r, true));
+  const filtrado = !!(ff.comp || ff.mes || qq);
   const aFat = R.filter(r => r.status === 'a faturar');
   const fat = R.filter(r => ['nf emitida','nf enviada','nf atrasada'].includes(r.status));
   const late = R.filter(isLate);
-  const pagosMes = R.filter(r => r.status === 'pago' && (r.dataPagamento || '').slice(0, 7) === thisMonth());
+  const pagosMes = R.filter(r => r.status === 'pago' && (ff.mes ? true : (r.dataPagamento || '').slice(0, 7) === thisMonth()));
   const prox = R.filter(r => recOpen(r) && r.previsao && daysTo(r.previsao) >= 0 && daysTo(r.previsao) <= 30);
-  $('#nFin').innerHTML = late.length ? `<span class="tag" style="background:var(--danger);color:#fff">${late.length}</span>` : '';
+  const lateTodos = RT.filter(isLate);
+  $('#nFin').innerHTML = lateTodos.length ? `<span class="tag" style="background:var(--danger);color:#fff">${lateTodos.length}</span>` : '';
   $('#finKpis').innerHTML = [
     ['A faturar', money(sum(aFat, r => num(r.valorBruto))), `${aFat.length} parcela(s) sem NF`],
     ['Faturado em aberto', money(sum(fat, r => num(r.valorBruto))), `${fat.length} NF(s) aguardando pagamento`],
     ['Atrasado', money(sum(late, r => num(r.valorBruto))), `${late.length} parcela(s) vencida(s)`, late.length ? 'alert' : ''],
-    ['Recebido no mês', money(sum(pagosMes, r => num(r.valorBruto))), `líquido ${money(sum(pagosMes, liquidoDe))}`],
+    [ff.mes ? 'Recebido — prev. ' + fmtMes(ff.mes) : 'Recebido no mês', money(sum(pagosMes, r => num(r.valorBruto))), `líquido ${money(sum(pagosMes, liquidoDe))}`],
     ['Previsto 30 dias', money(sum(prox, r => num(r.valorBruto))), `${prox.length} parcela(s)`]
-  ].map(([l, v, s, c]) => `<div class="kpi ${c || ''}"><div class="l">${l}</div><div class="v" style="font-size:21px">${v}</div><div class="s">${esc(s)}</div></div>`).join('');
+  ].map(([l, v, s, c]) => `<div class="kpi ${c || ''}"><div class="l">${l}</div><div class="v" style="font-size:21px">${v}</div><div class="s">${esc(s)}${filtrado ? ' · com filtro' : ''}</div></div>`).join('');
   const open = R.filter(recOpen);
   $('#finSplit').innerHTML = keys.map(k => {
     const v = sum(open, r => liquidoDe(r) * num((r.divisao || {})[k]));
     const m = sum(pagosMes, r => liquidoDe(r) * num((r.divisao || {})[k]));
-    return `<div class="p"><div class="l">${esc(partLabel(k))}</div><div class="v">${money(v)}</div><div class="sub">recebido no mês: ${money(m)}</div></div>`;
+    return `<div class="p"><div class="l">${esc(partLabel(k))}</div><div class="v">${money(v)}</div><div class="sub">${ff.mes ? 'recebido (prev. ' + fmtMes(ff.mes) + ')' : 'recebido no mês'}: ${money(m)}</div></div>`;
   }).join('');
 
   // chips
-  const ff = state.finFilter;
   const cnt = k => k === 'abertos' ? open.length : k === 'atrasadas' ? late.length : k === 'todas' ? R.length : R.filter(r => r.status === k).length;
   const chips = [['abertos','Em aberto'], ['atrasadas','Atrasadas'], ...REC_ST.map(s => [s.k, s.l]), ['todas','Todas']];
   $('#finChips').innerHTML = chips.map(([k, l]) => `<button class="chip ${ff.status === k ? 'on' : ''}" data-fst="${esc(k)}">${l} <b>${cnt(k)}</b></button>`).join('');
   $('#fComp').innerHTML = `<option value="">Todas as competências</option>` + (rateio().competencias || []).map(c => `<option ${c === ff.comp ? 'selected' : ''}>${esc(c)}</option>`).join('');
-  const meses = [...new Set(R.map(r => (r.previsao || '').slice(0, 7)).filter(Boolean))].sort();
+  const meses = [...new Set(RT.map(r => (r.previsao || '').slice(0, 7)).filter(Boolean))].sort();
   $('#fMes').innerHTML = `<option value="">Todos os meses (previsão)</option>` + meses.map(m => `<option value="${m}" ${m === ff.mes ? 'selected' : ''}>${fmtMes(m)}</option>`).join('');
 
-  const qq = ff.q.trim().toLowerCase();
   const list = R.filter(r => {
     if(ff.status === 'abertos' && !recOpen(r)) return false;
     if(ff.status === 'atrasadas' && !isLate(r)) return false;
     if(!['abertos','atrasadas','todas'].includes(ff.status) && r.status !== ff.status) return false;
     if(ff.status === 'todas' && !ff.closed && !recOpen(r)) return false;
-    if(ff.comp && r.competencia !== ff.comp) return false;
-    if(ff.mes && (r.previsao || '').slice(0, 7) !== ff.mes) return false;
-    if(qq && ![r.cliente, r.servico, r.empreendimento, r.codigo, r.nf, r.obs].join(' ').toLowerCase().includes(qq)) return false;
     return true;
   }).sort((a, b) => (a.previsao || '9999').localeCompare(b.previsao || '9999') || (a.cliente || '').localeCompare(b.cliente || ''));
-  $('#recBody').innerHTML = list.length ? list.map(r => {
+  const totRec = `<tr class="tot"><td colspan="3"><b>Total (${list.length})</b></td><td class="num"><b>${money(sum(list, r => num(r.valorBruto)))}</b></td><td class="num"><b>${money(sum(list, liquidoDe))}</b></td><td colspan="2"></td></tr>`;
+  $('#recBody').innerHTML = list.length ? totRec + list.map(r => {
     const late = isLate(r), d = daysTo(r.previsao);
     return `<tr data-rec="${esc(r.id)}" class="${late ? 'mine' : ''}" style="${late ? 'box-shadow:inset 4px 0 0 var(--danger)' : ''}">
       <td><b>${esc(r.cliente || '—')}</b><div class="sub">${esc([r.servico, r.empreendimento].filter(Boolean).join(' | ') || '—')}${r.codigo ? ' · ' + esc(r.codigo) : ''}</div></td>
@@ -2257,8 +2266,8 @@ function renderFin(){
       <td>${esc(r.nf || '—')}${r.emissao ? `<div class="sub">${fmtDate(r.emissao)}</div>` : ''}</td></tr>`;
   }).join('') : `<tr><td colspan="7" class="empty">${R.length ? 'Nenhum recebível com esses filtros.' : 'Nenhum recebível ainda. Eles aparecem aqui quando uma proposta é aceita pelo cliente, ou use “+ Recebível avulso”.'}</td></tr>`;
 
-  // repasse
-  const pagos = R.filter(r => r.status === 'pago' && r.dataPagamento);
+  // repasse (respeita busca e competência)
+  const pagos = RsemMes.filter(r => r.status === 'pago' && r.dataPagamento);
   const ms = [...new Set(pagos.map(r => r.dataPagamento.slice(0, 7)))].sort().reverse().slice(0, 12);
   if(!ms.length){ $('#repasse').innerHTML = '<tr><td class="sub">Nenhum pagamento registrado ainda.</td></tr>'; return; }
   const row = arr => { const b = sum(arr, r => num(r.valorBruto)), imp = sum(arr, r => num(r.valorBruto) * num(r.imposto) / 100), des = sum(arr, r => num(r.desembolso)), liq = sum(arr, liquidoDe);
@@ -2418,47 +2427,61 @@ function pagSectionHTML(tipo){
 
 function renderPag(tipo){
   const pre = tipo === 'conta' ? 'pg' : 'fo', t = PAG_TIPOS[tipo];
-  const all = state.pagamentos.filter(x => (x.tipo || 'conta') === tipo);
+  const todos = state.pagamentos.filter(x => (x.tipo || 'conta') === tipo);
   const ff = state.pagFilter[tipo];
   const sum = arr => arr.reduce((a, x) => a + num(x.valor), 0);
+  const qq = ff.q.trim().toLowerCase();
+  // filtros de busca, centro, categoria e mês valem também para os quadros
+  const passa = (x, semCentro) => {
+    if(!semCentro && ff.centro && x.centroCusto !== ff.centro) return false;
+    if(ff.cat && x.categoria !== ff.cat) return false;
+    if(ff.mes && (x.vencimento || '').slice(0, 7) !== ff.mes) return false;
+    if(qq && ![x.descricao, x.fornecedor, x.categoria, x.empreendimento, x.obs].join(' ').toLowerCase().includes(qq)) return false;
+    return true;
+  };
+  const all = todos.filter(x => passa(x)), allSemCentro = todos.filter(x => passa(x, true));
+  const filtrado = !!(ff.centro || ff.cat || ff.mes || qq);
+  const mesRef = ff.mes || thisMonth();
+  const pagoNoMes = x => x.status === 'pago' && (ff.mes ? true : (x.dataPagamento || '').slice(0, 7) === thisMonth());
   const open = all.filter(pagOpen), late = all.filter(x => pagSit(x) === 'atrasado');
   const sem = all.filter(x => pagOpen(x) && x.vencimento && daysTo(x.vencimento) >= 0 && daysTo(x.vencimento) <= 7);
-  const pagosMes = all.filter(x => x.status === 'pago' && (x.dataPagamento || '').slice(0, 7) === thisMonth());
+  const pagosMes = all.filter(pagoNoMes);
   const k4 = tipo === 'conta'
     ? ['Reembolsos em aberto', money(sum(open.filter(x => x.reembolso))), `${open.filter(x => x.reembolso).length} lançamento(s) pagos por sócios`]
-    : ['Pedidos no mês', money(sum(all.filter(x => (x.dataPedido || '').slice(0, 7) === thisMonth()))), `${all.filter(x => (x.dataPedido || '').slice(0, 7) === thisMonth()).length} pedido(s)`];
+    : ['Pedidos em ' + fmtMes(mesRef), money(sum(all.filter(x => (x.dataPedido || '').slice(0, 7) === mesRef))), `${all.filter(x => (x.dataPedido || '').slice(0, 7) === mesRef).length} pedido(s)`];
   $(`#${pre}Kpis`).innerHTML = [
     ['Em aberto', money(sum(open)), `${open.length} ${t.um}(s)`],
     ['Vence em 7 dias', money(sum(sem)), `${sem.length} ${t.um}(s)`],
     [t.st.atrasado, money(sum(late)), `${late.length} ${t.um}(s)`, late.length ? 'alert' : ''],
-    ['Pago no mês', money(sum(pagosMes)), `${pagosMes.length} ${t.um}(s)`],
+    [ff.mes ? 'Pago — venc. ' + fmtMes(ff.mes) : 'Pago no mês', money(sum(pagosMes)), `${pagosMes.length} ${t.um}(s)`],
     k4
-  ].map(([l, v, s, c]) => `<div class="kpi ${c || ''}"><div class="l">${l}</div><div class="v" style="font-size:21px">${v}</div><div class="s">${esc(s)}</div></div>`).join('');
-  $(`#${pre}Split`).innerHTML = (pcfg().centros || []).map(c => `<div class="p"><div class="l">${esc(c)}</div><div class="v">${money(sum(open.filter(x => x.centroCusto === c)))}</div><div class="sub">pago no mês: ${money(sum(pagosMes.filter(x => x.centroCusto === c)))}</div></div>`).join('');
-  $(tipo === 'conta' ? '#nPagar' : '#nForn').innerHTML = late.length ? `<span class="tag" style="background:var(--danger);color:#fff">${late.length}</span>` : '';
+  ].map(([l, v, s, c]) => `<div class="kpi ${c || ''}"><div class="l">${l}</div><div class="v" style="font-size:21px">${v}</div><div class="s">${esc(s)}${filtrado ? ' · com filtro' : ''}</div></div>`).join('');
+  $(`#${pre}Split`).innerHTML = (pcfg().centros || []).map(c => {
+    const daqui = allSemCentro.filter(x => x.centroCusto === c);
+    const sel = ff.centro === c, apagado = ff.centro && !sel;
+    return `<div class="p" style="${sel ? 'outline:2px solid var(--indigo);' : ''}${apagado ? 'opacity:.45' : ''}"><div class="l">${esc(c)}</div><div class="v">${money(sum(daqui.filter(pagOpen)))}</div><div class="sub">${ff.mes ? 'pago (venc. ' + fmtMes(ff.mes) + ')' : 'pago no mês'}: ${money(sum(daqui.filter(pagoNoMes)))}</div></div>`;
+  }).join('');
+  const lateTodos = todos.filter(x => pagSit(x) === 'atrasado');
+  $(tipo === 'conta' ? '#nPagar' : '#nForn').innerHTML = lateTodos.length ? `<span class="tag" style="background:var(--danger);color:#fff">${lateTodos.length}</span>` : '';
 
   const chips = [['abertos','Em aberto', open.length], ['vencendo', t.st.vencendo, all.filter(x => pagSit(x) === 'vencendo').length], ['atrasado', t.st.atrasado, late.length],
     ['pago','Pagos', all.filter(x => x.status === 'pago').length], ['cancelado','Cancelados', all.filter(x => x.status === 'cancelado').length], ['todos','Todos', all.length]];
   $(`#${pre}Chips`).innerHTML = chips.map(([k, l, n]) => `<button class="chip ${ff.st === k ? 'on' : ''}" data-pst="${k}">${l} <b>${n}</b></button>`).join('');
   $(`#${pre}Centro`).innerHTML = `<option value="">Todos os centros de custo</option>` + (pcfg().centros || []).map(c => `<option ${c === ff.centro ? 'selected' : ''}>${esc(c)}</option>`).join('');
   if(tipo === 'conta') $(`#${pre}Cat`).innerHTML = `<option value="">Todas as categorias</option>` + (pcfg().categorias || []).map(c => `<option ${c === ff.cat ? 'selected' : ''}>${esc(c)}</option>`).join('');
-  const meses = [...new Set(all.map(x => (x.vencimento || '').slice(0, 7)).filter(Boolean))].sort();
+  const meses = [...new Set(todos.map(x => (x.vencimento || '').slice(0, 7)).filter(Boolean))].sort();
   $(`#${pre}Mes`).innerHTML = `<option value="">Todos os meses (vencimento)</option>` + meses.map(m => `<option value="${m}" ${m === ff.mes ? 'selected' : ''}>${fmtMes(m)}</option>`).join('');
 
-  const qq = ff.q.trim().toLowerCase();
   const list = all.filter(x => {
     const sit = pagSit(x);
     if(ff.st === 'abertos' && !pagOpen(x)) return false;
     if(['vencendo','atrasado'].includes(ff.st) && sit !== ff.st) return false;
     if(['pago','cancelado'].includes(ff.st) && x.status !== ff.st) return false;
-    if(ff.centro && x.centroCusto !== ff.centro) return false;
-    if(ff.cat && x.categoria !== ff.cat) return false;
-    if(ff.mes && (x.vencimento || '').slice(0, 7) !== ff.mes) return false;
-    if(qq && ![x.descricao, x.fornecedor, x.categoria, x.empreendimento, x.obs].join(' ').toLowerCase().includes(qq)) return false;
     return true;
   }).sort((a, b) => (a.vencimento || '9999').localeCompare(b.vencimento || '9999'));
   const cols = tipo === 'conta' ? 6 : 7;
-  $(`#${pre}Body`).innerHTML = list.length ? list.map(x => {
+  const totalLista = `<tr class="tot"><td colspan="${tipo === 'conta' ? 3 : 4}"><b>Total (${list.length})</b></td><td class="num"><b>${money(sum(list))}</b></td><td colspan="${tipo === 'conta' ? 2 : 2}"></td></tr>`;
+  $(`#${pre}Body`).innerHTML = list.length ? totalLista + list.map(x => {
     const sit = pagSit(x), d = daysTo(x.vencimento);
     const lateCss = sit === 'atrasado' ? 'box-shadow:inset 4px 0 0 var(--danger)' : '';
     const venc = `<td class="${sit === 'atrasado' ? 'due late' : sit === 'vencendo' ? 'due soon' : ''}">${fmtDate(x.vencimento)}${sit === 'atrasado' ? `<div class="sub due late">${-d} dia(s)</div>` : ''}</td>`;
