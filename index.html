@@ -1040,26 +1040,31 @@ async function loadAll(silent){
   }
   if(!silent) setSync('loading');
   try{
-    const j = await api({action:'list'});
+    const t0 = Date.now();
+    const sigVer = LS.get('pp_sigver', '');
+    const j = await api({action:'list', sigVer});
+    state.lastMs = Date.now() - t0;
     state.items = j.items || [];
     state.recebiveis = j.recebiveis || [];
     state.pagamentos = j.pagamentos || [];
-    state.assinaturas = j.assinaturas || {};
+    if(j.assinaturas){ state.assinaturas = j.assinaturas; LS.set('pp_sigs_cache', j.assinaturas); LS.set('pp_sigver', j.assinaturasVer || ''); }
+    else if(!Object.keys(state.assinaturas || {}).length) state.assinaturas = LS.get('pp_sigs_cache', {});
     if(j.config && Object.keys(j.config).length) state.config = mergeCfg(j.config);
     else { state.config = mergeCfg(LS.get('pp_config', null)); persistConfig().catch(()=>{}); }
     state.pins = j.pinsConfigurados || [];
-    if(/^https?:$/.test(location.protocol) && !/^https?:\/\/[^\s@]+$/i.test(state.config.urlPainel || '')){
+    if(!state.urlFix && /^https?:$/.test(location.protocol) && !/^https?:\/\/[^\s@]+$/i.test(state.config.urlPainel || '')){
+      state.urlFix = true;
       state.config.urlPainel = location.origin + location.pathname; persistConfig().catch(() => {});
     }
     state.backendOk = (j.versaoBackend || 1) >= VERSAO_BACKEND_ESPERADA;
     $('#backendBanner').hidden = state.backendOk;
-    LS.set('pp_cache', {items: state.items, config: state.config, recebiveis: state.recebiveis, pagamentos: state.pagamentos, assinaturas: state.assinaturas});
+    LS.set('pp_cache', {items: state.items, config: state.config, recebiveis: state.recebiveis, pagamentos: state.pagamentos});
     setSync('ok');
   }catch(e){
     console.error(e);
     if(silent && state.items.length){ setSync('ok'); $('#sync span:last-child').textContent = 'Sem atualização agora — mostrando os últimos dados · ' + new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}); return; }
     const c = LS.get('pp_cache', null);
-    if(c && !state.items.length){ state.items = c.items; state.recebiveis = c.recebiveis || []; state.pagamentos = c.pagamentos || []; state.assinaturas = c.assinaturas || {}; state.config = mergeCfg(c.config); }
+    if(c && !state.items.length){ state.items = c.items; state.recebiveis = c.recebiveis || []; state.pagamentos = c.pagamentos || []; state.assinaturas = LS.get('pp_sigs_cache', {}); state.config = mergeCfg(c.config); }
     setSync('err', e.message);
   }
   renderAll();
@@ -1164,7 +1169,8 @@ function setSync(s, msg){
   const map = {
     local:   ['local', 'Modo local (só neste navegador)'],
     loading: ['',      'Sincronizando…'],
-    ok:      ['ok',    'Sincronizado · ' + new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})],
+    cache:   ['',      'Mostrando os últimos dados · atualizando…'],
+    ok:      ['ok',    'Sincronizado · ' + new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}) + (state.lastMs ? ' (' + (state.lastMs / 1000).toFixed(1).replace('.', ',') + ' s)' : '')],
     err:     ['err',   'Sem conexão com a planilha' + (msg ? ' — ' + msg : '')]
   };
   const [cls, txt] = map[s] || ['', ''];
@@ -1830,16 +1836,20 @@ ${minuta ? '<div class="wm">MINUTA</div>' : ''}
 </body></html>`;
 }
 
-function openPreview(){
+async function openPreview(){
   if(!state.draft) return;
+  const w = window.open('', '_blank');
+  if(!w){ toast('Permita pop-ups para visualizar a proposta.'); return; }
+  w.document.write('<p style="font-family:sans-serif;padding:40px;color:#555">Gerando a proposta…</p>');
+  // outro sócio pode ter aprovado enquanto a proposta estava aberta: confere a situação atual na planilha
+  if(useApi() && !isDirty()){ try{ await loadAll(true); }catch(e){} }
+  if(!state.draft) { w.close(); return; }
   const it = clone(state.draft);
   it.titulo = $('#p_titulo').value; it.cidade = $('#p_cidade').value; it.dataProposta = $('#p_data').value;
   it.cliente = $('#i_cliente').value; it.clienteCnpj = $('#i_clienteCnpj').value;
   it.doc = readDoc(); it.signatarios = readSigners();
   const stored = state.items.find(x => x.id === it.id);
   const aprovada = !!stored && apOf(stored).estado === 'aprovada' && contentHash(stored) === contentHash(it) && !isDirty();
-  const w = window.open('', '_blank');
-  if(!w){ toast('Permita pop-ups para visualizar a proposta.'); return; }
   w.document.open(); w.document.write(proposalHTML(it, !aprovada)); w.document.close();
 }
 
@@ -2852,7 +2862,15 @@ function openFromHash(){
   else toast('Proposta do link não encontrada — clique em ⟳ Atualizar.');
 }
 window.addEventListener('hashchange', () => { if(!state.draft) openFromHash(); });
-loadAll().then(() => { openFromHash(); if(!me()) setTimeout(() => { toast('Bem-vindo! Escolha quem é você em Configurações.'); openSettings(); }, 400); });
+(function mostrarCache(){
+  if(!useApi()) return;
+  const c = LS.get('pp_cache', null);
+  if(!c || !(c.items || []).length) return;
+  state.items = c.items; state.recebiveis = c.recebiveis || []; state.pagamentos = c.pagamentos || [];
+  state.assinaturas = LS.get('pp_sigs_cache', {}); state.config = mergeCfg(c.config);
+  renderAll(); setSync('cache');
+})();
+loadAll(!!(LS.get('pp_cache', null) || {}).items).then(() => { openFromHash(); if(!me()) setTimeout(() => { toast('Bem-vindo! Escolha quem é você em Configurações.'); openSettings(); }, 400); });
 </script>
 </body>
 </html>
