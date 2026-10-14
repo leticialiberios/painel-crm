@@ -546,6 +546,7 @@ table.fin tfoot td{font-weight:700;color:var(--navy);border-bottom:0}
       </div>
       <label class="f">Observações<textarea id="r_obs" rows="2" class="inp"></textarea></label>
       <div id="r_repeatBox" style="margin-top:10px"><label class="sync" style="gap:6px;font-size:13.5px">Repetir mensalmente por <input id="r_repeat" type="number" min="1" max="36" value="1" style="width:60px" class="inp"> mês(es) <span class="sub">(ex.: consultivo mensal)</span></label></div>
+      <div id="r_links" style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center" hidden></div>
       <div id="r_meta" class="hint" style="margin-top:10px"></div>
     </section>
     <section style="display:flex;gap:8px;align-items:center;border-bottom:0;flex-wrap:wrap">
@@ -626,6 +627,7 @@ table.fin tfoot td{font-weight:700;color:var(--navy);border-bottom:0}
         <label class="f">Link do painel (vai nos e-mails de aviso)<input id="s_url" type="url" autocomplete="off" placeholder="https://leticialiberios.github.io/painel-crm/"></label>
       </div>
       <label class="sync" style="margin-top:8px;gap:6px"><input type="checkbox" id="s_notif"> Avisar os sócios por e-mail quando houver proposta para aprovar</label>
+      <label class="f full" style="margin-top:10px">E-mails do operacional (avisados quando uma proposta for aceita, para cadastrar o processo)<input id="s_opEmails" autocomplete="off" placeholder="operacional@mannare.com.br, luiz.gabriel@mannare.com.br"></label>
     </section>
     <section>
       <h3>Sócios</h3>
@@ -1142,6 +1144,7 @@ async function persistItem(item){
   upsertLocal(j.item);
   state.lastNotif = j.notif || null;
   if(j.recebiveis && j.recebiveis.length){ j.recebiveis.forEach(upsertRecLocal); state.lastGenerated = true; }
+  state.lastOpNotif = j.opNotif || null;
   setSync('ok');
   return j.item;
 }
@@ -1553,7 +1556,10 @@ async function saveDraft(opts){
     state.draft = clone(saved); state.isNew = false;
     const tab = $('#tabs .tab.on').dataset.tab;
     fillForm(); showTab(tab); renderAll();
-    if(state.lastGenerated){ state.lastGenerated = false; toast('Proposta aceita — recebíveis gerados no Financeiro.', 4500); showTab('financeiro'); }
+    const op = state.lastOpNotif; state.lastOpNotif = null;
+    const opMsg = !op ? '' : op.enviados && op.enviados.length ? ' Operacional avisado por e-mail.' : ' ⚠ Operacional NÃO foi avisado: ' + (op.erro || 'sem e-mail cadastrado') ;
+    if(state.lastGenerated){ state.lastGenerated = false; toast('Proposta aceita — recebíveis gerados no Financeiro.' + opMsg, 6000); showTab('financeiro'); }
+    else if(opMsg) toast('Proposta salva.' + opMsg, 6000);
     else toast('Proposta salva');
     return true;
   }catch(e){ console.error(e); if(useApi()) setSync('ok'); toast(e.message, 5000); return false; }
@@ -1921,7 +1927,7 @@ function openSettings(){
   const s = state.settings, c = state.config;
   $('#s_nome').innerHTML = `<option value="">— selecione —</option>` + c.socios.filter(x => x.nome).map(x => `<option ${x.nome === s.nome ? 'selected' : ''}>${esc(x.nome)}</option>`).join('');
   $('#s_api').value = s.api || ''; $('#s_token').value = s.token || '';
-  $('#s_url').value = c.urlPainel || ''; $('#s_notif').checked = c.notificarEmail !== false;
+  $('#s_url').value = c.urlPainel || ''; $('#s_notif').checked = c.notificarEmail !== false; $('#s_opEmails').value = c.emailsOperacional || '';
   $('#s_tipos').value = (c.tipos || []).join('\n');
   $('#s_centros').value = (c.pagar.centros || []).join(', '); $('#s_categorias').value = (c.pagar.categorias || []).join(', ');
   $('#s_imposto').value = c.rateio.imposto; $('#s_comps').value = (c.rateio.competencias || []).join(', ');
@@ -1969,6 +1975,7 @@ async function saveSettings(){
     empresas: readEmpEditor().filter(e => e.razao || e.sigla), socios, modelos: readTplEditor(),
     tipos: $('#s_tipos').value.split('\n').map(x => x.trim()).filter(Boolean),
     notificarEmail: $('#s_notif').checked, urlPainel: painelUrl($('#s_url').value),
+    emailsOperacional: $('#s_opEmails').value.split(/[,;\s]+/).map(x => x.trim().toLowerCase()).filter(x => /@/.test(x)).join(', '),
     pagar: {centros: $('#s_centros').value.split(',').map(x => x.trim().toUpperCase()).filter(Boolean), categorias: $('#s_categorias').value.split(',').map(x => x.trim().toUpperCase()).filter(Boolean)},
     rateio: Object.assign(clone(state.config.rateio), {imposto: num($('#s_imposto').value), competencias: $('#s_comps').value.split(',').map(x => x.trim().toUpperCase()).filter(Boolean), regras: readRateioEditor()})
   };
@@ -2192,6 +2199,7 @@ const REC_ST = [
   {k:'a faturar',   l:'A faturar',   c:'#475467', b:'#f2f4f7'},
   {k:'nf emitida',  l:'NF emitida',  c:'#b54708', b:'#fffaeb'},
   {k:'nf enviada',  l:'NF enviada',  c:'#c4320a', b:'#fff6ed'},
+  {k:'nd enviada',  l:'Nota de débito enviada', c:'#c11574', b:'#fdf2fa'},
   {k:'nf atrasada', l:'NF atrasada', c:'#b42318', b:'#fef3f2'},
   {k:'pago',        l:'Pago',        c:'#067647', b:'#ecfdf3'},
   {k:'cancelada',   l:'Cancelada',   c:'#667085', b:'#f9fafb'}
@@ -2213,13 +2221,13 @@ function renderFin(){
   const passa = (r, semMes) => {
     if(ff.comp && r.competencia !== ff.comp) return false;
     if(!semMes && ff.mes && (r.previsao || '').slice(0, 7) !== ff.mes) return false;
-    if(qq && ![r.cliente, r.servico, r.empreendimento, r.codigo, r.nf, r.obs].join(' ').toLowerCase().includes(qq)) return false;
+    if(qq && ![r.cliente, r.servico, r.empreendimento, r.codigo, r.nf, r.obs, r.tipo].join(' ').toLowerCase().includes(qq)) return false;
     return true;
   };
   const R = RT.filter(r => passa(r)), RsemMes = RT.filter(r => passa(r, true));
   const filtrado = !!(ff.comp || ff.mes || qq);
   const aFat = R.filter(r => r.status === 'a faturar');
-  const fat = R.filter(r => ['nf emitida','nf enviada','nf atrasada'].includes(r.status));
+  const fat = R.filter(r => ['nf emitida','nf enviada','nd enviada','nf atrasada'].includes(r.status));
   const late = R.filter(isLate);
   const pagosMes = R.filter(r => r.status === 'pago' && (ff.mes ? true : (r.dataPagamento || '').slice(0, 7) === thisMonth()));
   const prox = R.filter(r => recOpen(r) && r.previsao && daysTo(r.previsao) >= 0 && daysTo(r.previsao) <= 30);
@@ -2240,8 +2248,9 @@ function renderFin(){
   }).join('');
 
   // chips
-  const cnt = k => k === 'abertos' ? open.length : k === 'atrasadas' ? late.length : k === 'todas' ? R.length : R.filter(r => r.status === k).length;
-  const chips = [['abertos','Em aberto'], ['atrasadas','Atrasadas'], ...REC_ST.map(s => [s.k, s.l]), ['todas','Todas']];
+  const isRe = r => r.tipo === 'reembolso';
+  const cnt = k => k === 'abertos' ? open.length : k === 'atrasadas' ? late.length : k === 'todas' ? R.length : k === 'reemb' ? open.filter(isRe).length : R.filter(r => r.status === k).length;
+  const chips = [['abertos','Em aberto'], ['atrasadas','Atrasadas'], ['reemb','Reembolsos em aberto'], ...REC_ST.map(s => [s.k, s.l]), ['todas','Todas']];
   $('#finChips').innerHTML = chips.map(([k, l]) => `<button class="chip ${ff.status === k ? 'on' : ''}" data-fst="${esc(k)}">${l} <b>${cnt(k)}</b></button>`).join('');
   $('#fComp').innerHTML = `<option value="">Todas as competências</option>` + (rateio().competencias || []).map(c => `<option ${c === ff.comp ? 'selected' : ''}>${esc(c)}</option>`).join('');
   const meses = [...new Set(RT.map(r => (r.previsao || '').slice(0, 7)).filter(Boolean))].sort();
@@ -2250,7 +2259,8 @@ function renderFin(){
   const list = R.filter(r => {
     if(ff.status === 'abertos' && !recOpen(r)) return false;
     if(ff.status === 'atrasadas' && !isLate(r)) return false;
-    if(!['abertos','atrasadas','todas'].includes(ff.status) && r.status !== ff.status) return false;
+    if(ff.status === 'reemb' && !(isRe(r) && recOpen(r))) return false;
+    if(!['abertos','atrasadas','todas','reemb'].includes(ff.status) && r.status !== ff.status) return false;
     if(ff.status === 'todas' && !ff.closed && !recOpen(r)) return false;
     return true;
   }).sort((a, b) => (a.previsao || '9999').localeCompare(b.previsao || '9999') || (a.cliente || '').localeCompare(b.cliente || ''));
@@ -2258,12 +2268,12 @@ function renderFin(){
   $('#recBody').innerHTML = list.length ? totRec + list.map(r => {
     const late = isLate(r), d = daysTo(r.previsao);
     return `<tr data-rec="${esc(r.id)}" class="${late ? 'mine' : ''}" style="${late ? 'box-shadow:inset 4px 0 0 var(--danger)' : ''}">
-      <td><b>${esc(r.cliente || '—')}</b><div class="sub">${esc([r.servico, r.empreendimento].filter(Boolean).join(' | ') || '—')}${r.codigo ? ' · ' + esc(r.codigo) : ''}</div></td>
-      <td>${r.parcela || 1}/${r.deTotal || 1}<div class="sub">${esc(r.condicao || '')}</div></td>
+      <td><b>${esc(r.cliente || '—')}</b>${isRe(r) ? '<span class="tagx" style="background:#fdf2fa;color:#c11574">reembolso</span>' : ''}<div class="sub">${esc([r.servico, r.empreendimento].filter(Boolean).join(' | ') || '—')}${r.codigo ? ' · ' + esc(r.codigo) : ''}</div></td>
+      <td>${isRe(r) ? `pago por ${esc(r.pagoPor || '—')}${r.despesaPagaEm ? `<div class="sub">em ${fmtDate(r.despesaPagaEm)}</div>` : ''}` : `${r.parcela || 1}/${r.deTotal || 1}<div class="sub">${esc(r.condicao || '')}</div>`}</td>
       <td class="${late ? 'due late' : ''}">${fmtDate(r.previsao)}${late && d !== null && d < 0 ? `<div class="sub due late">${-d} dia(s) de atraso</div>` : ''}</td>
       <td class="num">${money(r.valorBruto)}</td><td class="num">${money(liquidoDe(r))}</td>
       <td>${recPill(r)}${r.status === 'pago' ? `<div class="sub">${fmtDate(r.dataPagamento)}</div>` : ''}</td>
-      <td>${esc(r.nf || '—')}${r.emissao ? `<div class="sub">${fmtDate(r.emissao)}</div>` : ''}</td></tr>`;
+      <td>${isRe(r) && /^https?:/.test(r.linkNota || '') ? `<a href="${esc(r.linkNota)}" target="_blank" rel="noopener" data-stop>Nota de débito ↗</a>` : esc(r.nf || '—')}${r.emissao ? `<div class="sub">${fmtDate(r.emissao)}</div>` : ''}</td></tr>`;
   }).join('') : `<tr><td colspan="7" class="empty">${R.length ? 'Nenhum recebível com esses filtros.' : 'Nenhum recebível ainda. Eles aparecem aqui quando uma proposta é aceita pelo cliente, ou use “+ Recebível avulso”.'}</td></tr>`;
 
   // repasse (respeita busca e competência)
@@ -2286,7 +2296,10 @@ function openRec(id){
     valorBruto:'', imposto: rateio().imposto, desembolso:'', captacao: cap, competencia: (rateio().competencias || [])[0] || '', divisao: regraDivisao(cap), excecao:'',
     previsao:'', status:'a faturar', nf:'', emissao:'', dataPagamento:'', obs:'', log:[], versao:0, criadoEm: new Date().toISOString()};
   const r = recEdit;
-  $('#rTitle').textContent = src ? `${r.cliente || 'Recebível'} — parcela ${r.parcela}/${r.deTotal}` : 'Novo recebível avulso';
+  $('#rTitle').textContent = src ? (r.tipo === 'reembolso' ? `${r.cliente || 'Recebível'} — reembolso` : `${r.cliente || 'Recebível'} — parcela ${r.parcela}/${r.deTotal}`) : 'Novo recebível avulso';
+  const lk = (u, t) => /^https?:/.test(u || '') ? `<a class="btn sm" href="${esc(u)}" target="_blank" rel="noopener">${t} ↗</a>` : '';
+  $('#r_links').innerHTML = r.tipo === 'reembolso' ? `<span class="tagx" style="background:#fdf2fa;color:#c11574">Reembolso de despesa paga por ${esc(r.pagoPor || '—')}${r.despesaPagaEm ? ' em ' + fmtDate(r.despesaPagaEm) : ''} — sem imposto, volta 100% para quem pagou</span> ${lk(r.linkNota, 'Nota de débito')} ${lk(r.linkComprovante, 'Comprovante')}` : '';
+  $('#r_links').hidden = r.tipo !== 'reembolso';
   $('#r_status').innerHTML = REC_ST.map(s => `<option value="${s.k}" ${s.k === r.status ? 'selected' : ''}>${s.l}</option>`).join('');
   ['nf','emissao','previsao','dataPagamento','cliente','empreendimento','servico','valorBruto','imposto','desembolso','obs'].forEach(k => $('#r_' + k).value = r[k] ?? '');
   $('#r_parcelaTxt').value = `${r.parcela || 1} de ${r.deTotal || 1}`;
@@ -2858,7 +2871,7 @@ $('#fq').oninput = e => { state.finFilter.q = e.target.value; renderFin(); };
 $('#fComp').onchange = e => { state.finFilter.comp = e.target.value; renderFin(); };
 $('#fMes').onchange = e => { state.finFilter.mes = e.target.value; renderFin(); };
 $('#fClosed').onchange = e => { state.finFilter.closed = e.target.checked; if(e.target.checked) state.finFilter.status = 'todas'; renderFin(); };
-$('#recBody').onclick = e => { const tr = e.target.closest('[data-rec]'); if(tr) openRec(tr.dataset.rec); };
+$('#recBody').onclick = e => { if(e.target.closest('a')) return; const tr = e.target.closest('[data-rec]'); if(tr) openRec(tr.dataset.rec); };
 $('#f_recSect').addEventListener('click', e => { const tr = e.target.closest('[data-rec]'); if(tr) openRec(tr.dataset.rec); });
 $('#btnNewRec').onclick = () => { if(requireMe()) openRec(null); };
 $('#btnExpRec').onclick = exportRecCsv;
