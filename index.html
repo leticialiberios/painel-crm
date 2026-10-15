@@ -215,6 +215,14 @@ table.fin tfoot td{font-weight:700;color:var(--navy);border-bottom:0}
 .segm button{border:0;background:#fff;padding:6px 12px;cursor:pointer;font-weight:500}
 .segm button.on{background:var(--navy);color:#fff}
 #recBody tr.tot td,#pgBody tr.tot td,#foBody tr.tot td{background:var(--indigo-soft);color:var(--navy);cursor:default;font-size:13px}
+input.money{text-align:right;font-variant-numeric:tabular-nums}
+input[data-combo]{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23667085' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:26px}
+#comboPop{position:fixed;z-index:9999;background:#fff;border:1px solid var(--line);border-radius:8px;box-shadow:0 8px 24px rgba(16,24,40,.16);max-height:280px;overflow:auto;padding:4px 0;font-size:13.5px}
+#comboPop[hidden]{display:none}
+#comboPop .co{padding:7px 12px;cursor:pointer;line-height:1.3}
+#comboPop .co small{display:block;color:#667085;font-size:12px}
+#comboPop .co.on,#comboPop .co:hover{background:var(--indigo-soft)}
+#comboPop .cv{padding:8px 12px;color:#667085}
 </style>
 </head>
 <body>
@@ -384,14 +392,14 @@ table.fin tfoot td{font-weight:700;color:var(--navy);border-bottom:0}
       <div class="grid">
         <label class="f">Código<input id="i_codigo"></label>
         <label class="f">Status<select id="i_status"></select></label>
-        <label class="f">Cliente (razão social)<input id="i_cliente" list="dlCli" autocomplete="off" placeholder="Ex.: METRIX IMÓVEIS LTDA."></label>
-        <label class="f">CNPJ / CPF do cliente<input id="i_clienteCnpj" placeholder="00.000.000/0000-00"></label>
+        <label class="f">Cliente (razão social)<input id="i_cliente" data-combo="dlCli" autocomplete="off" placeholder="Ex.: METRIX IMÓVEIS LTDA."></label>
+        <label class="f">CNPJ / CPF do cliente<input id="i_clienteCnpj" class="cnpj" inputmode="numeric" autocomplete="off" maxlength="18" placeholder="00.000.000/0000-00"></label>
         <label class="f">Contato<input id="i_contato" placeholder="Pessoa de contato"></label>
         <label class="f">E-mail do contato<input id="i_email" type="email"></label>
         <label class="f">Telefone / WhatsApp<input id="i_telefone"></label>
-        <label class="f">Empreendimento<input id="i_empreendimento" list="dlEmp" autocomplete="off" placeholder="Ex.: Afonso Celso"></label>
+        <label class="f">Empreendimento<input id="i_empreendimento" data-combo="dlEmp" autocomplete="off" placeholder="Ex.: Afonso Celso"></label>
         <label class="f">Tipo de serviço<input id="i_tipo" list="dlTipos"></label>
-        <label class="f">Valor total (R$)<input id="i_valor" type="number" step="0.01" min="0"></label>
+        <label class="f">Valor total (R$)<input id="i_valor" class="money" type="text" inputmode="decimal" autocomplete="off"></label>
         <label class="f">Data de entrada<input id="i_dataEntrada" type="date"></label>
         <label class="f">Prazo para enviar a proposta<input id="i_prazo" type="date"></label>
         <label class="f">Responsável<input id="i_responsavel" list="dlResp"></label>
@@ -426,7 +434,7 @@ table.fin tfoot td{font-weight:700;color:var(--navy);border-bottom:0}
         <tbody id="itRows"></tbody>
         <tfoot>
           <tr id="itSubRow" hidden><td></td><td class="tot">SUBTOTAL</td><td class="tot" id="itSub">—</td><td></td></tr>
-          <tr><td></td><td><div style="display:flex;gap:6px;justify-content:flex-end;align-items:center"><span class="sub" style="font-weight:600">Desconto</span><input id="d_descMotivo" class="inp" placeholder="motivo (ex.: 1º projeto)" style="max-width:240px"><select id="d_descTipo" class="inp" style="width:72px"><option value="pct">%</option><option value="valor">R$</option></select></div></td><td><input id="d_descValor" class="inp" type="number" step="0.01" min="0" placeholder="0"></td><td></td></tr>
+          <tr><td></td><td><div style="display:flex;gap:6px;justify-content:flex-end;align-items:center"><span class="sub" style="font-weight:600">Desconto</span><input id="d_descMotivo" class="inp" placeholder="motivo (ex.: 1º projeto)" style="max-width:240px"><select id="d_descTipo" class="inp" style="width:72px"><option value="pct">%</option><option value="valor">R$</option></select></div></td><td><input id="d_descValor" class="inp money" type="text" inputmode="decimal" autocomplete="off" placeholder="0"></td><td></td></tr>
           <tr><td></td><td class="tot">TOTAL</td><td class="tot" id="itTotal">—</td><td></td></tr>
         </tfoot>
       </table>
@@ -477,7 +485,7 @@ table.fin tfoot td{font-weight:700;color:var(--navy);border-bottom:0}
     <!-- Financeiro da proposta -->
     <div data-pane="financeiro" hidden>
       <div class="grid">
-        <label class="f">Serviço (nome curto)<input id="f_servico" list="dlSrvNome" autocomplete="off" placeholder="Ex.: UNIFICAÇÃO IPTU"></label>
+        <label class="f">Serviço (nome curto)<input id="f_servico" data-combo="dlSrvNome" autocomplete="off" placeholder="Ex.: UNIFICAÇÃO IPTU"></label>
         <label class="f">Empreendimento<input id="f_empreendimento" readonly title="Vem da aba Dados"></label>
         <label class="f">Captação (quem trouxe o cliente)<select id="f_captacao"></select></label>
         <label class="f">Competência (quem emite a NF)<select id="f_competencia"></select></label>
@@ -565,13 +573,13 @@ table.fin tfoot td{font-weight:700;color:var(--navy);border-bottom:0}
         <label class="f">Previsão de pagamento<input id="r_previsao" type="date"></label>
         <label class="f">Data do pagamento<input id="r_dataPagamento" type="date"></label>
         <div></div>
-        <label class="f">Cliente<input id="r_cliente" list="dlCli" autocomplete="off"></label>
-        <label class="f">Empreendimento<input id="r_empreendimento" list="dlEmp" autocomplete="off"></label>
-        <label class="f">Serviço<input id="r_servico" list="dlSrvNome" autocomplete="off"></label>
+        <label class="f">Cliente<input id="r_cliente" data-combo="dlCli" autocomplete="off"></label>
+        <label class="f">Empreendimento<input id="r_empreendimento" data-combo="dlEmp" autocomplete="off"></label>
+        <label class="f">Serviço<input id="r_servico" data-combo="dlSrvNome" autocomplete="off"></label>
         <label class="f">Parcela<input id="r_parcelaTxt" placeholder="Ex.: 1 de 2"></label>
-        <label class="f">Valor bruto (R$)<input id="r_valorBruto" type="number" step="0.01" min="0"></label>
+        <label class="f">Valor bruto (R$)<input id="r_valorBruto" class="money" type="text" inputmode="decimal" autocomplete="off"></label>
         <label class="f">Imposto (%)<input id="r_imposto" type="number" step="0.01" min="0"></label>
-        <label class="f">Desembolso (R$)<input id="r_desembolso" type="number" step="0.01" min="0"></label>
+        <label class="f">Desembolso (R$)<input id="r_desembolso" class="money" type="text" inputmode="decimal" autocomplete="off"></label>
         <label class="f">Valor líquido<input id="r_liquido" readonly></label>
         <label class="f">Captação<select id="r_captacao"></select></label>
         <label class="f">Competência (emite NF)<select id="r_competencia"></select></label>
@@ -611,7 +619,7 @@ table.fin tfoot td{font-weight:700;color:var(--navy);border-bottom:0}
         <label class="f" data-only="forn">WhatsApp<input id="p_whatsapp"></label>
         <label class="f" data-only="conta">Categoria<select id="p_categoria"></select></label>
         <label class="f">Centro de custo<select id="p_centroCusto"></select></label>
-        <label class="f">Valor (R$)<input id="p_valor" type="number" step="0.01" min="0"></label>
+        <label class="f">Valor (R$)<input id="p_valor" class="money" type="text" inputmode="decimal" autocomplete="off"></label>
         <label class="f" data-only="forn">Parcela<input id="p_parcela" placeholder="Ex.: 1 de 2"></label>
         <label class="f" data-only="forn">Data do pedido<input id="p_dataPedido" type="date"></label>
         <label class="f">Vencimento<input id="p_vencimento" type="date"></label>
@@ -656,7 +664,7 @@ table.fin tfoot td{font-weight:700;color:var(--navy);border-bottom:0}
     <section>
       <div class="grid">
         <label class="f full">Razão social / nome<input id="c_nome" placeholder="Ex.: MRV ENGENHARIA E PARTICIPAÇÕES S.A."></label>
-        <label class="f">CNPJ / CPF<input id="c_cnpj" placeholder="00.000.000/0000-00"></label>
+        <label class="f">CNPJ / CPF<input id="c_cnpj" class="cnpj" inputmode="numeric" autocomplete="off" maxlength="18" placeholder="00.000.000/0000-00"></label>
         <label class="f">Grupo<input id="c_grupo" list="dlGrupo" placeholder="Ex.: MRV (igual em todas as SPEs)"></label>
         <label class="f">Contato<input id="c_contato" placeholder="Pessoa de contato"></label>
         <label class="f">E-mail do contato<input id="c_email" type="email"></label>
@@ -684,7 +692,7 @@ table.fin tfoot td{font-weight:700;color:var(--navy);border-bottom:0}
     <section>
       <div class="grid">
         <label class="f">Nome curto<input id="v_nome" placeholder="Ex.: UNIFICAÇÃO IPTU"></label>
-        <label class="f">Valor de referência (R$)<input id="v_valor" type="number" step="0.01" min="0"></label>
+        <label class="f">Valor de referência (R$)<input id="v_valor" class="money" type="text" inputmode="decimal" autocomplete="off"></label>
         <label class="f full">Descrição do item na proposta<textarea id="v_descricao" rows="3" class="inp" placeholder="Texto da linha do item em “Valores e forma de pagamento”. Se vazio, usa o nome curto."></textarea></label>
         <label class="f full">Observações internas<textarea id="v_obs" rows="2" class="inp"></textarea></label>
       </div>
@@ -749,6 +757,11 @@ table.fin tfoot td{font-weight:700;color:var(--navy);border-bottom:0}
       <p class="hint" style="margin:10px 0 6px">Percentual do líquido de cada participante, conforme quem captou o cliente (cada linha deve somar 100%).</p>
       <div style="overflow-x:auto"><table class="cfg" id="cfgRateio"></table></div>
       <button class="btn sm" id="btnAddRegra" style="margin-top:6px">+ Captação</button>
+    </section>
+    <section>
+      <h3>Notas de débito (reembolsos)</h3>
+      <p class="hint" style="margin:0 0 8px">Cada empresa tem a sua sequência, que recomeça em 001 a cada ano (ex.: 001/2026). O número é dado automaticamente quando o formulário de reembolso gera a nota. Ajuste aqui só para continuar uma numeração já existente.</p>
+      <div id="ndBox"></div>
     </section>
     <section>
       <h3>Listas</h3>
@@ -1197,6 +1210,7 @@ async function loadAll(silent){
     state.pagamentos = j.pagamentos || [];
     state.clientes = j.clientes || [];
     state.servicos = j.servicos || [];
+    state.numeracaoND = j.numeracaoND || null;
     if(j.assinaturas){ state.assinaturas = j.assinaturas; LS.set('pp_sigs_cache', j.assinaturas); LS.set('pp_sigver', j.assinaturasVer || ''); }
     else if(!Object.keys(state.assinaturas || {}).length) state.assinaturas = LS.get('pp_sigs_cache', {});
     if(j.config && Object.keys(j.config).length) state.config = mergeCfg(j.config);
@@ -1541,7 +1555,7 @@ function renderStatusOptions(){
 
 /* --- editor do documento --- */
 function itemRow(r){
-  return `<tr><td><input class="inp iq" value="${esc(r.qtd)}"></td><td><input class="inp idsc" list="dlSrvDesc" autocomplete="off" value="${esc(r.descricao)}" placeholder="Ex.: UNIFICAÇÃO IPTU's — ou escolha um serviço cadastrado"></td><td><input class="inp ival" type="number" step="0.01" min="0" value="${esc(r.valor)}"></td><td><button class="btn sm ghost" data-delit title="Remover">✕</button></td></tr>`;
+  return `<tr><td><input class="inp iq" value="${esc(r.qtd)}"></td><td><input class="inp idsc" data-combo="dlSrvDesc" autocomplete="off" value="${esc(r.descricao)}" placeholder="Ex.: UNIFICAÇÃO IPTU's — ou escolha um serviço cadastrado"></td><td><input class="inp ival money" type="text" inputmode="decimal" autocomplete="off" value="${esc(r.valor)}"></td><td><button class="btn sm ghost" data-delit title="Remover">✕</button></td></tr>`;
 }
 function secBlock(s){
   return `<div class="sec"><div class="secbar"><span class="sn"></span><input class="st" value="${esc(s.titulo)}"><button class="btn sm" data-delsec title="Remover seção">✕</button></div><textarea class="inp clauses sx">${esc(s.texto)}</textarea></div>`;
@@ -2064,7 +2078,7 @@ function openSettings(){
   $('#s_centros').value = (c.pagar.centros || []).join(', '); $('#s_categorias').value = (c.pagar.categorias || []).join(', ');
   $('#s_imposto').value = c.rateio.imposto; $('#s_comps').value = (c.rateio.competencias || []).join(', ');
   renderRateioEditor(clone(c.rateio.regras));
-  renderSigCfg();
+  renderSigCfg(); renderNDCfg();
   renderEmpEditor(clone(c.empresas)); renderSocioEditor(clone(c.socios)); renderTplEditor(clone(c.modelos || []));
   $('#settings').classList.add('on');
 }
@@ -2282,7 +2296,7 @@ function renderFinTab(src, stored){
   if(!inTable){
     $('#f_parcTable').innerHTML = `<thead><tr><th>Parcela</th><th>Condição</th><th class="num">Bruto</th><th style="width:150px">Previsão</th><th style="width:120px">Desembolso</th><th class="num">Líquido</th>${keys.map(k => `<th class="num">${esc(partLabel(k))}</th>`).join('')}</tr></thead>
       <tbody>${ps.map((p, i) => `<tr><td>${i + 1}/${ps.length}</td><td class="sub" style="min-width:150px">${esc(p.condicao)}</td><td class="num">${money(vals[i])}</td>
-        <td><input type="date" class="fp" value="${esc((prev[i] || {}).previsao || '')}"></td><td><input type="number" step="0.01" min="0" class="fd" value="${esc((prev[i] || {}).desembolso || '')}"></td>
+        <td><input type="date" class="fp" value="${esc((prev[i] || {}).previsao || '')}"></td><td><input type="text" inputmode="decimal" autocomplete="off" class="fd money" value="${esc((prev[i] || {}).desembolso || '')}"></td>
         <td class="num fl"></td>${keys.map(k => `<td class="num fs" data-k="${k}"></td>`).join('')}</tr>`).join('')}</tbody><tfoot><tr><td colspan="2">Total</td><td class="num">${money(total)}</td><td></td><td class="num ftd"></td><td class="num ftl"></td>${keys.map(k => `<td class="num fts" data-k="${k}"></td>`).join('')}</tr></tfoot>`;
   }
   let tl = 0, td = 0; const ts = {};
@@ -2430,7 +2444,7 @@ function openRec(id){
   const r = recEdit;
   $('#rTitle').textContent = src ? (r.tipo === 'reembolso' ? `${r.cliente || 'Recebível'} — reembolso` : `${r.cliente || 'Recebível'} — parcela ${r.parcela}/${r.deTotal}`) : 'Novo recebível avulso';
   const lk = (u, t) => /^https?:/.test(u || '') ? `<a class="btn sm" href="${esc(u)}" target="_blank" rel="noopener">${t} ↗</a>` : '';
-  $('#r_links').innerHTML = r.tipo === 'reembolso' ? `<span class="tagx" style="background:#fdf2fa;color:#c11574">Reembolso de despesa paga por ${esc(r.pagoPor || '—')}${r.despesaPagaEm ? ' em ' + fmtDate(r.despesaPagaEm) : ''} — sem imposto, volta 100% para quem pagou</span> ${lk(r.linkNota, 'Nota de débito')} ${(() => { const cs = (r.linkComprovantes && r.linkComprovantes.length) ? r.linkComprovantes : [r.linkComprovante]; return cs.map((u, i) => lk(u, cs.length > 1 ? 'Comprovante ' + (i + 1) : 'Comprovante')).join(' '); })()}${(r.itens || []).length > 1 ? `<div style="flex-basis:100%;font-size:13px;color:var(--muted,#667085)">${r.itens.map(it => esc(it.descricao) + ' — ' + money(it.valor)).join('<br>')}</div>` : ''}` : '';
+  $('#r_links').innerHTML = r.tipo === 'reembolso' ? `<span class="tagx" style="background:#fdf2fa;color:#c11574">${r.numeroND ? 'ND nº ' + esc(r.numeroND) + ' · ' : ''}Reembolso de despesa paga por ${esc(r.pagoPor || '—')}${r.despesaPagaEm ? ' em ' + fmtDate(r.despesaPagaEm) : ''} — sem imposto, volta 100% para quem pagou</span> ${lk(r.linkNota, 'Nota de débito')} ${(() => { const cs = (r.linkComprovantes && r.linkComprovantes.length) ? r.linkComprovantes : [r.linkComprovante]; return cs.map((u, i) => lk(u, cs.length > 1 ? 'Comprovante ' + (i + 1) : 'Comprovante')).join(' '); })()}${(r.itens || []).length > 1 ? `<div style="flex-basis:100%;font-size:13px;color:var(--muted,#667085)">${r.itens.map(it => esc(it.descricao) + ' — ' + money(it.valor)).join('<br>')}</div>` : ''}` : '';
   $('#r_links').hidden = r.tipo !== 'reembolso';
   $('#r_status').innerHTML = REC_ST.map(s => `<option value="${s.k}" ${s.k === r.status ? 'selected' : ''}>${s.l}</option>`).join('');
   ['nf','emissao','previsao','dataPagamento','cliente','empreendimento','servico','valorBruto','imposto','desembolso','obs'].forEach(k => $('#r_' + k).value = r[k] ?? '');
@@ -3358,6 +3372,157 @@ $('#recModal').addEventListener('change', e => {
   const c = findCli(e.target.value); setEmpList(c);
   const em = empsDe(c);
   if(c && em.length === 1 && !$('#r_empreendimento').value.trim()) $('#r_empreendimento').value = em[0];
+});
+
+/* ================== Campos de valor (1.234,56), CNPJ/CPF e listas suspensas ================== */
+/* Valores: o campo mostra 1.234,56, mas para o resto do painel .value continua devolvendo o número no formato
+   de sempre ("1234.56"). Assim os dados gravados na planilha não mudam de formato. */
+const nativeVal = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+function lerMoeda(t){
+  t = String(t ?? '').trim().replace(/[^\d,.\-]/g, '');
+  if(!t) return null;
+  if(t.includes(',')) t = t.replace(/\./g, '').replace(',', '.');
+  else if((t.match(/\./g) || []).length > 1 || /^-?\d{1,3}\.\d{3}$/.test(t)) t = t.replace(/\./g, '');
+  const n = parseFloat(t);
+  return isNaN(n) ? null : n;
+}
+function moneyfy(el){
+  if(el._m) return;
+  el._m = true;
+  const ini = nativeVal.get.call(el);
+  Object.defineProperty(el, 'value', {
+    configurable: true,
+    get(){
+      const t = nativeVal.get.call(this);
+      if(!t.trim()) return '';
+      const n = lerMoeda(t);
+      if(n === null) return '';
+      const raw = this._raw;
+      if(raw !== undefined && raw !== null && raw !== '' && !isNaN(+raw) && round2(+raw) === round2(n)) return String(raw);
+      return String(n);
+    },
+    set(v){
+      const s = v === null || v === undefined ? '' : String(v);
+      const n = typeof v === 'number' ? v : (/^\s*-?\d*\.?\d+\s*$/.test(s) ? parseFloat(s) : lerMoeda(s));
+      this._raw = n === null ? '' : (/^\s*-?\d*\.?\d+\s*$/.test(s) ? s.trim() : String(n));
+      nativeVal.set.call(this, n === null ? '' : fmtMoedaBR(n));
+    }
+  });
+  el.value = ini;
+}
+function moneyScan(){ document.querySelectorAll('input.money').forEach(el => { if(!el._m) moneyfy(el); }); }
+new MutationObserver(moneyScan).observe(document.body, {childList: true, subtree: true});
+moneyScan();
+document.addEventListener('focusout', e => { const el = e.target; if(el && el._m) el.value = el.value; });
+
+/* CNPJ / CPF: só números; pontos, barra e traço entram sozinhos */
+function mascaraDoc(v){
+  const d = String(v || '').replace(/\D/g, '').slice(0, 14);
+  if(d.length <= 11) return d.replace(/^(\d{3})(\d)/, '$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3').replace(/\.(\d{3})(\d{1,2})$/, '.$1-$2');
+  return d.replace(/^(\d{2})(\d)/, '$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3').replace(/\.(\d{3})(\d)/, '.$1/$2').replace(/(\d{4})(\d{1,2})$/, '$1-$2');
+}
+document.addEventListener('input', e => {
+  const el = e.target;
+  if(!el.classList || !el.classList.contains('cnpj')) return;
+  const pos = el.selectionStart ?? el.value.length;
+  const digAntes = el.value.slice(0, pos).replace(/\D/g, '').length;
+  const novo = mascaraDoc(el.value);
+  if(novo === el.value) return;
+  el.value = novo;
+  let p = 0, c = 0;
+  while(p < novo.length && c < digAntes){ if(/\d/.test(novo[p])) c++; p++; }
+  try{ el.setSelectionRange(p, p); }catch(_){}
+});
+
+/* Listas suspensas (clientes, empreendimentos e serviços do cadastro). Continua sendo possível digitar um nome novo. */
+const combo = {el: null, opts: [], i: -1, quiet: false};
+const comboPop = document.createElement('div');
+comboPop.id = 'comboPop'; comboPop.hidden = true;
+document.body.appendChild(comboPop);
+function comboOpts(el){
+  const dl = document.getElementById(el.dataset.combo);
+  return dl ? [...dl.options].map(o => ({v: o.value, l: o.label && o.label !== o.value ? o.label : ''})).filter(o => o.v) : [];
+}
+function comboShow(el, filtrar){
+  const all = comboOpts(el);
+  if(!all.length){ comboHide(); return; }
+  const q = filtrar ? normNome(el.value) : '', qd = filtrar ? el.value.replace(/\D/g, '') : '';
+  const lst = (q ? all.filter(o => normNome(o.v + ' ' + o.l).includes(q) || (qd.length >= 3 && o.l.replace(/\D/g, '').includes(qd))) : all).slice(0, 100);
+  combo.el = el; combo.opts = lst; combo.i = -1;
+  comboPop.innerHTML = lst.length
+    ? lst.map((o, i) => `<div class="co" data-i="${i}">${esc(o.v)}${o.l ? `<small>${esc(o.l)}</small>` : ''}</div>`).join('')
+    : '<div class="cv">Nada parecido no cadastro — o texto digitado será usado.</div>';
+  comboPop.hidden = false;
+  comboPos();
+}
+function comboPos(){
+  const el = combo.el; if(!el || comboPop.hidden) return;
+  const r = el.getBoundingClientRect(), w = Math.min(Math.max(r.width, 280), innerWidth - 16);
+  comboPop.style.width = w + 'px';
+  comboPop.style.left = Math.max(8, Math.min(r.left, innerWidth - w - 8)) + 'px';
+  const abaixo = innerHeight - r.bottom;
+  if(abaixo < 220 && r.top > abaixo){ comboPop.style.top = ''; comboPop.style.bottom = (innerHeight - r.top + 2) + 'px'; comboPop.style.maxHeight = Math.min(280, r.top - 10) + 'px'; }
+  else { comboPop.style.bottom = ''; comboPop.style.top = (r.bottom + 2) + 'px'; comboPop.style.maxHeight = Math.min(280, abaixo - 10) + 'px'; }
+}
+function comboHide(){ comboPop.hidden = true; combo.el = null; combo.i = -1; }
+function comboPick(i){
+  const el = combo.el, o = combo.opts[i];
+  if(!el || !o) return;
+  el.value = o.v;
+  combo.quiet = true;
+  el.dispatchEvent(new Event('input', {bubbles: true}));
+  el.dispatchEvent(new Event('change', {bubbles: true}));
+  combo.quiet = false;
+  comboHide();
+}
+function comboMark(i){
+  const its = comboPop.querySelectorAll('.co');
+  if(!its.length) return;
+  combo.i = (i + its.length) % its.length;
+  its.forEach((x, k) => x.classList.toggle('on', k === combo.i));
+  its[combo.i].scrollIntoView({block: 'nearest'});
+}
+document.addEventListener('focusin', e => { if(e.target.matches && e.target.matches('input[data-combo]')) comboShow(e.target, false); });
+document.addEventListener('focusout', e => { if(e.target === combo.el) comboHide(); });
+document.addEventListener('input', e => { if(!combo.quiet && e.target.matches && e.target.matches('input[data-combo]')) comboShow(e.target, true); });
+document.addEventListener('mousedown', e => { if(e.target.matches && e.target.matches('input[data-combo]') && comboPop.hidden && document.activeElement === e.target) setTimeout(() => comboShow(e.target, false)); });
+comboPop.addEventListener('mousedown', e => { e.preventDefault(); const it = e.target.closest('.co'); if(it) comboPick(+it.dataset.i); });
+document.addEventListener('keydown', e => {
+  if(!e.target.matches || !e.target.matches('input[data-combo]')) return;
+  if(e.key === 'ArrowDown' || e.key === 'ArrowUp'){
+    if(comboPop.hidden || combo.el !== e.target) comboShow(e.target, false);
+    e.preventDefault(); comboMark(combo.i + (e.key === 'ArrowDown' ? 1 : -1));
+  } else if(e.key === 'Enter' && !comboPop.hidden && combo.i >= 0){ e.preventDefault(); comboPick(combo.i); }
+  else if(e.key === 'Escape' && !comboPop.hidden){ e.preventDefault(); e.stopPropagation(); comboHide(); }
+}, true);
+document.addEventListener('scroll', e => { if(!comboPop.hidden && !comboPop.contains(e.target)) comboPos(); }, true);
+addEventListener('resize', () => comboPos());
+document.addEventListener('transitionend', () => comboPos());   // painel lateral ainda deslizando quando o campo recebe o foco
+
+/* Configurações: numeração das notas de débito */
+const pad3 = n => ('00' + n).slice(-3);
+function renderNDCfg(){
+  const box = $('#ndBox'); if(!box) return;
+  const n = state.numeracaoND;
+  if(!useApi() || !n){
+    box.innerHTML = `<p class="hint">${useApi() ? 'Disponível depois de atualizar o Apps Script (versão 14).' : 'Conecte o painel à planilha para ver a numeração.'}</p>`;
+    return;
+  }
+  box.innerHTML = `<div class="grid">${['MANNARE', 'BMM'].map(e => `<label class="f">Último nº usado pela ${e === 'MANNARE' ? 'Mannare' : 'BMM'} em ${n.ano}<input class="ndUlt" data-e="${e}" type="number" min="0" step="1" value="${n.ultimo[e] || 0}"></label>`).join('')}</div>
+    <p class="hint" style="margin:8px 0">Próximas notas: Mannare <b>${pad3((n.ultimo.MANNARE || 0) + 1)}/${n.ano}</b> · BMM <b>${pad3((n.ultimo.BMM || 0) + 1)}/${n.ano}</b></p>
+    <button class="btn sm" id="btnSaveND">Salvar numeração</button>`;
+}
+document.addEventListener('click', async e => {
+  if(e.target.id !== 'btnSaveND') return;
+  const n = state.numeracaoND; if(!n) return;
+  const mud = $$('#ndBox .ndUlt').map(i => ({e: i.dataset.e, v: Math.floor(+i.value)})).filter(x => x.v >= 0 && x.v !== (n.ultimo[x.e] || 0));
+  if(!mud.length){ toast('Nada mudou na numeração.'); return; }
+  if(!confirm(mud.map(x => `${x.e === 'MANNARE' ? 'Mannare' : 'BMM'}: próxima nota será ${pad3(x.v + 1)}/${n.ano}`).join('\n') + '\n\nConfirmar?')) return;
+  try{
+    for(const x of mud){ const j = await api({action: 'setNumeracaoND', emissor: x.e, ano: n.ano, ultimo: x.v}); state.numeracaoND = j.numeracaoND; }
+    toast('Numeração das notas de débito salva.');
+  }catch(err){ toast(err.message); }
+  renderNDCfg();
 });
 
 /* ================== Início ================== */
