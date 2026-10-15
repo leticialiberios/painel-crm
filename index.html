@@ -239,6 +239,7 @@ table.fin tfoot td{font-weight:700;color:var(--navy);border-bottom:0}
   <div class="views" id="views">
     <button class="on" data-view="prop">Propostas</button>
     <button data-view="fin">Financeiro <span id="nFin"></span></button>
+    <button data-view="cad">Cadastros</button>
   </div>
 
   <div class="banner" id="backendBanner" hidden style="background:#fef3f2;border-color:#fecdca;color:#912018">
@@ -320,6 +321,42 @@ table.fin tfoot td{font-weight:700;color:var(--navy);border-bottom:0}
       <div class="card tablewrap" style="margin-bottom:60px"><table class="list" id="fluxo"></table></div>
     </div>
   </div>
+
+  <!-- Visão Cadastros -->
+  <div id="viewCad" hidden>
+    <div class="subviews" id="cadSub">
+      <button class="on" data-cad="cli">Clientes <span id="nCli"></span></button>
+      <button data-cad="srv">Serviços <span id="nSrv"></span></button>
+    </div>
+    <div class="banner" id="cadBanner" hidden style="background:#fef3f2;border-color:#fecdca;color:#912018">
+      <b>Para gravar cadastros, a planilha precisa do Code.gs novo (versão 13).</b> No Apps Script: cole o <b>Code.gs</b>, salve, e vá em <b>Implantar → Gerenciar implantações → ✎ → Nova versão → Implantar</b>.
+    </div>
+    <div id="cad_cli">
+      <div class="filters">
+        <input type="search" id="cliQ" placeholder="Buscar por razão social, CNPJ, grupo, contato, empreendimento…">
+        <select id="cliGrupo"></select>
+        <span class="spacer"></span>
+        <button class="btn sm" id="cliImport" title="Cria o cadastro dos clientes que já aparecem nas propostas e nos recebíveis">Importar das propostas</button>
+        <button class="btn sm" id="cliCsv">Exportar (.csv)</button>
+        <button class="btn primary sm" id="cliNew">+ Novo cliente</button>
+      </div>
+      <div class="card tablewrap" style="margin-bottom:60px">
+        <table class="list"><thead><tr><th>Cliente</th><th>CNPJ / CPF</th><th>Grupo</th><th>Contato</th><th>Empreendimentos</th><th class="num">Propostas</th></tr></thead><tbody id="cliBody"></tbody></table>
+      </div>
+    </div>
+    <div id="cad_srv" hidden>
+      <div class="filters">
+        <input type="search" id="srvQ" placeholder="Buscar serviço…">
+        <span class="spacer"></span>
+        <button class="btn sm" id="srvImport" title="Cria o cadastro a partir dos itens das propostas já feitas">Importar das propostas</button>
+        <button class="btn sm" id="srvCsv">Exportar (.csv)</button>
+        <button class="btn primary sm" id="srvNew">+ Novo serviço</button>
+      </div>
+      <div class="card tablewrap" style="margin-bottom:60px">
+        <table class="list"><thead><tr><th>Serviço</th><th>Descrição na proposta</th><th class="num">Valor de referência</th><th class="num">Propostas</th></tr></thead><tbody id="srvBody"></tbody></table>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Painel da proposta -->
@@ -347,12 +384,12 @@ table.fin tfoot td{font-weight:700;color:var(--navy);border-bottom:0}
       <div class="grid">
         <label class="f">Código<input id="i_codigo"></label>
         <label class="f">Status<select id="i_status"></select></label>
-        <label class="f">Cliente (razão social)<input id="i_cliente" placeholder="Ex.: METRIX IMÓVEIS LTDA."></label>
+        <label class="f">Cliente (razão social)<input id="i_cliente" list="dlCli" autocomplete="off" placeholder="Ex.: METRIX IMÓVEIS LTDA."></label>
         <label class="f">CNPJ / CPF do cliente<input id="i_clienteCnpj" placeholder="00.000.000/0000-00"></label>
         <label class="f">Contato<input id="i_contato" placeholder="Pessoa de contato"></label>
         <label class="f">E-mail do contato<input id="i_email" type="email"></label>
         <label class="f">Telefone / WhatsApp<input id="i_telefone"></label>
-        <label class="f">Empreendimento<input id="i_empreendimento" placeholder="Ex.: Afonso Celso"></label>
+        <label class="f">Empreendimento<input id="i_empreendimento" list="dlEmp" autocomplete="off" placeholder="Ex.: Afonso Celso"></label>
         <label class="f">Tipo de serviço<input id="i_tipo" list="dlTipos"></label>
         <label class="f">Valor total (R$)<input id="i_valor" type="number" step="0.01" min="0"></label>
         <label class="f">Data de entrada<input id="i_dataEntrada" type="date"></label>
@@ -361,6 +398,7 @@ table.fin tfoot td{font-weight:700;color:var(--navy);border-bottom:0}
         <label class="f">Origem<input id="i_origem" placeholder="Indicação, site, edital…"></label>
         <label class="f full">Observações internas<textarea id="i_observacoes" rows="3"></textarea></label>
       </div>
+      <p class="hint" id="cliHint" hidden></p>
     </div>
 
     <!-- Proposta -->
@@ -439,7 +477,7 @@ table.fin tfoot td{font-weight:700;color:var(--navy);border-bottom:0}
     <!-- Financeiro da proposta -->
     <div data-pane="financeiro" hidden>
       <div class="grid">
-        <label class="f">Serviço (nome curto)<input id="f_servico" placeholder="Ex.: UNIFICAÇÃO IPTU"></label>
+        <label class="f">Serviço (nome curto)<input id="f_servico" list="dlSrvNome" autocomplete="off" placeholder="Ex.: UNIFICAÇÃO IPTU"></label>
         <label class="f">Empreendimento<input id="f_empreendimento" readonly title="Vem da aba Dados"></label>
         <label class="f">Captação (quem trouxe o cliente)<select id="f_captacao"></select></label>
         <label class="f">Competência (quem emite a NF)<select id="f_competencia"></select></label>
@@ -527,9 +565,9 @@ table.fin tfoot td{font-weight:700;color:var(--navy);border-bottom:0}
         <label class="f">Previsão de pagamento<input id="r_previsao" type="date"></label>
         <label class="f">Data do pagamento<input id="r_dataPagamento" type="date"></label>
         <div></div>
-        <label class="f">Cliente<input id="r_cliente"></label>
-        <label class="f">Empreendimento<input id="r_empreendimento"></label>
-        <label class="f">Serviço<input id="r_servico"></label>
+        <label class="f">Cliente<input id="r_cliente" list="dlCli" autocomplete="off"></label>
+        <label class="f">Empreendimento<input id="r_empreendimento" list="dlEmp" autocomplete="off"></label>
+        <label class="f">Serviço<input id="r_servico" list="dlSrvNome" autocomplete="off"></label>
         <label class="f">Parcela<input id="r_parcelaTxt" placeholder="Ex.: 1 de 2"></label>
         <label class="f">Valor bruto (R$)<input id="r_valorBruto" type="number" step="0.01" min="0"></label>
         <label class="f">Imposto (%)<input id="r_imposto" type="number" step="0.01" min="0"></label>
@@ -609,6 +647,58 @@ table.fin tfoot td{font-weight:700;color:var(--navy);border-bottom:0}
   </div>
 </div>
 <datalist id="dlForn"></datalist>
+<datalist id="dlCli"></datalist><datalist id="dlEmp"></datalist><datalist id="dlGrupo"></datalist><datalist id="dlSrvNome"></datalist><datalist id="dlSrvDesc"></datalist>
+
+<!-- Cadastro de cliente -->
+<div class="modal" id="cliModal">
+  <div class="mbox">
+    <section class="head"><h3 id="cTitle">Cliente</h3><button class="btn ghost" data-close>✕</button></section>
+    <section>
+      <div class="grid">
+        <label class="f full">Razão social / nome<input id="c_nome" placeholder="Ex.: MRV ENGENHARIA E PARTICIPAÇÕES S.A."></label>
+        <label class="f">CNPJ / CPF<input id="c_cnpj" placeholder="00.000.000/0000-00"></label>
+        <label class="f">Grupo<input id="c_grupo" list="dlGrupo" placeholder="Ex.: MRV (igual em todas as SPEs)"></label>
+        <label class="f">Contato<input id="c_contato" placeholder="Pessoa de contato"></label>
+        <label class="f">E-mail do contato<input id="c_email" type="email"></label>
+        <label class="f">Telefone / WhatsApp<input id="c_telefone"></label>
+        <label class="f">E-mail financeiro (notas e ND)<input id="c_emailFinanceiro" type="email" placeholder="Se vazio, usa o e-mail do contato"></label>
+        <label class="f full">Endereço<input id="c_endereco" placeholder="Rua, número, bairro, cidade/UF, CEP"></label>
+        <label class="f full">Empreendimentos <span class="sub" style="font-weight:400">(um por linha)</span><textarea id="c_empreendimentos" rows="3" class="inp" placeholder="Ex.: Reserva das Garças&#10;Flora das Carnaúbas"></textarea></label>
+        <label class="f full">Observações<textarea id="c_obs" rows="2" class="inp"></textarea></label>
+      </div>
+      <div id="c_meta" class="hint" style="margin-top:10px"></div>
+    </section>
+    <section style="display:flex;gap:8px;align-items:center;border-bottom:0;flex-wrap:wrap">
+      <button class="btn danger sm" id="c_del">Excluir</button>
+      <span class="spacer"></span>
+      <button class="btn" data-close>Cancelar</button>
+      <button class="btn primary" id="c_save">Salvar</button>
+    </section>
+  </div>
+</div>
+
+<!-- Cadastro de serviço -->
+<div class="modal" id="srvModal">
+  <div class="mbox">
+    <section class="head"><h3 id="sTitle">Serviço</h3><button class="btn ghost" data-close>✕</button></section>
+    <section>
+      <div class="grid">
+        <label class="f">Nome curto<input id="v_nome" placeholder="Ex.: UNIFICAÇÃO IPTU"></label>
+        <label class="f">Valor de referência (R$)<input id="v_valor" type="number" step="0.01" min="0"></label>
+        <label class="f full">Descrição do item na proposta<textarea id="v_descricao" rows="3" class="inp" placeholder="Texto da linha do item em “Valores e forma de pagamento”. Se vazio, usa o nome curto."></textarea></label>
+        <label class="f full">Observações internas<textarea id="v_obs" rows="2" class="inp"></textarea></label>
+      </div>
+      <div id="v_meta" class="hint" style="margin-top:10px"></div>
+    </section>
+    <section style="display:flex;gap:8px;align-items:center;border-bottom:0;flex-wrap:wrap">
+      <button class="btn danger sm" id="v_del">Excluir</button>
+      <span class="spacer"></span>
+      <button class="btn" data-close>Cancelar</button>
+      <button class="btn primary" id="v_save">Salvar</button>
+    </section>
+  </div>
+</div>
+
 
 <!-- Configurações -->
 <div class="modal" id="settings">
@@ -1029,6 +1119,9 @@ const state = {
   items: [],
   recebiveis: [],
   pagamentos: [],
+  clientes: [],
+  servicos: [],
+  cadSub: 'cli', cadQ: {cli:'', srv:'', grupo:''},
   assinaturas: {},
   finSub: 'receber',
   pagFilter: {conta: {q:'', st:'abertos', centro:'', cat:'', mes:''}, forn: {q:'', st:'abertos', centro:'', cat:'', mes:''}},
@@ -1087,6 +1180,8 @@ async function loadAll(silent){
     state.items = LS.get('pp_items', []);
     state.recebiveis = LS.get('pp_rec', []);
     state.pagamentos = LS.get('pp_pag', []);
+    state.clientes = LS.get('pp_cli', []);
+    state.servicos = LS.get('pp_srv', []);
     state.assinaturas = LS.get('pp_sigs', {});
     state.config = mergeCfg(LS.get('pp_config', null));
     setSync('local'); renderAll(); return;
@@ -1100,6 +1195,8 @@ async function loadAll(silent){
     state.items = j.items || [];
     state.recebiveis = j.recebiveis || [];
     state.pagamentos = j.pagamentos || [];
+    state.clientes = j.clientes || [];
+    state.servicos = j.servicos || [];
     if(j.assinaturas){ state.assinaturas = j.assinaturas; LS.set('pp_sigs_cache', j.assinaturas); LS.set('pp_sigver', j.assinaturasVer || ''); }
     else if(!Object.keys(state.assinaturas || {}).length) state.assinaturas = LS.get('pp_sigs_cache', {});
     if(j.config && Object.keys(j.config).length) state.config = mergeCfg(j.config);
@@ -1112,13 +1209,13 @@ async function loadAll(silent){
     state.backendOk = (j.versaoBackend || 1) >= VERSAO_BACKEND_ESPERADA;
     fecharAprovacoes();
     $('#backendBanner').hidden = state.backendOk;
-    LS.set('pp_cache', {items: state.items, config: state.config, recebiveis: state.recebiveis, pagamentos: state.pagamentos});
+    LS.set('pp_cache', {items: state.items, config: state.config, recebiveis: state.recebiveis, pagamentos: state.pagamentos, clientes: state.clientes, servicos: state.servicos});
     setSync('ok');
   }catch(e){
     console.error(e);
     if(silent && state.items.length){ setSync('ok'); $('#sync span:last-child').textContent = 'Sem atualização agora — mostrando os últimos dados · ' + new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'}); return; }
     const c = LS.get('pp_cache', null);
-    if(c && !state.items.length){ state.items = c.items; state.recebiveis = c.recebiveis || []; state.pagamentos = c.pagamentos || []; state.assinaturas = LS.get('pp_sigs_cache', {}); state.config = mergeCfg(c.config); }
+    if(c && !state.items.length){ state.items = c.items; state.recebiveis = c.recebiveis || []; state.pagamentos = c.pagamentos || []; state.clientes = c.clientes || []; state.servicos = c.servicos || []; state.assinaturas = LS.get('pp_sigs_cache', {}); state.config = mergeCfg(c.config); }
     setSync('err', e.message);
   }
   renderAll();
@@ -1260,7 +1357,7 @@ function apProgress(x){
 }
 
 /* ================== Render: painel ================== */
-function renderAll(){ renderWho(); renderKpis(); renderPipeline(); renderFilters(); renderTable(); renderDatalists(); renderFin(); renderPag('conta'); renderPag('forn'); renderFluxo(); }
+function renderAll(){ renderWho(); renderKpis(); renderPipeline(); renderFilters(); renderTable(); renderDatalists(); renderFin(); renderPag('conta'); renderPag('forn'); renderFluxo(); renderCad(); }
 
 function renderWho(){
   $('#who').innerHTML = me() ? `Você: <b>${esc(me())}</b>` : `<a style="color:var(--indigo);cursor:pointer;font-weight:700" onclick="openSettings()">Informe quem é você</a>`;
@@ -1415,6 +1512,7 @@ function openDrawer(id){
   showTab(src && needsMyVote(src) ? 'aprovacao' : 'dados');
   $('#overlay').classList.add('on'); $('#drawer').classList.add('on'); $('#drawer').setAttribute('aria-hidden', 'false');
   if(state.isNew) setTimeout(() => $('#i_cliente').focus(), 60);
+  prepClienteDrawer();
 }
 
 function fillForm(){
@@ -1443,7 +1541,7 @@ function renderStatusOptions(){
 
 /* --- editor do documento --- */
 function itemRow(r){
-  return `<tr><td><input class="inp iq" value="${esc(r.qtd)}"></td><td><input class="inp idsc" value="${esc(r.descricao)}" placeholder="Ex.: UNIFICAÇÃO IPTU's"></td><td><input class="inp ival" type="number" step="0.01" min="0" value="${esc(r.valor)}"></td><td><button class="btn sm ghost" data-delit title="Remover">✕</button></td></tr>`;
+  return `<tr><td><input class="inp iq" value="${esc(r.qtd)}"></td><td><input class="inp idsc" list="dlSrvDesc" autocomplete="off" value="${esc(r.descricao)}" placeholder="Ex.: UNIFICAÇÃO IPTU's — ou escolha um serviço cadastrado"></td><td><input class="inp ival" type="number" step="0.01" min="0" value="${esc(r.valor)}"></td><td><button class="btn sm ghost" data-delit title="Remover">✕</button></td></tr>`;
 }
 function secBlock(s){
   return `<div class="sec"><div class="secbar"><span class="sn"></span><input class="st" value="${esc(s.titulo)}"><button class="btn sm" data-delsec title="Remover seção">✕</button></div><textarea class="inp clauses sx">${esc(s.texto)}</textarea></div>`;
@@ -2885,8 +2983,9 @@ $('#views').onclick = e => {
   const b = e.target.closest('[data-view]'); if(!b) return;
   state.view = b.dataset.view;
   $$('#views button').forEach(x => x.classList.toggle('on', x === b));
-  $('#viewProp').hidden = state.view !== 'prop'; $('#viewFin').hidden = state.view !== 'fin';
+  $('#viewProp').hidden = state.view !== 'prop'; $('#viewFin').hidden = state.view !== 'fin'; $('#viewCad').hidden = state.view !== 'cad';
   if(state.view === 'fin') renderFin();
+  if(state.view === 'cad') renderCad();
 };
 /* --- parcelas --- */
 $('#btnAddParc').onclick = () => { $('#parcRows').insertAdjacentHTML('beforeend', parcRow({pct:'', condicao:''})); numberParcs(); syncTotals(); markDirty(); };
@@ -2972,6 +3071,295 @@ $('#sigFile').onchange = async e => {
 };
 $('#sgOk').onclick = saveSig;
 
+/* ================== Cadastros: clientes e serviços ================== */
+const onlyDig = v => String(v || '').replace(/\D/g, '');
+const cadOk = () => !useApi() || (state.lastVersaoBackend || 0) >= 13;
+const CAD = {
+  cli: {lista: () => state.clientes, set: v => { state.clientes = v; }, ls: 'pp_cli', save: 'saveCli', many: 'saveClis', del: 'deleteCli', key: 'cli'},
+  srv: {lista: () => state.servicos, set: v => { state.servicos = v; }, ls: 'pp_srv', save: 'saveSrv', many: 'saveSrvs', del: 'deleteSrv', key: 'srv'}
+};
+function cadCache(){ if(useApi()) LS.set('pp_cache', {items: state.items, config: state.config, recebiveis: state.recebiveis, pagamentos: state.pagamentos, clientes: state.clientes, servicos: state.servicos}); }
+function upsertCad(t, o){
+  const l = CAD[t].lista(), i = l.findIndex(x => x.id === o.id);
+  if(i >= 0) l[i] = o; else l.push(o);
+  if(useApi()) cadCache(); else LS.set(CAD[t].ls, l);
+}
+function exigeCad(){ if(!cadOk()) throw new Error('Atualize o Code.gs da planilha (versão 13) para gravar cadastros.'); }
+async function persistCad(t, o){
+  const c = CAD[t];
+  o.atualizadoEm = new Date().toISOString(); o.atualizadoPor = me();
+  if(!useApi()){ o.versao = (o.versao || 0) + 1; upsertCad(t, o); return o; }
+  exigeCad(); setSync('loading');
+  let j = await api({action: c.save, [c.key]: o});
+  if(j.conflict){
+    const cur = j[c.key];
+    const ok = confirm(`Este cadastro foi alterado por ${cur.atualizadoPor || 'outro sócio'} em ${fmtDT(cur.atualizadoEm)}.\n\nOK = gravar a sua versão por cima\nCancelar = descartar a sua alteração`);
+    if(!ok){ upsertCad(t, cur); setSync('ok'); return cur; }
+    o.versao = cur.versao; j = await api({action: c.save, [c.key]: o});
+  }
+  upsertCad(t, j[c.key]); setSync('ok'); return j[c.key];
+}
+async function persistCadMany(t, arr){
+  const c = CAD[t], now = new Date().toISOString();
+  arr.forEach(o => { o.atualizadoEm = now; o.atualizadoPor = me(); });
+  if(!useApi()){ arr.forEach(o => { o.versao = 1; upsertCad(t, o); }); return arr.length; }
+  exigeCad(); setSync('loading');
+  let n = 0;
+  for(let i = 0; i < arr.length; i += 40){
+    const j = await api({action: c.many, [c.key + 's']: arr.slice(i, i + 40)});
+    (j.itens || []).forEach(o => upsertCad(t, o)); n += (j.itens || []).length;
+  }
+  setSync('ok'); return n;
+}
+async function removeCad(t, id){
+  const c = CAD[t];
+  if(useApi()){ exigeCad(); setSync('loading'); await api({action: c.del, id}); setSync('ok'); }
+  c.set(c.lista().filter(x => x.id !== id));
+  if(useApi()) cadCache(); else LS.set(c.ls, c.lista());
+}
+
+/* --- busca --- */
+const empsDe = c => !c ? [] : (Array.isArray(c.empreendimentos) ? c.empreendimentos : String(c.empreendimentos || '').split(/\r?\n/)).map(x => String(x).trim()).filter(Boolean);
+function findCli(nome, cnpj){
+  const d = onlyDig(cnpj);
+  if(d.length >= 11){ const c = state.clientes.find(x => onlyDig(x.cnpj) === d); if(c) return c; }
+  const n = normNome(nome);
+  return n ? state.clientes.find(x => normNome(x.nome) === n) || null : null;
+}
+function findSrv(txt){
+  const n = normNome(txt); if(!n) return null;
+  return state.servicos.find(x => normNome(x.descricao) === n) || state.servicos.find(x => normNome(x.nome) === n) || null;
+}
+function propsDoCli(c){ const n = normNome(c.nome), d = onlyDig(c.cnpj); return state.items.filter(x => normNome(x.cliente) === n || (d.length >= 11 && onlyDig(x.clienteCnpj) === d)); }
+function propsDoSrv(v){
+  const a = normNome(v.descricao), b = normNome(v.nome);
+  return state.items.filter(x => ((x.doc && x.doc.itens) || []).some(i => { const d = normNome(i.descricao); return d && (d === a || d === b); }) || (b && normNome(x.fin && x.fin.servico) === b));
+}
+
+/* --- listas de sugestão (datalists) --- */
+function setEmpList(cli){
+  const all = cli ? empsDe(cli) : [...new Set([...state.clientes.flatMap(empsDe), ...state.items.map(x => x.empreendimento).filter(Boolean)])];
+  $('#dlEmp').innerHTML = all.map(e => `<option value="${esc(e)}">`).join('');
+}
+function renderCadDatalists(){
+  $('#dlCli').innerHTML = state.clientes.map(c => `<option value="${esc(c.nome)}" label="${esc([c.cnpj, c.grupo].filter(Boolean).join(' · '))}">`).join('');
+  $('#dlGrupo').innerHTML = [...new Set(state.clientes.map(c => c.grupo).filter(Boolean))].map(g => `<option value="${esc(g)}">`).join('');
+  $('#dlSrvNome').innerHTML = state.servicos.map(v => `<option value="${esc(v.nome)}" label="${esc(v.valor !== '' && v.valor != null ? money(v.valor) : '')}">`).join('');
+  $('#dlSrvDesc').innerHTML = state.servicos.map(v => `<option value="${esc(v.descricao || v.nome)}" label="${esc(v.nome + (v.valor !== '' && v.valor != null ? ' · ' + money(v.valor) : ''))}">`).join('');
+  if(!state.draft) setEmpList(null);
+}
+
+/* --- telas --- */
+function renderCad(){
+  renderCadDatalists();
+  $('#nCli').textContent = state.clientes.length ? `(${state.clientes.length})` : '';
+  $('#nSrv').textContent = state.servicos.length ? `(${state.servicos.length})` : '';
+  $('#cadBanner').hidden = cadOk();
+  ['cli', 'srv'].forEach(k => $('#cad_' + k).hidden = k !== state.cadSub);
+  $$('#cadSub button').forEach(b => b.classList.toggle('on', b.dataset.cad === state.cadSub));
+  const grupos = [...new Set(state.clientes.map(c => c.grupo).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt'));
+  if(state.cadQ.grupo && !grupos.includes(state.cadQ.grupo)) state.cadQ.grupo = '';
+  $('#cliGrupo').innerHTML = '<option value="">Todos os grupos</option>' + grupos.map(g => `<option ${g === state.cadQ.grupo ? 'selected' : ''}>${esc(g)}</option>`).join('');
+  const q = normNome(state.cadQ.cli);
+  const cl = state.clientes
+    .filter(c => (!state.cadQ.grupo || c.grupo === state.cadQ.grupo) && (!q || normNome([c.nome, c.cnpj, onlyDig(c.cnpj), c.grupo, c.contato, c.email, c.emailFinanceiro, empsDe(c).join(' ')].join(' ')).includes(q)))
+    .sort((a, b) => String(a.grupo || a.nome || '').localeCompare(String(b.grupo || b.nome || ''), 'pt') || String(a.nome || '').localeCompare(String(b.nome || ''), 'pt'));
+  $('#cliBody').innerHTML = cl.length ? cl.map(c => {
+    const e = empsDe(c), np = propsDoCli(c).length;
+    return `<tr data-cli="${esc(c.id)}" style="cursor:pointer"><td><b>${esc(c.nome)}</b>${c.emailFinanceiro || c.email ? `<div class="sub">${esc(c.emailFinanceiro || c.email)}</div>` : ''}</td><td>${esc(c.cnpj || '—')}</td><td>${esc(c.grupo || '—')}</td><td>${esc(c.contato || '—')}${c.telefone ? `<div class="sub">${esc(c.telefone)}</div>` : ''}</td><td>${e.length ? esc(e.slice(0, 3).join(', ')) + (e.length > 3 ? ` <span class="sub">+${e.length - 3}</span>` : '') : '—'}</td><td class="num">${np || '—'}</td></tr>`;
+  }).join('') : `<tr><td colspan="6" class="empty">${state.clientes.length ? 'Nada com esses filtros.' : 'Nenhum cliente cadastrado. Use “+ Novo cliente” ou “Importar das propostas”.'}</td></tr>`;
+  const qs = normNome(state.cadQ.srv);
+  const sv = state.servicos.filter(v => !qs || normNome([v.nome, v.descricao].join(' ')).includes(qs)).sort((a, b) => String(a.nome || '').localeCompare(String(b.nome || ''), 'pt'));
+  $('#srvBody').innerHTML = sv.length ? sv.map(v => `<tr data-srv="${esc(v.id)}" style="cursor:pointer"><td><b>${esc(v.nome)}</b></td><td>${esc(v.descricao || '—')}</td><td class="num">${v.valor !== '' && v.valor != null ? money(v.valor) : '—'}</td><td class="num">${propsDoSrv(v).length || '—'}</td></tr>`).join('')
+    : `<tr><td colspan="4" class="empty">${state.servicos.length ? 'Nada com essa busca.' : 'Nenhum serviço cadastrado. Use “+ Novo serviço” ou “Importar das propostas”.'}</td></tr>`;
+}
+
+/* --- cliente: modal --- */
+let cliEdit = null, cliDaProposta = false;
+const CLI_F = ['nome', 'cnpj', 'grupo', 'contato', 'email', 'telefone', 'emailFinanceiro', 'endereco', 'obs'];
+const novoCli = pre => Object.assign({id: uid(), nome:'', cnpj:'', grupo:'', contato:'', email:'', telefone:'', emailFinanceiro:'', endereco:'', empreendimentos:[], obs:'', versao:0, criadoEm: new Date().toISOString()}, pre || {});
+function openCli(id, pre){
+  const src = id ? state.clientes.find(x => x.id === id) : null;
+  cliEdit = src ? clone(src) : novoCli(pre);
+  cliDaProposta = !src && !!pre;
+  $('#cTitle').textContent = src ? cliEdit.nome : 'Novo cliente';
+  CLI_F.forEach(k => $('#c_' + k).value = cliEdit[k] || '');
+  $('#c_empreendimentos').value = empsDe(cliEdit).join('\n');
+  $('#c_del').hidden = !src;
+  const ps = src ? propsDoCli(src) : [];
+  $('#c_meta').innerHTML = src ? `${ps.length ? 'Propostas: ' + ps.map(x => esc(x.codigo || '—')).join(', ') + ' · ' : ''}Atualizado em ${fmtDT(cliEdit.atualizadoEm)}${cliEdit.atualizadoPor ? ' por ' + esc(cliEdit.atualizadoPor) : ''}` : '';
+  $('#cliModal').classList.add('on'); setTimeout(() => $('#c_nome').focus(), 50);
+}
+async function saveCliModal(){
+  const c = cliEdit;
+  CLI_F.forEach(k => c[k] = $('#c_' + k).value.trim());
+  c.empreendimentos = [...new Set($('#c_empreendimentos').value.split(/\r?\n/).map(x => x.trim()).filter(Boolean))];
+  if(!c.nome){ toast('Informe a razão social.'); $('#c_nome').focus(); return; }
+  const d = onlyDig(c.cnpj);
+  const dup = state.clientes.find(x => x.id !== c.id && ((d.length >= 11 && onlyDig(x.cnpj) === d) || normNome(x.nome) === normNome(c.nome)));
+  if(dup && !confirm(`Já existe “${dup.nome}”${dup.cnpj ? ' (' + dup.cnpj + ')' : ''} no cadastro. Salvar mesmo assim?`)) return;
+  try{
+    const r = await persistCad('cli', c);
+    $('#cliModal').classList.remove('on'); renderCad();
+    if(cliDaProposta && state.draft){ aplicaCliente(r); }
+    toast('Cliente salvo');
+  }catch(e){ toast('Falha: ' + e.message, 5000); }
+}
+
+/* --- serviço: modal --- */
+let srvEdit = null;
+function openSrv(id, pre){
+  const src = id ? state.servicos.find(x => x.id === id) : null;
+  srvEdit = src ? clone(src) : Object.assign({id: uid(), nome:'', descricao:'', valor:'', obs:'', versao:0, criadoEm: new Date().toISOString()}, pre || {});
+  $('#sTitle').textContent = src ? srvEdit.nome : 'Novo serviço';
+  ['nome', 'descricao', 'obs'].forEach(k => $('#v_' + k).value = srvEdit[k] || '');
+  $('#v_valor').value = srvEdit.valor ?? '';
+  $('#v_del').hidden = !src;
+  const ps = src ? propsDoSrv(src) : [];
+  $('#v_meta').innerHTML = src ? `${ps.length ? 'Usado em: ' + ps.map(x => esc(x.codigo || '—')).join(', ') + ' · ' : ''}Atualizado em ${fmtDT(srvEdit.atualizadoEm)}${srvEdit.atualizadoPor ? ' por ' + esc(srvEdit.atualizadoPor) : ''}` : '';
+  $('#srvModal').classList.add('on'); setTimeout(() => $('#v_nome').focus(), 50);
+}
+async function saveSrvModal(){
+  const v = srvEdit;
+  ['nome', 'descricao', 'obs'].forEach(k => v[k] = $('#v_' + k).value.trim());
+  v.valor = $('#v_valor').value === '' ? '' : num($('#v_valor').value);
+  if(!v.nome){ toast('Informe o nome curto do serviço.'); $('#v_nome').focus(); return; }
+  if(!v.descricao) v.descricao = v.nome;
+  const dup = state.servicos.find(x => x.id !== v.id && normNome(x.nome) === normNome(v.nome));
+  if(dup && !confirm(`Já existe o serviço “${dup.nome}”. Salvar mesmo assim?`)) return;
+  try{ await persistCad('srv', v); $('#srvModal').classList.remove('on'); renderCad(); toast('Serviço salvo'); }
+  catch(e){ toast('Falha: ' + e.message, 5000); }
+}
+
+/* --- preenchimento automático na proposta e no financeiro --- */
+function aplicaCliente(c){
+  if(!c) return;
+  const set = (id, v) => { const el = $(id); if(el && v && !el.value.trim()) el.value = v; };
+  $('#i_cliente').value = c.nome;
+  set('#i_clienteCnpj', c.cnpj); set('#i_contato', c.contato); set('#i_email', c.email || c.emailFinanceiro); set('#i_telefone', c.telefone);
+  const e = empsDe(c); setEmpList(c);
+  if(e.length === 1) set('#i_empreendimento', e[0]);
+  state.cliAuto = c;
+  syncTotals(); markDirty(); cliHint();
+  if(state.draft) $('#dTitle').textContent = c.nome;
+}
+function cliHint(){
+  const h = $('#cliHint'); if(!h) return;
+  const n = $('#i_cliente').value.trim(), porCnpj = findCli('', $('#i_clienteCnpj').value);
+  if(!n || findCli(n, '') || (porCnpj && !(state.cliAuto && porCnpj.id === state.cliAuto.id))){ h.hidden = true; return; }
+  h.hidden = false;
+  h.innerHTML = `“${esc(n)}” ainda não está no cadastro de clientes. <a href="#" id="lnkCadCli">Cadastrar com os dados desta proposta</a>`;
+}
+/* trocou o cliente da proposta: limpa o que tinha vindo do cadastro do cliente anterior */
+function soltaClienteAnterior(){
+  const c = state.cliAuto; if(!c) return;
+  [['#i_clienteCnpj', c.cnpj], ['#i_contato', c.contato], ['#i_email', c.email || c.emailFinanceiro], ['#i_telefone', c.telefone]].forEach(([id, v]) => { const el = $(id); if(el && v && el.value === v) el.value = ''; });
+  const emp = $('#i_empreendimento'); if(emp && empsDe(c).includes(emp.value)) emp.value = '';
+  state.cliAuto = null;
+}
+function prepClienteDrawer(){ state.cliAuto = findCli($('#i_cliente').value, '') || null; setEmpList(findCli($('#i_cliente').value, $('#i_clienteCnpj').value)); cliHint(); }
+function aplicaServico(inp){
+  const v = findSrv(inp.value); if(!v) return;
+  if(v.descricao && normNome(inp.value) !== normNome(v.descricao)) inp.value = v.descricao;
+  const val = inp.closest('tr').querySelector('.ival');
+  if(val && !val.value && v.valor !== '' && v.valor != null) val.value = v.valor;
+  const fs = $('#f_servico'); if(fs && !fs.value.trim()) fs.value = v.nome;
+  syncTotals(); markDirty();
+}
+
+/* --- importar dos dados que já existem --- */
+const porRecentes = arr => [...arr].sort((a, b) => String(b.atualizadoEm || '').localeCompare(String(a.atualizadoEm || '')));
+function importarClientes(){
+  const novos = new Map();
+  const add = (nome, d) => {
+    nome = String(nome || '').trim(); if(!nome || findCli(nome, d.cnpj)) return;
+    const dg = onlyDig(d.cnpj);
+    const k = [...novos.keys()].find(kk => kk === normNome(nome) || (dg.length >= 11 && novos.get(kk).cnpjDig === dg)) || normNome(nome);
+    const o = novos.get(k) || Object.assign(novoCli({nome}), {cnpjDig: dg});
+    ['cnpj', 'contato', 'email', 'telefone', 'emailFinanceiro'].forEach(f => { const v = String(d[f] || '').trim(); if(!o[f] && v && normNome(v) !== normNome(nome)) o[f] = v; });
+    if(!o.cnpjDig) o.cnpjDig = onlyDig(o.cnpj);
+    const emp = String(d.emp || '').trim(); if(emp && !o.empreendimentos.some(x => normNome(x) === normNome(emp))) o.empreendimentos.push(emp);
+    novos.set(k, o);
+  };
+  porRecentes(state.items).forEach(x => add(x.cliente, {cnpj: x.clienteCnpj, contato: x.contato, email: x.email, telefone: x.telefone, emp: x.empreendimento || (x.fin && x.fin.empreendimento)}));
+  porRecentes(state.recebiveis).forEach(r => add(r.cliente, {emailFinanceiro: r.emailCliente, emp: r.empreendimento}));
+  return [...novos.values()].map(o => { delete o.cnpjDig; return o; });
+}
+function importarServicos(){
+  const novos = new Map();
+  porRecentes(state.items).forEach(x => {
+    const its = ((x.doc && x.doc.itens) || []).filter(i => String(i.descricao || '').trim());
+    its.forEach(i => {
+      const d = String(i.descricao).trim(), k = normNome(d);
+      if(findSrv(d) || novos.has(k)) return;
+      const nome = its.length === 1 && x.fin && String(x.fin.servico || '').trim() ? x.fin.servico.trim() : (d.length > 60 ? d.slice(0, 57) + '…' : d);
+      novos.set(k, {id: uid(), nome, descricao: d, valor: num(i.valor) || '', obs: x.codigo ? 'Importado da proposta ' + x.codigo : '', versao: 0, criadoEm: new Date().toISOString()});
+    });
+  });
+  return [...novos.values()];
+}
+async function importar(t){
+  if(!requireMe()) return;
+  const lista = t === 'cli' ? importarClientes() : importarServicos();
+  if(!lista.length){ toast(t === 'cli' ? 'Todos os clientes das propostas já estão no cadastro.' : 'Todos os itens das propostas já estão no cadastro.'); return; }
+  const nomes = lista.slice(0, 8).map(o => '• ' + o.nome).join('\n') + (lista.length > 8 ? `\n… e mais ${lista.length - 8}` : '');
+  if(!confirm(`Encontrei ${lista.length} ${t === 'cli' ? 'cliente(s)' : 'serviço(s)'} nas propostas que ainda não estão no cadastro:\n\n${nomes}\n\nCadastrar agora? Depois você pode revisar e completar cada um.`)) return;
+  try{ const n = await persistCadMany(t, lista); renderCad(); toast(`${n} cadastrado(s).`); }
+  catch(e){ toast('Falha: ' + e.message, 5000); }
+}
+function exportCad(t){
+  const c = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+  const rows = t === 'cli'
+    ? [['Razão social', 'CNPJ/CPF', 'Grupo', 'Contato', 'E-mail', 'Telefone', 'E-mail financeiro', 'Endereço', 'Empreendimentos', 'Observações'], ...state.clientes.map(x => [x.nome, x.cnpj, x.grupo, x.contato, x.email, x.telefone, x.emailFinanceiro, x.endereco, empsDe(x).join(' | '), x.obs])]
+    : [['Serviço', 'Descrição', 'Valor de referência', 'Observações'], ...state.servicos.map(x => [x.nome, x.descricao, x.valor === '' || x.valor == null ? '' : String(x.valor).replace('.', ','), x.obs])];
+  download(`${t === 'cli' ? 'clientes' : 'servicos'}-${today()}.csv`, '﻿' + rows.map(r => r.map(c).join(';')).join('\r\n'), 'text/csv;charset=utf-8');
+}
+
+/* --- eventos --- */
+$('#cadSub').onclick = e => { const b = e.target.closest('[data-cad]'); if(!b) return; state.cadSub = b.dataset.cad; renderCad(); };
+$('#cliQ').oninput = e => { state.cadQ.cli = e.target.value; renderCad(); };
+$('#cliGrupo').onchange = e => { state.cadQ.grupo = e.target.value; renderCad(); };
+$('#srvQ').oninput = e => { state.cadQ.srv = e.target.value; renderCad(); };
+$('#cliBody').onclick = e => { const tr = e.target.closest('[data-cli]'); if(tr) openCli(tr.dataset.cli); };
+$('#srvBody').onclick = e => { const tr = e.target.closest('[data-srv]'); if(tr) openSrv(tr.dataset.srv); };
+$('#cliNew').onclick = () => { if(requireMe()) openCli(null); };
+$('#srvNew').onclick = () => { if(requireMe()) openSrv(null); };
+$('#cliImport').onclick = () => importar('cli');
+$('#srvImport').onclick = () => importar('srv');
+$('#cliCsv').onclick = () => exportCad('cli');
+$('#srvCsv').onclick = () => exportCad('srv');
+$('#c_save').onclick = saveCliModal;
+$('#v_save').onclick = saveSrvModal;
+$('#c_del').onclick = async () => {
+  if(!confirm('Excluir este cliente do cadastro? As propostas e os lançamentos dele continuam como estão.')) return;
+  try{ await removeCad('cli', cliEdit.id); $('#cliModal').classList.remove('on'); renderCad(); toast('Cliente excluído'); } catch(e){ toast('Falha: ' + e.message); }
+};
+$('#v_del').onclick = async () => {
+  if(!confirm('Excluir este serviço do cadastro? As propostas que já o usam continuam como estão.')) return;
+  try{ await removeCad('srv', srvEdit.id); $('#srvModal').classList.remove('on'); renderCad(); toast('Serviço excluído'); } catch(e){ toast('Falha: ' + e.message); }
+};
+$('#drawer').addEventListener('input', e => {
+  if(e.target.id === 'i_cliente'){
+    const c = findCli(e.target.value);
+    if(c){ if(state.cliAuto && state.cliAuto.id !== c.id) soltaClienteAnterior(); aplicaCliente(c); }
+    else { if(state.cliAuto && normNome(e.target.value) !== normNome(state.cliAuto.nome)) soltaClienteAnterior(); setEmpList(null); cliHint(); }
+  }
+  if(e.target.classList && e.target.classList.contains('idsc')) aplicaServico(e.target);
+});
+$('#drawer').addEventListener('change', e => { if(e.target.id === 'i_clienteCnpj'){ const c = findCli('', e.target.value); if(c) aplicaCliente(c); else cliHint(); } });
+$('#drawer').addEventListener('click', e => {
+  if(e.target.id !== 'lnkCadCli') return;
+  e.preventDefault();
+  const emp = $('#i_empreendimento').value.trim();
+  openCli(null, {nome: $('#i_cliente').value.trim(), cnpj: $('#i_clienteCnpj').value.trim(), contato: $('#i_contato').value.trim(), email: $('#i_email').value.trim(), telefone: $('#i_telefone').value.trim(), empreendimentos: emp ? [emp] : []});
+});
+$('#recModal').addEventListener('change', e => {
+  if(e.target.id !== 'r_cliente') return;
+  const c = findCli(e.target.value); setEmpList(c);
+  const em = empsDe(c);
+  if(c && em.length === 1 && !$('#r_empreendimento').value.trim()) $('#r_empreendimento').value = em[0];
+});
+
 /* ================== Início ================== */
 function openFromHash(){
   const m = /[#&]p=([^&]+)/.exec(location.hash || '');
@@ -2987,7 +3375,7 @@ window.addEventListener('hashchange', () => { if(!state.draft) openFromHash(); }
   if(!useApi()) return;
   const c = LS.get('pp_cache', null);
   if(!c || !(c.items || []).length) return;
-  state.items = c.items; state.recebiveis = c.recebiveis || []; state.pagamentos = c.pagamentos || [];
+  state.items = c.items; state.recebiveis = c.recebiveis || []; state.pagamentos = c.pagamentos || []; state.clientes = c.clientes || []; state.servicos = c.servicos || [];
   state.assinaturas = LS.get('pp_sigs_cache', {}); state.config = mergeCfg(c.config);
   renderAll(); setSync('cache');
 })();
