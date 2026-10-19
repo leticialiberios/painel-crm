@@ -762,6 +762,10 @@ input[data-combo]{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://
       <h3>Notas de débito (reembolsos)</h3>
       <p class="hint" style="margin:0 0 8px">Cada empresa tem a sua sequência, que recomeça em 001 a cada ano (ex.: 001/2026). O número é dado automaticamente quando o formulário de reembolso gera a nota. Ajuste aqui só para continuar uma numeração já existente.</p>
       <div id="ndBox"></div>
+      <div class="grid" style="margin-top:12px">
+        <label class="f">Código de acesso do formulário do site<input id="s_codSite" autocomplete="off" placeholder="Ex.: MANNARE2026 (vazio = formulário desativado)"></label>
+      </div>
+      <p class="hint" style="margin:6px 0 0">Formulário para clientes sem acesso ao Google: <a href="https://painel.mannare.com.br/reembolso/" target="_blank" rel="noopener">painel.mannare.com.br/reembolso</a>. Passe o link e o código ao cliente; maiúsculas, acentos e espaços não importam. Ao trocar o código, o anterior deixa de valer.</p>
     </section>
     <section>
       <h3>Listas</h3>
@@ -2079,6 +2083,7 @@ function openSettings(){
   $('#s_imposto').value = c.rateio.imposto; $('#s_comps').value = (c.rateio.competencias || []).join(', ');
   renderRateioEditor(clone(c.rateio.regras));
   renderSigCfg(); renderNDCfg();
+  $('#s_codSite').value = (c.reembolso || {}).codigoSite || '';
   renderEmpEditor(clone(c.empresas)); renderSocioEditor(clone(c.socios)); renderTplEditor(clone(c.modelos || []));
   $('#settings').classList.add('on');
 }
@@ -2122,6 +2127,7 @@ async function saveSettings(){
     tipos: $('#s_tipos').value.split('\n').map(x => x.trim()).filter(Boolean),
     notificarEmail: $('#s_notif').checked, urlPainel: painelUrl($('#s_url').value),
     emailsOperacional: $('#s_opEmails').value.split(/[,;\s]+/).map(x => x.trim().toLowerCase()).filter(x => /@/.test(x)).join(', '),
+    reembolso: Object.assign(clone(state.config.reembolso || {}), {codigoSite: $('#s_codSite').value.trim()}),
     pagar: {centros: $('#s_centros').value.split(',').map(x => x.trim().toUpperCase()).filter(Boolean), categorias: $('#s_categorias').value.split(',').map(x => x.trim().toUpperCase()).filter(Boolean)},
     rateio: Object.assign(clone(state.config.rateio), {imposto: num($('#s_imposto').value), competencias: $('#s_comps').value.split(',').map(x => x.trim().toUpperCase()).filter(Boolean), regras: readRateioEditor()})
   };
