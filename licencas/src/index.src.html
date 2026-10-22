@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Licenças · Mannare</title>
+<link rel="icon" type="image/svg+xml" href="{{FAVICON}}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&family=Sora:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+/* Identidade visual Mannare: azul #0000FF predominante, ciano #00D2FF e amarelo #FDCA40 secundárias,
+   marinho #132054 dos patterns. Títulos em Kanit; textos em Forma DJR Display (Sora como alternativa web). */
+:root{
+  --azul:#0000FF; --azul2:#3333FF; --azul4:#9999FF; --azul5:#CCCCFF; --azul6:#EEF0FF;
+  --ciano:#00D2FF; --ciano5:#CCF6FF; --amarelo:#FDCA40; --amarelo5:#FFF4D9;
+  --marinho:#132054; --marinho2:#3A4677;
+  --bg:#F4F5FA; --card:#fff; --tx:#132054; --mut:#6A7192; --ln:#E1E3EE;
+  --red:#D41B3C; --redbg:#FDE8EC;
+  --titulo:"Kanit",system-ui,sans-serif;
+  --texto:"Forma DJR Display","Sora",system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  --chevron:url("{{CHEVRON}}");
+  --iso:url("{{ISO}}");
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{margin:0;color:var(--tx);font:14px/1.5 var(--texto);min-height:100vh;display:flex;flex-direction:column}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--azul)}
+.hide{display:none!important}
+h1,h2,h3,.kpi b,th,.badge,.btn{font-family:var(--titulo)}
+
+/* Topo */
+header{background:var(--azul);color:#fff;padding:16px 28px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.marca{display:flex;align-items:center;gap:16px;flex:1;min-width:0}
+.marca img{height:34px;width:auto;display:block}
+.marca .sep{width:1px;height:30px;background:rgba(255,255,255,.45)}
+.marca h1{margin:0;font-size:19px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+#topo-acoes{display:flex;gap:8px;flex-wrap:wrap}
+.faixa{height:44px;background:var(--chevron) left top/auto 100% repeat-x;flex-shrink:0}
+body.em-login header, body.em-login .faixa, body.em-login footer{display:none}
+
+main{width:100%;max-width:1220px;margin:0 auto;padding:28px 20px 50px;flex:1}
+.titulo-pag{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.titulo-pag h2{margin:0;font-size:24px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.titulo-pag h2::before{content:"";display:inline-block;width:12px;height:12px;background:var(--azul);margin-right:10px;vertical-align:2px;border-radius:3px 0 3px 0}
+.titulo-pag span{color:var(--mut)}
+
+/* Botões */
+.btn{border:1.5px solid var(--ln);background:#fff;color:var(--marinho);padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:500;letter-spacing:.02em;transition:background .15s,border-color .15s}
+.btn:hover{border-color:var(--azul4);background:var(--azul6)}
+.btn:focus-visible,.kpi:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--ciano);outline-offset:1px}
+.btn.pri{background:var(--azul);border-color:var(--azul);color:#fff}
+.btn.pri:hover{background:var(--azul2);border-color:var(--azul2)}
+.btn.dan{color:var(--red);border-color:#F3C2CC}
+.btn.dan:hover{background:var(--redbg)}
+.btn.sm{padding:4px 12px;font-size:13px}
+.btn:disabled{opacity:.55;cursor:wait}
+header .btn{background:transparent;color:#fff;border-color:rgba(255,255,255,.5)}
+header .btn:hover{background:rgba(255,255,255,.14);border-color:#fff}
+header .btn.pri{background:#fff;color:var(--azul);border-color:#fff}
+header .btn.pri:hover{background:var(--amarelo);border-color:var(--amarelo);color:var(--marinho)}
+
+.aviso{padding:11px 16px;border-radius:6px;margin-bottom:14px;border-left:4px solid}
+.aviso.err{background:var(--redbg);color:var(--red);border-color:var(--red)}
+.aviso.warn{background:var(--amarelo5);color:#6B4A00;border-color:var(--amarelo)}
+
+/* Indicadores */
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.kpi{position:relative;overflow:hidden;background:var(--card);border:1px solid var(--ln);border-radius:8px;padding:16px 18px 14px;cursor:pointer;text-align:left;border-top:5px solid}
+.kpi:hover{box-shadow:0 4px 16px rgba(19,32,84,.08)}
+.kpi.on{border-color:var(--marinho);box-shadow:0 0 0 2px var(--marinho)}
+.kpi b{display:block;font-size:36px;font-weight:600;line-height:1}
+.kpi span{display:block;margin-top:6px;color:var(--mut);font-size:13px}
+.kpi.v{border-top-color:var(--red);color:var(--red)}
+.kpi.r{border-top-color:var(--amarelo);color:#B07D00}
+.kpi.p{border-top-color:var(--ciano);color:#0094B8}
+.kpi.d{border-top-color:var(--azul);color:var(--azul)}
+.kpi span{color:var(--mut)}
+
+/* Filtros */
+.filtros{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.filtros input[type=search]{flex:1;min-width:220px}
+input,select,textarea{border:1.5px solid var(--ln);border-radius:6px;padding:9px 11px;background:#fff;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--azul)}
+.filtros select{width:auto}
+label.chk{display:flex;gap:7px;align-items:center;color:var(--mut);white-space:nowrap;cursor:pointer}
+label.chk input{width:auto;accent-color:var(--azul)}
+
+/* Tabela */
+table{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border:1px solid var(--ln);border-radius:8px;overflow:hidden}
+th{text-align:left;font-weight:500;color:#fff;font-size:12px;text-transform:uppercase;letter-spacing:.08em;background:var(--marinho)}
+th,td{padding:12px 14px;border-bottom:1px solid var(--ln);vertical-align:top}
+tbody tr:hover td{background:#FAFAFE}
+tr:last-child td{border-bottom:0}
+td b{font-weight:600}
+td .sub{color:var(--mut);font-size:12.5px}
+.badge{display:inline-block;padding:3px 11px;border-radius:4px;font-size:12px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.b-v{background:var(--red);color:#fff}
+.b-r{background:var(--amarelo);color:var(--marinho)}
+.b-p{background:var(--ciano);color:var(--marinho)}
+.b-d{background:var(--azul5);color:var(--azul)}
+.b-h{background:#ECEDF3;color:var(--mut)}
+.prazo{font-weight:600;white-space:nowrap}
+.acoes{white-space:nowrap;text-align:right}
+.vazio{padding:46px 20px;text-align:center;color:var(--mut);background:var(--card);border:1px solid var(--ln);border-radius:8px;position:relative;overflow:hidden}
+.vazio::before{content:"";display:block;width:84px;height:84px;margin:0 auto 14px;border-radius:10px;background:var(--iso) center/180px auto}
+.carregando{color:var(--mut);padding:30px;text-align:center}
+
+/* Modais */
+.fundo{position:fixed;inset:0;background:rgba(19,32,84,.55);display:flex;align-items:flex-start;justify-content:center;padding:30px 12px;overflow:auto;z-index:10}
+.modal{background:#fff;border-radius:8px;width:100%;max-width:740px;padding:0 0 22px;box-shadow:0 20px 50px rgba(19,32,84,.3);overflow:hidden}
+.modal h2{margin:0 0 18px;padding:16px 24px;font-size:17px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#fff;background:var(--azul);border-bottom:6px solid var(--ciano)}
+.modal>*:not(h2){margin-left:24px;margin-right:24px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
+.grid .full{grid-column:1/-1}
+.campo label{display:block;font-size:12.5px;color:var(--mut);margin-bottom:4px}
+.campo .dica{font-size:12px;color:var(--mut);margin-top:4px}
+.rodape{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}
+.rodape .esq{margin-right:auto}
+.abas{display:flex;gap:8px;margin-bottom:16px}
+.abas button{flex:1}
+.abas button.on{background:var(--marinho);color:#fff;border-color:var(--marinho)}
+
+/* Acesso */
+.login-tela{flex:1;display:flex;min-height:100vh}
+.login-arte{flex:1.1;background:var(--iso) center/cover}
+.login-lado{flex:1;max-width:520px;background:var(--azul);color:#fff;display:flex;flex-direction:column;justify-content:center;padding:48px 52px}
+.login-lado img{width:250px;max-width:80%;margin-bottom:46px}
+.login-lado h2{font-family:var(--titulo);font-size:30px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;line-height:1.1;margin:0 0 8px}
+.login-lado p{margin:0 0 28px;opacity:.85}
+.login-lado .campo label{color:rgba(255,255,255,.85)}
+.login-lado input{border-color:transparent;color:var(--marinho)}
+.login-lado .btn.pri{background:var(--amarelo);border-color:var(--amarelo);color:var(--marinho);font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:11px}
+.login-lado .btn.pri:hover{background:#fff;border-color:#fff}
+.login-lado .aviso.err{background:#fff}
+.login-lado small{margin-top:34px;opacity:.65;font-size:12px}
+
+footer{background:var(--marinho);color:rgba(255,255,255,.75);font-size:12px;padding:0 0 14px}
+footer .faixa{margin-bottom:14px}
+footer div{max-width:1220px;margin:0 auto;padding:0 20px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--marinho);color:#fff;padding:11px 18px;border-radius:6px;border-left:4px solid var(--ciano);z-index:20;max-width:90vw;box-shadow:0 8px 24px rgba(19,32,84,.3)}
+
+@media (max-width:860px){
+  header{padding:14px 16px}
+  .marca img{height:26px}
+  .marca h1{font-size:15px}
+  .cards{grid-template-columns:1fr 1fr}
+  .grid{grid-template-columns:1fr}
+  table,thead,tbody,tr,td{display:block}
+  thead{display:none}
+  table{border:0;background:transparent}
+  tr{background:#fff;border:1px solid var(--ln);border-left:4px solid var(--azul4);border-radius:8px;margin-bottom:10px;padding:8px 4px}
+  td{border:0;padding:4px 12px}
+  tbody tr:hover td{background:transparent}
+  .acoes{text-align:left;padding-top:8px}
+  .login-tela{flex-direction:column}
+  .login-arte{flex:0 0 180px}
+  .login-lado{max-width:none;padding:32px 22px 40px}
+  .login-lado img{margin-bottom:28px;width:200px}
+  .modal>*:not(h2){margin-left:16px;margin-right:16px}
+  .modal h2{padding:14px 16px}
+}
+</style>
+</head>
+<body class="em-login">
+
+<header>
+  <div class="marca">
+    <img src="{{LOGO}}" alt="Mannare Consultoria Urbanística">
+    <span class="sep"></span>
+    <h1>Licenças</h1>
+  </div>
+  <div id="topo-acoes" class="hide">
+    <button class="btn pri" id="bt-nova">+ Nova licença</button>
+    <button class="btn" id="bt-config">Configurações</button>
+    <button class="btn" id="bt-sair">Sair</button>
+  </div>
+</header>
+<div class="faixa" aria-hidden="true"></div>
+
+<section id="tela-login" class="login-tela hide">
+  <div class="login-arte" aria-hidden="true"></div>
+  <div class="login-lado">
+    <img src="{{LOGO}}" alt="Mannare Consultoria Urbanística">
+    <h2>Controle de<br>Licenças</h2>
+    <p>Vencimentos e renovações das licenças dos clientes.</p>
+    <div class="campo" style="margin-bottom:12px">
+      <label for="lg-url">Endereço do Apps Script</label>
+      <input id="lg-url" placeholder="https://script.google.com/macros/s/.../exec">
+    </div>
+    <div class="campo" style="margin-bottom:18px">
+      <label for="lg-token">Chave de acesso</label>
+      <input id="lg-token" type="password" autocomplete="off">
+    </div>
+    <div id="lg-erro" class="aviso err hide"></div>
+    <button class="btn pri" id="lg-entrar" style="width:100%">Entrar</button>
+    <small>Informe uma vez neste navegador. Os dados de acesso ficam guardados só aqui.</small>
+  </div>
+</section>
+
+<main id="tela-painel" class="hide">
+  <div id="msg-versao" class="aviso warn hide"></div>
+  <div id="msg-aviso" class="aviso warn hide"></div>
+
+  <div class="titulo-pag"><h2>Licenças dos clientes</h2><span id="hoje-txt"></span></div>
+
+  <div class="cards">
+    <button class="kpi v" data-f="vencida"><b id="k-v">0</b><span>Vencidas</span></button>
+    <button class="kpi r" data-f="renovar"><b id="k-r">0</b><span>No prazo de renovar</span></button>
+    <button class="kpi p" data-f="protocolada"><b id="k-p">0</b><span>Renovação protocolada</span></button>
+    <button class="kpi d" data-f="emdia"><b id="k-d">0</b><span>Em dia</span></button>
+  </div>
+
+  <div class="filtros">
+    <input type="search" id="f-busca" placeholder="Buscar cliente, empreendimento, nº, órgão…">
+    <select id="f-cliente"><option value="">Todos os clientes</option></select>
+    <select id="f-tipo"><option value="">Todos os tipos</option></select>
+    <label class="chk"><input type="checkbox" id="f-hist"> Mostrar renovadas e encerradas</label>
+  </div>
+
+  <div id="lista"><div class="carregando">Carregando…</div></div>
+</main>
+
+<footer id="rodape" class="hide">
+  <div class="faixa" aria-hidden="true"></div>
+  <div><span>Mannare Consultoria Urbanística · BMM · Vertis</span><span>Painel de Licenças</span></div>
+</footer>
+
+<!-- Modal licença -->
+<div class="fundo hide" id="md-lic">
+  <form class="modal" id="fm-lic" novalidate>
+    <h2 id="md-lic-tit">Nova licença</h2>
+    <input type="hidden" name="id">
+    <div class="grid">
+      <div class="campo"><label>Cliente *</label><input name="cliente" list="dl-clientes" required></div>
+      <div class="campo"><label>Empreendimento / SPE</label><input name="empreendimento" list="dl-emps"></div>
+      <div class="campo"><label>CNPJ</label><input name="cnpj" placeholder="00.000.000/0000-00"></div>
+      <div class="campo"><label>Tipo de licença *</label><input name="tipo" list="dl-tipos" required></div>
+      <div class="campo"><label>Número da licença</label><input name="numero"></div>
+      <div class="campo"><label>Órgão emissor</label><input name="orgao" list="dl-orgaos"></div>
+      <div class="campo"><label>Nº do processo no órgão</label><input name="processo"></div>
+      <div class="campo"><label>Responsável</label><input name="responsavel" list="dl-resp"></div>
+      <div class="campo"><label>Data de emissão</label><input type="date" name="emissao"></div>
+      <div class="campo"><label>Validade *</label><input type="date" name="validade" required></div>
+      <div class="campo"><label>Avisar com quantos dias de antecedência *</label>
+        <input type="number" name="aviso_dias" min="0" max="730" step="1" required>
+        <div class="dica" id="dica-aviso">Depois disso, novos avisos aos 90, 60, 30, 15, 7 dias e no vencimento.</div></div>
+      <div class="campo"><label>Situação</label>
+        <select name="situacao">
+          <option>Vigente</option><option>Renovação protocolada</option><option>Renovada</option><option>Encerrada</option>
+        </select></div>
+      <div class="campo bloco-prot"><label>Data do protocolo de renovação</label><input type="date" name="protocolo_data"></div>
+      <div class="campo bloco-prot"><label>Nº do protocolo de renovação</label><input name="protocolo_numero"></div>
+      <div class="campo full"><label>Link do documento (Drive)</label><input name="documento_url" placeholder="https://drive.google.com/..."></div>
+      <div class="campo full"><label>Observações / condicionantes</label><textarea name="obs" rows="3"></textarea></div>
+    </div>
+    <div id="lic-erro" class="aviso err hide" style="margin-top:12px"></div>
+    <div class="rodape">
+      <button type="button" class="btn dan esq hide" id="bt-excluir">Excluir</button>
+      <button type="button" class="btn" data-fechar>Cancelar</button>
+      <button type="submit" class="btn pri" id="bt-salvar">Salvar</button>
+    </div>
+  </form>
+</div>
+
+<!-- Modal renovação -->
+<div class="fundo hide" id="md-ren">
+  <form class="modal" id="fm-ren" novalidate>
+    <h2>Renovação</h2>
+    <p id="ren-desc" style="margin-top:-6px;color:var(--mut)"></p>
+    <div class="abas">
+      <button type="button" class="btn on" data-aba="prot">Protocolei a renovação</button>
+      <button type="button" class="btn" data-aba="nova">Nova licença emitida</button>
+    </div>
+    <div data-painel="prot">
+      <p class="sub" style="color:var(--mut);margin-top:0">A licença fica como “Renovação protocolada” e os avisos param.</p>
+      <div class="grid">
+        <div class="campo"><label>Data do protocolo *</label><input type="date" name="protocolo_data"></div>
+        <div class="campo"><label>Nº do protocolo</label><input name="protocolo_numero"></div>
+      </div>
+    </div>
+    <div data-painel="nova" class="hide">
+      <p class="sub" style="color:var(--mut);margin-top:0">A licença atual vai para o histórico como “Renovada” e a nova passa a ser acompanhada.</p>
+      <div class="grid">
+        <div class="campo"><label>Número da nova licença</label><input name="numero"></div>
+        <div class="campo"><label>Data de emissão</label><input type="date" name="emissao"></div>
+        <div class="campo"><label>Nova validade *</label><input type="date" name="validade"></div>
+        <div class="campo"><label>Avisar com quantos dias *</label><input type="number" name="aviso_dias" min="0" max="730" step="1"></div>
+        <div class="campo full"><label>Link do documento (Drive)</label><input name="documento_url"></div>
+        <div class="campo full"><label>Observações / condicionantes</label><textarea name="obs" rows="2"></textarea></div>
+      </div>
+    </div>
+    <div id="ren-erro" class="aviso err hide" style="margin-top:12px"></div>
+    <div class="rodape">
+      <button type="button" class="btn" data-fechar>Cancelar</button>
+      <button type="submit" class="btn pri">Salvar</button>
+    </div>
+  </form>
+</div>
+
+<!-- Modal configurações -->
+<div class="fundo hide" id="md-cfg">
+  <form class="modal" id="fm-cfg" novalidate>
+    <h2>Configurações</h2>
+    <div class="campo" style="margin-bottom:6px">
+      <label>E-mails que recebem os avisos (separe por vírgula)</label>
+      <textarea name="emails_aviso" rows="3"></textarea>
+    </div>
+    <p id="cfg-status" style="color:var(--mut)"></p>
+    <div id="cfg-erro" class="aviso err hide"></div>
+    <div class="rodape">
+      <button type="button" class="btn esq" id="bt-ativar">Ativar aviso diário</button>
+      <button type="button" class="btn esq" id="bt-teste">Enviar aviso de teste</button>
+      <button type="button" class="btn" data-fechar>Fechar</button>
+      <button type="submit" class="btn pri">Salvar e-mails</button>
+    </div>
+  </form>
+</div>
+
+<datalist id="dl-clientes"></datalist>
+<datalist id="dl-emps"></datalist>
+<datalist id="dl-resp"></datalist>
+<datalist id="dl-tipos"></datalist>
+<datalist id="dl-orgaos"></datalist>
+
+<script>
+(function(){
+'use strict';
+const VERSAO_ESPERADA = 1;
+const CHAVE_LOCAL = 'mannare_licencas_acesso';
+const TIPOS = [
+  'Licença Prévia (LP)','Licença de Instalação (LI)','Licença de Operação (LO)',
+  'Licença Ambiental Simplificada','Licença Ambiental por Adesão e Compromisso (LAC)',
+  'Autorização de Supressão Vegetal','Outorga de uso de água','Alvará de Construção',
+  'Alvará de Funcionamento','Habite-se','Certificado do Corpo de Bombeiros','Anuência/Certidão'
+];
+const ORGAOS = ['SEUMA','SEMACE','IBAMA','SRH/COGERH','CBMCE','AGEFIS','IPHAN','Prefeitura'];
+const AVISO_PADRAO = function(tipo){ return /licen|outorga|supress/i.test(tipo||'') ? 120 : 60; };
+
+const $ = function(s,el){ return (el||document).querySelector(s); };
+const $$ = function(s,el){ return Array.prototype.slice.call((el||document).querySelectorAll(s)); };
+const esc = function(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); };
+
+let acesso = null, dados = { licencas:[], config:{}, aviso_ativo:null, hoje:'' }, filtroKpi = '';
+
+function lerAcesso(){ try { return JSON.parse(localStorage.getItem(CHAVE_LOCAL)||'null'); } catch(e){ return null; } }
+function gravarAcesso(a){ try { a ? localStorage.setItem(CHAVE_LOCAL, JSON.stringify(a)) : localStorage.removeItem(CHAVE_LOCAL); } catch(e){} }
+
+async function api(acao, extra){
+  const corpo = Object.assign({ token: acesso.token, acao: acao }, extra||{});
+  let r;
+  try {
+    r = await fetch(acesso.url, { method:'POST', body: JSON.stringify(corpo) });
+  } catch(e){ throw new Error('Não foi possível falar com o Apps Script. Confira a internet e o endereço.'); }
+  let j;
+  try { j = await r.json(); } catch(e){ throw new Error('Resposta inesperada do Apps Script. Confira se o endereço termina em /exec.'); }
+  if (j.versao !== undefined) avisoVersao(j.versao);
+  if (!j.ok){
+    const err = new Error(j.erro || 'Erro desconhecido.');
+    err.codigo = j.codigo; throw err;
+  }
+  return j;
+}
+
+function avisoVersao(v){
+  const el = $('#msg-versao');
+  if (Number(v) < VERSAO_ESPERADA){
+    el.textContent = 'O Apps Script está desatualizado (versão '+v+', o painel espera '+VERSAO_ESPERADA+'). Publique a nova versão em Implantar → Gerenciar implantações.';
+    el.classList.remove('hide');
+  } else el.classList.add('hide');
+}
+
+function toast(t){
+  const d = document.createElement('div'); d.className='toast'; d.textContent=t;
+  document.body.appendChild(d); setTimeout(function(){ d.remove(); }, 3200);
+}
+
+/* ---------- Datas ---------- */
+function diasAte(iso){
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso||'')) return null;
+  const h = (dados.hoje || hojeLocal()).split('-').map(Number), v = iso.split('-').map(Number);
+  return Math.round((Date.UTC(v[0],v[1]-1,v[2]) - Date.UTC(h[0],h[1]-1,h[2])) / 86400000);
+}
+function hojeLocal(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function br(iso){ if(!iso) return '—'; const p=iso.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+
+/** Estado exibido: vencida | renovar | protocolada | emdia | historico */
+function estado(l){
+  if (l.situacao === 'Renovada' || l.situacao === 'Encerrada') return 'historico';
+  if (l.situacao === 'Renovação protocolada') return 'protocolada';
+  const d = diasAte(l.validade);
+  if (d === null) return 'emdia';
+  if (d < 0) return 'vencida';
+  if (d <= Number(l.aviso_dias||0)) return 'renovar';
+  return 'emdia';
+}
+const ROTULO = { vencida:['Vencida','b-v'], renovar:['Renovar','b-r'], protocolada:['Protocolada','b-p'], emdia:['Em dia','b-d'], historico:['',''] };
+const ORDEM = { vencida:0, renovar:1, protocolada:2, emdia:3, historico:4 };
+
+function textoPrazo(l){
+  const d = diasAte(l.validade);
+  if (d === null) return '—';
+  if (d < 0) return 'vencida há '+(-d)+(d===-1?' dia':' dias');
+  if (d === 0) return 'vence hoje';
+  return 'faltam '+d+(d===1?' dia':' dias');
+}
+
+/* ---------- Telas ---------- */
+function mostrarLogin(msg){
+  document.body.classList.add('em-login'); $('#rodape').classList.add('hide');
+  $('#tela-login').classList.remove('hide');
+  $('#tela-painel').classList.add('hide');
+  $('#topo-acoes').classList.add('hide');
+  if (acesso){ $('#lg-url').value = acesso.url||''; }
+  const e = $('#lg-erro');
+  if (msg){ e.textContent = msg; e.classList.remove('hide'); } else e.classList.add('hide');
+}
+
+async function entrar(){
+  const url = $('#lg-url').value.trim(), token = $('#lg-token').value.trim();
+  if (!/^https:\/\/script\.google(usercontent)?\.com\//.test(url) && !/^http:\/\/(localhost|127\.0\.0\.1)[:/]/.test(url)) return mostrarLogin('Cole o endereço do Apps Script (começa com https://script.google.com/).');
+  if (!token) return mostrarLogin('Informe a chave de acesso.');
+  acesso = { url:url, token:token };
+  $('#lg-entrar').disabled = true;
+  try { await carregar(); gravarAcesso(acesso); }
+  catch(e){ mostrarLogin(e.message); }
+  finally { $('#lg-entrar').disabled = false; }
+}
+
+async function carregar(){
+  const j = await api('listar');
+  dados = j;
+  $('#tela-login').classList.add('hide');
+  $('#tela-painel').classList.remove('hide');
+  $('#topo-acoes').classList.remove('hide');
+  document.body.classList.remove('em-login'); $('#rodape').classList.remove('hide');
+  $('#hoje-txt').textContent = 'Hoje: '+br(dados.hoje || hojeLocal());
+  avisoConfig();
+  preencherListas();
+  render();
+}
+
+function avisoConfig(){
+  const el = $('#msg-aviso'), falta = [];
+  if (!String(dados.config.emails_aviso||'').trim()) falta.push('cadastre os e-mails que recebem os avisos');
+  if (dados.aviso_ativo === false) falta.push('ative o aviso diário');
+  if (falta.length){ el.innerHTML = 'Para receber avisos por e-mail, '+esc(falta.join(' e '))+' em <b>Configurações</b>.'; el.classList.remove('hide'); }
+  else el.classList.add('hide');
+}
+
+function unicos(campo){
+  const s = {}; dados.licencas.forEach(function(l){ if (l[campo]) s[l[campo]] = 1; });
+  return Object.keys(s).sort(function(a,b){ return a.localeCompare(b,'pt-BR'); });
+}
+function opcoes(lista){ return lista.map(function(v){ return '<option value="'+esc(v)+'"></option>'; }).join(''); }
+
+function preencherListas(){
+  $('#dl-clientes').innerHTML = opcoes(unicos('cliente'));
+  $('#dl-emps').innerHTML = opcoes(unicos('empreendimento'));
+  $('#dl-resp').innerHTML = opcoes(unicos('responsavel'));
+  const tipos = TIPOS.concat(unicos('tipo').filter(function(t){ return TIPOS.indexOf(t)<0; }));
+  $('#dl-tipos').innerHTML = opcoes(tipos);
+  $('#dl-orgaos').innerHTML = opcoes(ORGAOS.concat(unicos('orgao').filter(function(t){ return ORGAOS.indexOf(t)<0; })));
+  const sc = $('#f-cliente'), vc = sc.value;
+  sc.innerHTML = '<option value="">Todos os clientes</option>' + unicos('cliente').map(function(c){ return '<option>'+esc(c)+'</option>'; }).join('');
+  sc.value = vc;
+  const st = $('#f-tipo'), vt = st.value;
+  st.innerHTML = '<option value="">Todos os tipos</option>' + unicos('tipo').map(function(c){ return '<option>'+esc(c)+'</option>'; }).join('');
+  st.value = vt;
+}
+
+function render(){
+  const cont = { vencida:0, renovar:0, protocolada:0, emdia:0 };
+  dados.licencas.forEach(function(l){ const e = estado(l); if (cont[e] !== undefined) cont[e]++; });
+  $('#k-v').textContent = cont.vencida; $('#k-r').textContent = cont.renovar;
+  $('#k-p').textContent = cont.protocolada; $('#k-d').textContent = cont.emdia;
+  $$('.kpi').forEach(function(b){ b.classList.toggle('on', b.dataset.f === filtroKpi); });
+
+  const busca = $('#f-busca').value.trim().toLowerCase();
+  const cli = $('#f-cliente').value, tipo = $('#f-tipo').value, hist = $('#f-hist').checked;
+  const lista = dados.licencas.filter(function(l){
+    const e = estado(l);
+    if (e === 'historico' && !hist) return false;
+    if (filtroKpi && e !== filtroKpi) return false;
+    if (cli && l.cliente !== cli) return false;
+    if (tipo && l.tipo !== tipo) return false;
+    if (busca){
+      const t = [l.cliente,l.empreendimento,l.cnpj,l.tipo,l.numero,l.orgao,l.processo,l.responsavel,l.protocolo_numero,l.obs].join(' ').toLowerCase();
+      if (t.indexOf(busca) < 0) return false;
+    }
+    return true;
+  }).sort(function(a,b){
+    const ea = estado(a), eb = estado(b);
+    if (ORDEM[ea] !== ORDEM[eb]) return ORDEM[ea] - ORDEM[eb];
+    return String(a.validade).localeCompare(String(b.validade));
+  });
+
+  if (!dados.licencas.length){
+    $('#lista').innerHTML = '<div class="vazio">Nenhuma licença cadastrada ainda. Clique em <b>+ Nova licença</b> para começar.</div>';
+    return;
+  }
+  if (!lista.length){
+    $('#lista').innerHTML = '<div class="vazio">Nenhuma licença com esses filtros.</div>';
+    return;
+  }
+  const linhas = lista.map(function(l){
+    const e = estado(l);
+    const rot = e === 'historico' ? [l.situacao,'b-h'] : ROTULO[e];
+    const corPrazo = e==='vencida'?'var(--red)':e==='renovar'?'var(--amb)':'var(--mut)';
+    const prot = l.situacao === 'Renovação protocolada'
+      ? '<div class="sub">Protocolo '+esc(l.protocolo_numero||'')+(l.protocolo_data?' em '+br(l.protocolo_data):'')+'</div>' : '';
+    const doc = l.documento_url && /^https?:\/\//i.test(l.documento_url) ? ' · <a href="'+esc(l.documento_url)+'" target="_blank" rel="noopener">documento</a>' : '';
+    return '<tr data-id="'+esc(l.id)+'">'+
+      '<td><span class="badge '+rot[1]+'">'+esc(rot[0])+'</span></td>'+
+      '<td><b>'+esc(l.cliente)+'</b>'+(l.empreendimento?'<div class="sub">'+esc(l.empreendimento)+'</div>':'')+(l.cnpj?'<div class="sub">'+esc(l.cnpj)+'</div>':'')+'</td>'+
+      '<td>'+esc(l.tipo)+'<div class="sub">'+(l.numero?'nº '+esc(l.numero):'sem número')+(l.orgao?' · '+esc(l.orgao):'')+doc+'</div></td>'+
+      '<td>'+br(l.validade)+'<div class="sub">aviso com '+esc(l.aviso_dias)+' dias</div></td>'+
+      '<td><span class="prazo" style="color:'+(e==='historico'?'var(--mut)':corPrazo)+'">'+(e==='historico'?'—':textoPrazo(l))+'</span>'+prot+'</td>'+
+      '<td>'+esc(l.responsavel||'—')+'</td>'+
+      '<td class="acoes"><button class="btn sm" data-ac="editar">Editar</button> '+
+        (e==='historico'?'':'<button class="btn sm" data-ac="renovar">Renovar</button>')+'</td>'+
+    '</tr>';
+  }).join('');
+  $('#lista').innerHTML = '<table><thead><tr><th>Situação</th><th>Cliente</th><th>Licença</th><th>Validade</th><th>Prazo</th><th>Responsável</th><th></th></tr></thead><tbody>'+linhas+'</tbody></table>';
+}
+
+/* ---------- Modais ---------- */
+function abrir(id){ $(id).classList.remove('hide'); }
+function fechar(el){ el.closest('.fundo').classList.add('hide'); }
+function erroEm(sel, msg){ const e=$(sel); if(msg){ e.textContent=msg; e.classList.remove('hide'); } else e.classList.add('hide'); }
+
+function abrirLicenca(l){
+  const f = $('#fm-lic'); f.reset(); erroEm('#lic-erro');
+  $('#md-lic-tit').textContent = l ? 'Editar licença' : 'Nova licença';
+  $('#bt-excluir').classList.toggle('hide', !l);
+  const v = l || { situacao:'Vigente', aviso_dias:'' };
+  Array.prototype.forEach.call(f.elements, function(el){ if (el.name) el.value = v[el.name] == null ? '' : v[el.name]; });
+  f.dataset.avisoManual = l ? '1' : '';
+  atualizaProt(); abrir('#md-lic'); f.cliente.focus();
+}
+function atualizaProt(){
+  const f = $('#fm-lic'), on = f.situacao.value === 'Renovação protocolada';
+  $$('.bloco-prot', f).forEach(function(b){ b.style.display = on ? '' : 'none'; });
+}
+
+function coletar(f){
+  const o = {};
+  Array.prototype.forEach.call(f.elements, function(el){ if (el.name && !el.closest('.hide')) o[el.name] = el.value.trim(); });
+  return o;
+}
+
+async function salvarLicenca(ev){
+  ev.preventDefault(); erroEm('#lic-erro');
+  const f = $('#fm-lic'), o = coletar(f);
+  if (!o.cliente) return erroEm('#lic-erro','Informe o cliente.');
+  if (!o.tipo) return erroEm('#lic-erro','Informe o tipo de licença.');
+  if (!o.validade) return erroEm('#lic-erro','Informe a validade.');
+  if (o.aviso_dias === '') return erroEm('#lic-erro','Informe com quantos dias de antecedência avisar.');
+  if (o.situacao === 'Renovação protocolada' && !o.protocolo_data) return erroEm('#lic-erro','Informe a data do protocolo de renovação.');
+  if (o.situacao !== 'Renovação protocolada'){ o.protocolo_data = o.protocolo_data || ''; }
+  const bt = $('#bt-salvar'); bt.disabled = true;
+  try { await api('salvar', { licenca:o }); fechar(f); toast('Licença salva.'); await carregar(); }
+  catch(e){ tratarErro(e, '#lic-erro'); }
+  finally { bt.disabled = false; }
+}
+
+async function excluirLicenca(){
+  const f = $('#fm-lic'), id = f.elements.namedItem('id').value;
+  if (!id) return;
+  if (!confirm('Excluir esta licença do painel? Isso não pode ser desfeito.\n\nPara guardar no histórico, prefira mudar a situação para "Encerrada".')) return;
+  try { await api('excluir', { id:id }); fechar(f); toast('Licença excluída.'); await carregar(); }
+  catch(e){ tratarErro(e, '#lic-erro'); }
+}
+
+let renId = null, renAba = 'prot';
+function abrirRenovacao(l){
+  renId = l.id; const f = $('#fm-ren'); f.reset(); erroEm('#ren-erro');
+  $('#ren-desc').textContent = l.tipo+(l.numero?' nº '+l.numero:'')+' — '+l.cliente+(l.empreendimento?' / '+l.empreendimento:'')+' · vence em '+br(l.validade);
+  f.aviso_dias.value = l.aviso_dias;
+  f.protocolo_data.value = l.protocolo_data || hojeLocal();
+  f.protocolo_numero.value = l.protocolo_numero || '';
+  trocarAba(l.situacao === 'Renovação protocolada' ? 'nova' : 'prot');
+  abrir('#md-ren');
+}
+function trocarAba(a){
+  renAba = a;
+  $$('#fm-ren [data-aba]').forEach(function(b){ b.classList.toggle('on', b.dataset.aba === a); });
+  $$('#fm-ren [data-painel]').forEach(function(p){ p.classList.toggle('hide', p.dataset.painel !== a); });
+}
+async function salvarRenovacao(ev){
+  ev.preventDefault(); erroEm('#ren-erro');
+  const f = $('#fm-ren'), l = dados.licencas.filter(function(x){ return x.id === renId; })[0];
+  if (!l) return;
+  try {
+    if (renAba === 'prot'){
+      if (!f.protocolo_data.value) return erroEm('#ren-erro','Informe a data do protocolo.');
+      const o = Object.assign({}, l, { situacao:'Renovação protocolada', protocolo_data:f.protocolo_data.value, protocolo_numero:f.protocolo_numero.value.trim() });
+      await api('salvar', { licenca:o });
+    } else {
+      if (!f.validade.value) return erroEm('#ren-erro','Informe a nova validade.');
+      if (f.aviso_dias.value === '') return erroEm('#ren-erro','Informe com quantos dias avisar.');
+      if (f.validade.value <= l.validade && !confirm('A nova validade não é posterior à atual. Salvar mesmo assim?')) return;
+      await api('renovar', { id:l.id, nova:{
+        numero:f.numero.value.trim(), emissao:f.emissao.value, validade:f.validade.value,
+        aviso_dias:f.aviso_dias.value, documento_url:f.documento_url.value.trim(), obs:f.obs.value.trim()
+      }});
+    }
+    fechar(f); toast('Renovação registrada.'); await carregar();
+  } catch(e){ tratarErro(e, '#ren-erro'); }
+}
+
+function abrirConfig(){
+  const f = $('#fm-cfg'); erroEm('#cfg-erro');
+  f.emails_aviso.value = dados.config.emails_aviso || '';
+  statusConfig(); abrir('#md-cfg');
+}
+function statusConfig(){
+  const at = dados.aviso_ativo, uv = dados.config.ultima_verificacao;
+  $('#cfg-status').innerHTML =
+    'Aviso diário: <b>'+(at===true?'ativo (todo dia por volta das 7h)':at===false?'desativado':'não foi possível verificar')+'</b>'+
+    (uv ? '<br>Última verificação: '+esc(br(uv.slice(0,10))+' '+uv.slice(11,16)) : '')+
+    '<br><span style="font-size:12.5px">O e-mail só sai quando alguma licença atinge um novo marco: o prazo definido nela, depois 90, 60, 30, 15, 7 dias, o dia do vencimento e, se vencer, toda semana. Renovações protocoladas não geram aviso.</span>';
+  $('#bt-ativar').classList.toggle('hide', at === true);
+}
+async function salvarConfig(ev){
+  ev.preventDefault(); erroEm('#cfg-erro');
+  try { const j = await api('config', { config:{ emails_aviso: $('#fm-cfg').emails_aviso.value } });
+    dados = j; avisoConfig(); statusConfig(); toast('E-mails salvos.'); }
+  catch(e){ tratarErro(e, '#cfg-erro'); }
+}
+async function ativarAviso(){
+  erroEm('#cfg-erro');
+  try { const j = await api('ativar_aviso'); dados.aviso_ativo = j.aviso_ativo; avisoConfig(); statusConfig(); toast('Aviso diário ativado.'); }
+  catch(e){ tratarErro(e, '#cfg-erro'); }
+}
+async function testarAviso(){
+  erroEm('#cfg-erro');
+  const salvos = String(dados.config.emails_aviso||'').trim();
+  if (!salvos) return erroEm('#cfg-erro','Salve ao menos um e-mail antes de testar.');
+  if (!confirm('Enviar agora um e-mail de teste para: '+salvos+'?')) return;
+  try { const j = await api('testar_aviso'); toast('Teste enviado ('+j.resultado.total+' licença(s) no prazo de aviso).'); }
+  catch(e){ tratarErro(e, '#cfg-erro'); }
+}
+
+function tratarErro(e, alvo){
+  if (e.codigo === 'auth'){ gravarAcesso(null); $$('.fundo').forEach(function(m){ m.classList.add('hide'); }); return mostrarLogin('A chave de acesso não confere. Informe novamente.'); }
+  erroEm(alvo, e.message);
+}
+
+/* ---------- Eventos ---------- */
+$('#lg-entrar').addEventListener('click', entrar);
+$('#lg-token').addEventListener('keydown', function(e){ if (e.key === 'Enter') entrar(); });
+$('#bt-nova').addEventListener('click', function(){ abrirLicenca(null); });
+$('#bt-config').addEventListener('click', abrirConfig);
+$('#bt-sair').addEventListener('click', function(){ if (confirm('Sair deste navegador? Será preciso informar a chave de novo.')){ gravarAcesso(null); acesso = null; $('#lg-token').value=''; mostrarLogin(); } });
+$('#fm-lic').addEventListener('submit', salvarLicenca);
+$('#fm-lic').situacao.addEventListener('change', atualizaProt);
+$('#fm-lic').aviso_dias.addEventListener('input', function(){ $('#fm-lic').dataset.avisoManual = '1'; });
+$('#fm-lic').tipo.addEventListener('input', function(){
+  const f = $('#fm-lic'); if (!f.dataset.avisoManual) f.aviso_dias.value = f.tipo.value.trim() ? AVISO_PADRAO(f.tipo.value) : '';
+});
+$$('input[name=aviso_dias]').forEach(function(el){ el.addEventListener('focus', function(){ el.select(); }); });
+$('#bt-excluir').addEventListener('click', excluirLicenca);
+$('#fm-ren').addEventListener('submit', salvarRenovacao);
+$$('#fm-ren [data-aba]').forEach(function(b){ b.addEventListener('click', function(){ trocarAba(b.dataset.aba); }); });
+$('#fm-cfg').addEventListener('submit', salvarConfig);
+$('#bt-ativar').addEventListener('click', ativarAviso);
+$('#bt-teste').addEventListener('click', testarAviso);
+$$('[data-fechar]').forEach(function(b){ b.addEventListener('click', function(){ fechar(b); }); });
+$$('.fundo').forEach(function(m){ m.addEventListener('mousedown', function(e){ if (e.target === m) m.classList.add('hide'); }); });
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') $$('.fundo').forEach(function(m){ m.classList.add('hide'); }); });
+$$('.kpi').forEach(function(b){ b.addEventListener('click', function(){ filtroKpi = filtroKpi === b.dataset.f ? '' : b.dataset.f; render(); }); });
+['#f-busca','#f-cliente','#f-tipo','#f-hist'].forEach(function(s){ $(s).addEventListener('input', render); });
+$('#lista').addEventListener('click', function(e){
+  const b = e.target.closest('[data-ac]'); if (!b) return;
+  const l = dados.licencas.filter(function(x){ return x.id === b.closest('tr').dataset.id; })[0];
+  if (!l) return;
+  if (b.dataset.ac === 'editar') abrirLicenca(l); else abrirRenovacao(l);
+});
+
+/* ---------- Início ---------- */
+acesso = lerAcesso();
+if (acesso && acesso.url && acesso.token){
+  carregar().catch(function(e){ if (e.codigo === 'auth') gravarAcesso(null); mostrarLogin(e.message); });
+} else mostrarLogin();
+})();
+</script>
+</body>
+</html>
