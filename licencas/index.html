@@ -67,13 +67,15 @@ header .btn.pri:hover{background:var(--amarelo);border-color:var(--amarelo);colo
 .aviso.warn{background:var(--amarelo5);color:#6B4A00;border-color:var(--amarelo)}
 
 /* Indicadores */
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px}
 .kpi{position:relative;overflow:hidden;background:var(--card);border:1px solid var(--ln);border-radius:8px;padding:16px 18px 14px;cursor:pointer;text-align:left;border-top:5px solid}
 .kpi:hover{box-shadow:0 4px 16px rgba(19,32,84,.08)}
 .kpi.on{border-color:var(--marinho);box-shadow:0 0 0 2px var(--marinho)}
 .kpi b{display:block;font-size:36px;font-weight:600;line-height:1}
 .kpi span{display:block;margin-top:6px;color:var(--mut);font-size:13px}
 .kpi.v{border-top-color:var(--red);color:var(--red)}
+.kpi.a{border-top-color:var(--red);color:var(--red);background:linear-gradient(var(--redbg),#fff 70%)}
+.kpi.a{border-top-style:dashed}
 .kpi.r{border-top-color:var(--amarelo);color:#B07D00}
 .kpi.p{border-top-color:var(--ciano);color:#0094B8}
 .kpi.d{border-top-color:var(--azul);color:var(--azul)}
@@ -99,10 +101,16 @@ td .sub{color:var(--mut);font-size:12.5px}
 .badge{display:inline-block;padding:3px 11px;border-radius:4px;font-size:12px;font-weight:500;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
 .b-v{background:var(--red);color:#fff}
 .b-r{background:var(--amarelo);color:var(--marinho)}
+.b-a{background:#fff;color:var(--red);box-shadow:inset 0 0 0 1.5px var(--red)}
 .b-p{background:var(--ciano);color:var(--marinho)}
 .b-d{background:var(--azul5);color:var(--azul)}
 .b-h{background:#ECEDF3;color:var(--mut)}
 .prazo{font-weight:600;white-space:nowrap}
+.resumo-prazos{grid-column:1/-1;background:var(--azul6);border-left:4px solid var(--azul);border-radius:6px;padding:10px 14px;font-size:13px;line-height:1.6}
+.resumo-prazos b{font-family:var(--titulo);font-weight:600}
+.linha-tempo{display:flex;height:8px;border-radius:4px;overflow:hidden;margin:8px 0 2px}
+.linha-tempo i{display:block}
+.lt-ok{background:var(--azul5)} .lt-prep{background:var(--amarelo)} .lt-atr{background:#F6A9B7}
 .acoes{white-space:nowrap;text-align:right}
 .vazio{padding:46px 20px;text-align:center;color:var(--mut);background:var(--card);border:1px solid var(--ln);border-radius:8px;position:relative;overflow:hidden}
 .vazio::before{content:"";display:block;width:84px;height:84px;margin:0 auto 14px;border-radius:10px;background:var(--iso) center/180px auto}
@@ -143,6 +151,7 @@ footer div{max-width:1220px;margin:0 auto;padding:0 20px;display:flex;justify-co
 
 .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--marinho);color:#fff;padding:11px 18px;border-radius:6px;border-left:4px solid var(--ciano);z-index:20;max-width:90vw;box-shadow:0 8px 24px rgba(19,32,84,.3)}
 
+@media (max-width:1100px){ .cards{grid-template-columns:repeat(3,1fr)} }
 @media (max-width:860px){
   header{padding:14px 16px}
   .marca img{height:26px}
@@ -156,6 +165,7 @@ footer div{max-width:1220px;margin:0 auto;padding:0 20px;display:flex;justify-co
   td{border:0;padding:4px 12px}
   tbody tr:hover td{background:transparent}
   .acoes{text-align:left;padding-top:8px}
+  td[data-rotulo]::before{content:attr(data-rotulo);display:block;font-family:var(--titulo);font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--mut)}
   .login-tela{flex-direction:column}
   .login-arte{flex:0 0 180px}
   .login-lado{max-width:none;padding:32px 22px 40px}
@@ -209,7 +219,8 @@ footer div{max-width:1220px;margin:0 auto;padding:0 20px;display:flex;justify-co
 
   <div class="cards">
     <button class="kpi v" data-f="vencida"><b id="k-v">0</b><span>Vencidas</span></button>
-    <button class="kpi r" data-f="renovar"><b id="k-r">0</b><span>No prazo de renovar</span></button>
+    <button class="kpi a" data-f="atrasado"><b id="k-a">0</b><span>Protocolo atrasado</span></button>
+    <button class="kpi r" data-f="preparar"><b id="k-r">0</b><span>Preparar documentação</span></button>
     <button class="kpi p" data-f="protocolada"><b id="k-p">0</b><span>Renovação protocolada</span></button>
     <button class="kpi d" data-f="emdia"><b id="k-d">0</b><span>Em dia</span></button>
   </div>
@@ -245,9 +256,13 @@ footer div{max-width:1220px;margin:0 auto;padding:0 20px;display:flex;justify-co
       <div class="campo"><label>Responsável</label><input name="responsavel" list="dl-resp"></div>
       <div class="campo"><label>Data de emissão</label><input type="date" name="emissao"></div>
       <div class="campo"><label>Validade *</label><input type="date" name="validade" required></div>
-      <div class="campo"><label>Avisar com quantos dias de antecedência *</label>
+      <div class="campo"><label>Prazo para protocolar a renovação *</label>
         <input type="number" name="aviso_dias" min="0" max="730" step="1" required>
-        <div class="dica" id="dica-aviso">Depois disso, novos avisos aos 90, 60, 30, 15, 7 dias e no vencimento.</div></div>
+        <div class="dica">Dias antes do vencimento (ex.: 120). Use 0 se não houver prazo legal.</div></div>
+      <div class="campo"><label>Tempo para preparar a documentação *</label>
+        <input type="number" name="preparo_dias" min="0" max="365" step="1" required>
+        <div class="dica">Dias antes do prazo de protocolo (padrão 30).</div></div>
+      <div class="resumo-prazos" id="resumo-lic"></div>
       <div class="campo"><label>Situação</label>
         <select name="situacao">
           <option>Vigente</option><option>Renovação protocolada</option><option>Renovada</option><option>Encerrada</option>
@@ -288,7 +303,9 @@ footer div{max-width:1220px;margin:0 auto;padding:0 20px;display:flex;justify-co
         <div class="campo"><label>Número da nova licença</label><input name="numero"></div>
         <div class="campo"><label>Data de emissão</label><input type="date" name="emissao"></div>
         <div class="campo"><label>Nova validade *</label><input type="date" name="validade"></div>
-        <div class="campo"><label>Avisar com quantos dias *</label><input type="number" name="aviso_dias" min="0" max="730" step="1"></div>
+        <div class="campo"><label>Prazo para protocolar (dias antes do vencimento) *</label><input type="number" name="aviso_dias" min="0" max="730" step="1"></div>
+        <div class="campo"><label>Tempo para preparar a documentação (dias) *</label><input type="number" name="preparo_dias" min="0" max="365" step="1"></div>
+        <div class="resumo-prazos" id="resumo-ren"></div>
         <div class="campo full"><label>Link do documento (Drive)</label><input name="documento_url"></div>
         <div class="campo full"><label>Observações / condicionantes</label><textarea name="obs" rows="2"></textarea></div>
       </div>
@@ -329,7 +346,8 @@ footer div{max-width:1220px;margin:0 auto;padding:0 20px;display:flex;justify-co
 <script>
 (function(){
 'use strict';
-const VERSAO_ESPERADA = 1;
+const VERSAO_ESPERADA = 2;
+const PREPARO_PADRAO = 30;
 const CHAVE_LOCAL = 'mannare_licencas_acesso';
 const TIPOS = [
   'Licença Prévia (LP)','Licença de Instalação (LI)','Licença de Operação (LO)',
@@ -338,7 +356,8 @@ const TIPOS = [
   'Alvará de Funcionamento','Habite-se','Certificado do Corpo de Bombeiros','Anuência/Certidão'
 ];
 const ORGAOS = ['SEUMA','SEMACE','IBAMA','SRH/COGERH','CBMCE','AGEFIS','IPHAN','Prefeitura'];
-const AVISO_PADRAO = function(tipo){ return /licen|outorga|supress/i.test(tipo||'') ? 120 : 60; };
+/** Prazo legal sugerido para protocolar a renovação (dias antes do vencimento). */
+const AVISO_PADRAO = function(tipo){ return /licen|outorga|supress/i.test(tipo||'') ? 120 : 0; };
 
 const $ = function(s,el){ return (el||document).querySelector(s); };
 const $$ = function(s,el){ return Array.prototype.slice.call((el||document).querySelectorAll(s)); };
@@ -387,25 +406,72 @@ function diasAte(iso){
 function hojeLocal(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function br(iso){ if(!iso) return '—'; const p=iso.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
 
-/** Estado exibido: vencida | renovar | protocolada | emdia | historico */
+function somarDias(iso, n){
+  const p = iso.split('-').map(Number), d = new Date(Date.UTC(p[0], p[1]-1, p[2]+n));
+  return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0');
+}
+function numOu(v, padrao){ return v === '' || v == null || isNaN(Number(v)) ? padrao : Number(v); }
+/** Datas-chave: protocolar até (validade − prazo) e começar a preparar (protocolo − preparo). */
+function prazos(l){
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(l.validade||'')) return null;
+  const protocolo = numOu(l.aviso_dias, 0), preparo = numOu(l.preparo_dias, PREPARO_PADRAO);
+  const limite = somarDias(l.validade, -protocolo), inicio = somarDias(limite, -preparo);
+  return { limite:limite, inicio:inicio, protocolo:protocolo, preparo:preparo,
+    diasLimite: diasAte(limite), diasInicio: diasAte(inicio), diasValidade: diasAte(l.validade) };
+}
+function dias(n){ return n+(Math.abs(n)===1?' dia':' dias'); }
+
+/** Estado exibido: vencida | atrasado | preparar | protocolada | emdia | historico */
 function estado(l){
   if (l.situacao === 'Renovada' || l.situacao === 'Encerrada') return 'historico';
   if (l.situacao === 'Renovação protocolada') return 'protocolada';
-  const d = diasAte(l.validade);
-  if (d === null) return 'emdia';
-  if (d < 0) return 'vencida';
-  if (d <= Number(l.aviso_dias||0)) return 'renovar';
+  const p = prazos(l);
+  if (!p) return 'emdia';
+  if (p.diasValidade < 0) return 'vencida';
+  if (p.diasLimite < 0) return 'atrasado';
+  if (p.diasInicio <= 0) return 'preparar';
   return 'emdia';
 }
-const ROTULO = { vencida:['Vencida','b-v'], renovar:['Renovar','b-r'], protocolada:['Protocolada','b-p'], emdia:['Em dia','b-d'], historico:['',''] };
-const ORDEM = { vencida:0, renovar:1, protocolada:2, emdia:3, historico:4 };
+const ROTULO = { vencida:['Vencida','b-v'], atrasado:['Protocolo atrasado','b-a'], preparar:['Preparar','b-r'], protocolada:['Protocolada','b-p'], emdia:['Em dia','b-d'], historico:['',''] };
+const ORDEM = { vencida:0, atrasado:1, preparar:2, protocolada:3, emdia:4, historico:5 };
 
-function textoPrazo(l){
-  const d = diasAte(l.validade);
-  if (d === null) return '—';
-  if (d < 0) return 'vencida há '+(-d)+(d===-1?' dia':' dias');
-  if (d === 0) return 'vence hoje';
-  return 'faltam '+d+(d===1?' dia':' dias');
+/** Texto da coluna "Protocolar até". */
+function celulaProtocolo(l, e, p){
+  if (!p) return '—';
+  let sub = '', cor = 'var(--tx)';
+  if (e === 'protocolada'){
+    sub = 'Protocolo '+esc(l.protocolo_numero||'')+(l.protocolo_data?' em '+br(l.protocolo_data):'');
+    cor = 'var(--mut)';
+  } else if (e === 'historico'){
+    cor = 'var(--mut)';
+  } else if (e === 'vencida'){
+    sub = 'prazo perdido'; cor = 'var(--mut)';
+  } else if (e === 'atrasado'){
+    sub = '<span style="color:var(--red);font-weight:600">atrasado há '+dias(-p.diasLimite)+'</span>'; cor = 'var(--red)';
+  } else if (e === 'preparar'){
+    sub = '<span style="color:#8A6100;font-weight:600">'+(p.diasLimite === 0 ? 'hoje é o último dia' : 'faltam '+dias(p.diasLimite))+'</span>';
+  } else {
+    sub = 'preparar a partir de '+br(p.inicio);
+  }
+  return '<span class="prazo" style="color:'+cor+'">'+br(p.limite)+'</span>'+(sub?'<div class="sub">'+sub+'</div>':'');
+}
+function celulaValidade(l, e, p){
+  if (!p || e === 'historico') return br(l.validade);
+  const d = p.diasValidade;
+  const sub = d < 0 ? '<span style="color:var(--red);font-weight:600">vencida há '+dias(-d)+'</span>' : d === 0 ? 'vence hoje' : 'vence em '+dias(d);
+  return br(l.validade)+'<div class="sub">'+sub+'</div>';
+}
+
+/** Resumo dos prazos no formulário, recalculado enquanto a pessoa digita. */
+function resumoPrazos(f, alvo){
+  const el = $(alvo);
+  const l = { validade: f.validade.value, aviso_dias: f.aviso_dias.value, preparo_dias: f.preparo_dias.value };
+  const p = prazos(l);
+  if (!p || f.aviso_dias.value === '' || f.preparo_dias.value === ''){ el.innerHTML = 'Preencha a validade e os prazos para ver as datas.'; return; }
+  el.innerHTML =
+    'Começar a preparar em <b>'+br(p.inicio)+'</b> · Protocolar até <b>'+br(p.limite)+'</b> · Vence em <b>'+br(l.validade)+'</b>'+
+    '<div class="linha-tempo" aria-hidden="true"><i class="lt-prep" style="flex:'+p.preparo+'"></i><i class="lt-atr" style="flex:'+p.protocolo+'"></i></div>'+
+    '<span style="color:var(--mut);font-size:12px"><span style="color:#B07D00">■</span> preparação da documentação &nbsp; <span style="color:#E26A82">■</span> depois do prazo de protocolo, até o vencimento<br>Avisos por e-mail no início da preparação e a 15, 7, 3 dias e no último dia do prazo de protocolo.</span>';
 }
 
 /* ---------- Telas ---------- */
@@ -473,9 +539,9 @@ function preencherListas(){
 }
 
 function render(){
-  const cont = { vencida:0, renovar:0, protocolada:0, emdia:0 };
+  const cont = { vencida:0, atrasado:0, preparar:0, protocolada:0, emdia:0 };
   dados.licencas.forEach(function(l){ const e = estado(l); if (cont[e] !== undefined) cont[e]++; });
-  $('#k-v').textContent = cont.vencida; $('#k-r').textContent = cont.renovar;
+  $('#k-v').textContent = cont.vencida; $('#k-a').textContent = cont.atrasado; $('#k-r').textContent = cont.preparar;
   $('#k-p').textContent = cont.protocolada; $('#k-d').textContent = cont.emdia;
   $$('.kpi').forEach(function(b){ b.classList.toggle('on', b.dataset.f === filtroKpi); });
 
@@ -495,7 +561,8 @@ function render(){
   }).sort(function(a,b){
     const ea = estado(a), eb = estado(b);
     if (ORDEM[ea] !== ORDEM[eb]) return ORDEM[ea] - ORDEM[eb];
-    return String(a.validade).localeCompare(String(b.validade));
+    const pa = prazos(a), pb = prazos(b);
+    return String(pa?pa.limite:a.validade).localeCompare(String(pb?pb.limite:b.validade));
   });
 
   if (!dados.licencas.length){
@@ -507,24 +574,21 @@ function render(){
     return;
   }
   const linhas = lista.map(function(l){
-    const e = estado(l);
+    const e = estado(l), p = prazos(l);
     const rot = e === 'historico' ? [l.situacao,'b-h'] : ROTULO[e];
-    const corPrazo = e==='vencida'?'var(--red)':e==='renovar'?'var(--amb)':'var(--mut)';
-    const prot = l.situacao === 'Renovação protocolada'
-      ? '<div class="sub">Protocolo '+esc(l.protocolo_numero||'')+(l.protocolo_data?' em '+br(l.protocolo_data):'')+'</div>' : '';
     const doc = l.documento_url && /^https?:\/\//i.test(l.documento_url) ? ' · <a href="'+esc(l.documento_url)+'" target="_blank" rel="noopener">documento</a>' : '';
     return '<tr data-id="'+esc(l.id)+'">'+
       '<td><span class="badge '+rot[1]+'">'+esc(rot[0])+'</span></td>'+
       '<td><b>'+esc(l.cliente)+'</b>'+(l.empreendimento?'<div class="sub">'+esc(l.empreendimento)+'</div>':'')+(l.cnpj?'<div class="sub">'+esc(l.cnpj)+'</div>':'')+'</td>'+
       '<td>'+esc(l.tipo)+'<div class="sub">'+(l.numero?'nº '+esc(l.numero):'sem número')+(l.orgao?' · '+esc(l.orgao):'')+doc+'</div></td>'+
-      '<td>'+br(l.validade)+'<div class="sub">aviso com '+esc(l.aviso_dias)+' dias</div></td>'+
-      '<td><span class="prazo" style="color:'+(e==='historico'?'var(--mut)':corPrazo)+'">'+(e==='historico'?'—':textoPrazo(l))+'</span>'+prot+'</td>'+
+      '<td data-rotulo="Protocolar até">'+celulaProtocolo(l, e, p)+'</td>'+
+      '<td data-rotulo="Validade">'+celulaValidade(l, e, p)+'</td>'+
       '<td>'+esc(l.responsavel||'—')+'</td>'+
       '<td class="acoes"><button class="btn sm" data-ac="editar">Editar</button> '+
         (e==='historico'?'':'<button class="btn sm" data-ac="renovar">Renovar</button>')+'</td>'+
     '</tr>';
   }).join('');
-  $('#lista').innerHTML = '<table><thead><tr><th>Situação</th><th>Cliente</th><th>Licença</th><th>Validade</th><th>Prazo</th><th>Responsável</th><th></th></tr></thead><tbody>'+linhas+'</tbody></table>';
+  $('#lista').innerHTML = '<table><thead><tr><th>Situação</th><th>Cliente</th><th>Licença</th><th>Protocolar até</th><th>Validade</th><th>Responsável</th><th></th></tr></thead><tbody>'+linhas+'</tbody></table>';
 }
 
 /* ---------- Modais ---------- */
@@ -536,9 +600,11 @@ function abrirLicenca(l){
   const f = $('#fm-lic'); f.reset(); erroEm('#lic-erro');
   $('#md-lic-tit').textContent = l ? 'Editar licença' : 'Nova licença';
   $('#bt-excluir').classList.toggle('hide', !l);
-  const v = l || { situacao:'Vigente', aviso_dias:'' };
+  const v = l || { situacao:'Vigente', aviso_dias:'', preparo_dias:PREPARO_PADRAO };
   Array.prototype.forEach.call(f.elements, function(el){ if (el.name) el.value = v[el.name] == null ? '' : v[el.name]; });
+  if (l && (l.preparo_dias === '' || l.preparo_dias == null)) f.preparo_dias.value = PREPARO_PADRAO;
   f.dataset.avisoManual = l ? '1' : '';
+  resumoPrazos(f, '#resumo-lic');
   atualizaProt(); abrir('#md-lic'); f.cliente.focus();
 }
 function atualizaProt(){
@@ -558,7 +624,8 @@ async function salvarLicenca(ev){
   if (!o.cliente) return erroEm('#lic-erro','Informe o cliente.');
   if (!o.tipo) return erroEm('#lic-erro','Informe o tipo de licença.');
   if (!o.validade) return erroEm('#lic-erro','Informe a validade.');
-  if (o.aviso_dias === '') return erroEm('#lic-erro','Informe com quantos dias de antecedência avisar.');
+  if (o.aviso_dias === '') return erroEm('#lic-erro','Informe o prazo para protocolar a renovação (use 0 se não houver).');
+  if (o.preparo_dias === '') return erroEm('#lic-erro','Informe o tempo para preparar a documentação.');
   if (o.situacao === 'Renovação protocolada' && !o.protocolo_data) return erroEm('#lic-erro','Informe a data do protocolo de renovação.');
   if (o.situacao !== 'Renovação protocolada'){ o.protocolo_data = o.protocolo_data || ''; }
   const bt = $('#bt-salvar'); bt.disabled = true;
@@ -580,6 +647,8 @@ function abrirRenovacao(l){
   renId = l.id; const f = $('#fm-ren'); f.reset(); erroEm('#ren-erro');
   $('#ren-desc').textContent = l.tipo+(l.numero?' nº '+l.numero:'')+' — '+l.cliente+(l.empreendimento?' / '+l.empreendimento:'')+' · vence em '+br(l.validade);
   f.aviso_dias.value = l.aviso_dias;
+  f.preparo_dias.value = numOu(l.preparo_dias, PREPARO_PADRAO);
+  resumoPrazos(f, '#resumo-ren');
   f.protocolo_data.value = l.protocolo_data || hojeLocal();
   f.protocolo_numero.value = l.protocolo_numero || '';
   trocarAba(l.situacao === 'Renovação protocolada' ? 'nova' : 'prot');
@@ -601,11 +670,12 @@ async function salvarRenovacao(ev){
       await api('salvar', { licenca:o });
     } else {
       if (!f.validade.value) return erroEm('#ren-erro','Informe a nova validade.');
-      if (f.aviso_dias.value === '') return erroEm('#ren-erro','Informe com quantos dias avisar.');
+      if (f.aviso_dias.value === '') return erroEm('#ren-erro','Informe o prazo para protocolar (use 0 se não houver).');
+      if (f.preparo_dias.value === '') return erroEm('#ren-erro','Informe o tempo para preparar a documentação.');
       if (f.validade.value <= l.validade && !confirm('A nova validade não é posterior à atual. Salvar mesmo assim?')) return;
       await api('renovar', { id:l.id, nova:{
         numero:f.numero.value.trim(), emissao:f.emissao.value, validade:f.validade.value,
-        aviso_dias:f.aviso_dias.value, documento_url:f.documento_url.value.trim(), obs:f.obs.value.trim()
+        aviso_dias:f.aviso_dias.value, preparo_dias:f.preparo_dias.value, documento_url:f.documento_url.value.trim(), obs:f.obs.value.trim()
       }});
     }
     fechar(f); toast('Renovação registrada.'); await carregar();
@@ -622,7 +692,7 @@ function statusConfig(){
   $('#cfg-status').innerHTML =
     'Aviso diário: <b>'+(at===true?'ativo (todo dia por volta das 7h)':at===false?'desativado':'não foi possível verificar')+'</b>'+
     (uv ? '<br>Última verificação: '+esc(br(uv.slice(0,10))+' '+uv.slice(11,16)) : '')+
-    '<br><span style="font-size:12.5px">O e-mail só sai quando alguma licença atinge um novo marco: o prazo definido nela, depois 90, 60, 30, 15, 7 dias, o dia do vencimento e, se vencer, toda semana. Renovações protocoladas não geram aviso.</span>';
+    '<br><span style="font-size:12.5px">O e-mail só sai quando alguma licença atinge um novo marco: o início da preparação da documentação, 15, 7 e 3 dias antes do prazo de protocolo e o último dia para protocolar. Se o protocolo atrasar ou a licença vencer, o lembrete passa a ser semanal. Renovações protocoladas não geram aviso.</span>';
   $('#bt-ativar').classList.toggle('hide', at === true);
 }
 async function salvarConfig(ev){
@@ -660,9 +730,13 @@ $('#fm-lic').addEventListener('submit', salvarLicenca);
 $('#fm-lic').situacao.addEventListener('change', atualizaProt);
 $('#fm-lic').aviso_dias.addEventListener('input', function(){ $('#fm-lic').dataset.avisoManual = '1'; });
 $('#fm-lic').tipo.addEventListener('input', function(){
-  const f = $('#fm-lic'); if (!f.dataset.avisoManual) f.aviso_dias.value = f.tipo.value.trim() ? AVISO_PADRAO(f.tipo.value) : '';
+  const f = $('#fm-lic'); if (!f.dataset.avisoManual){ f.aviso_dias.value = f.tipo.value.trim() ? AVISO_PADRAO(f.tipo.value) : ''; resumoPrazos(f, '#resumo-lic'); }
 });
-$$('input[name=aviso_dias]').forEach(function(el){ el.addEventListener('focus', function(){ el.select(); }); });
+$$('input[name=aviso_dias],input[name=preparo_dias]').forEach(function(el){ el.addEventListener('focus', function(){ el.select(); }); });
+['validade','aviso_dias','preparo_dias'].forEach(function(n){
+  $('#fm-lic')[n].addEventListener('input', function(){ resumoPrazos($('#fm-lic'), '#resumo-lic'); });
+  $('#fm-ren')[n].addEventListener('input', function(){ resumoPrazos($('#fm-ren'), '#resumo-ren'); });
+});
 $('#bt-excluir').addEventListener('click', excluirLicenca);
 $('#fm-ren').addEventListener('submit', salvarRenovacao);
 $$('#fm-ren [data-aba]').forEach(function(b){ b.addEventListener('click', function(){ trocarAba(b.dataset.aba); }); });
