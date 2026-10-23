@@ -224,6 +224,14 @@ input[readonly]{background:#F4F5FA;color:var(--mut)}
 .det-corpo .acoes-topo span{color:var(--mut);font-size:13px}
 tr.inativo td{color:var(--mut)}
 .nowrap{white-space:nowrap}
+fieldset.titular{border:1.5px solid var(--ln);border-radius:6px;padding:8px 12px 10px;margin:0;display:flex;gap:22px;flex-wrap:wrap}
+fieldset.titular legend{font-size:12.5px;color:var(--mut);padding:0 4px}
+fieldset.titular input{accent-color:var(--azul)}
+fieldset.titular .chk{color:var(--tx)}
+.info-holding{background:var(--azul6);border-left:4px solid var(--azul);border-radius:6px;padding:10px 14px;font-size:13px}
+.info-holding.falta{background:var(--redbg);border-color:var(--red);color:var(--red)}
+.sep-form{font-family:var(--titulo);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);border-top:1px solid var(--ln);padding-top:12px;margin-top:4px}
+.tag-holding{font-family:var(--titulo);font-size:11px;letter-spacing:.04em;text-transform:uppercase;background:var(--azul5);color:var(--azul);border-radius:4px;padding:1px 6px;margin-left:4px;white-space:nowrap}
 .dl{display:grid;grid-template-columns:160px 1fr;gap:10px 18px;margin:0}
 .dl dt{color:var(--mut);font-size:13px}
 .dl dd{margin:0}
@@ -376,6 +384,8 @@ h3{font-size:14px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;c
     <h3 id="lista-tit">Todas as licenças</h3>
     <select id="f-cliente"><option value="">Todos os clientes</option></select>
     <select id="f-tipo"><option value="">Todos os tipos</option></select>
+    <select id="f-cidade"><option value="">Todas as cidades</option></select>
+    <select id="f-bairro"><option value="">Todos os bairros</option></select>
     <label class="chk"><input type="checkbox" id="f-hist"> Mostrar renovadas e encerradas</label>
   </div>
 
@@ -415,9 +425,9 @@ h3{font-size:14px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;c
     <div class="grid">
       <div class="campo"><label for="lic-grupo">Grupo (cliente) *</label><select name="grupo_id" id="lic-grupo" required></select>
         <button type="button" class="link-mini" data-novo="grupo">+ Cadastrar grupo</button></div>
-      <div class="campo"><label for="lic-spe">SPE / obra *</label><select name="spe_id" id="lic-spe" required></select>
-        <button type="button" class="link-mini" data-novo="spe">+ Cadastrar SPE/obra</button></div>
-      <div class="campo"><label for="lic-cnpj">CNPJ da SPE</label><input id="lic-cnpj" readonly tabindex="-1" placeholder="preenchido pelo cadastro"></div>
+      <div class="campo"><label for="lic-spe">Obra *</label><select name="spe_id" id="lic-spe" required></select>
+        <button type="button" class="link-mini" data-novo="spe">+ Cadastrar obra</button></div>
+      <div class="campo"><label for="lic-cnpj">CNPJ da obra</label><input id="lic-cnpj" readonly tabindex="-1" placeholder="preenchido pelo cadastro"></div>
       <div class="campo"><label>Tipo de licença *</label><input name="tipo" list="dl-tipos" required></div>
       <div class="campo"><label>Número da licença</label><input name="numero"></div>
       <div class="campo"><label>Órgão emissor</label><input name="orgao" list="dl-orgaos"></div>
@@ -514,16 +524,27 @@ h3{font-size:14px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;c
 <!-- Modal SPE/obra -->
 <div class="fundo hide" id="md-spe">
   <form class="modal" id="fm-spe" novalidate>
-    <h2 id="md-spe-tit">Nova SPE / obra</h2>
+    <h2 id="md-spe-tit">Nova obra</h2>
     <input type="hidden" name="id">
     <div class="grid">
-      <div class="campo full"><label>Grupo *</label><select name="grupo_id" required></select></div>
+      <div class="campo"><label>Grupo *</label><select name="grupo_id" required></select></div>
       <div class="campo"><label>Nome da obra *</label><input name="obra" required autocomplete="off">
         <div class="parecido hide" id="spe-parecido"></div></div>
-      <div class="campo"><label>CNPJ da SPE</label><input name="cnpj" data-cnpj placeholder="00.000.000/0000-00" inputmode="numeric">
+      <fieldset class="campo full titular">
+        <legend>Titular do CNPJ da obra *</legend>
+        <label class="chk"><input type="radio" name="titular" value="spe"> SPE própria</label>
+        <label class="chk"><input type="radio" name="titular" value="holding"> Holding do grupo (sem SPE)</label>
+      </fieldset>
+      <div class="campo bloco-spe"><label>CNPJ da SPE</label><input name="cnpj" data-cnpj placeholder="00.000.000/0000-00" inputmode="numeric">
         <div class="parecido hide" id="spe-cnpj-aviso"></div></div>
-      <div class="campo"><label>Razão social</label><input name="razao_social"></div>
-      <div class="campo"><label>Município</label><input name="municipio" list="dl-municipios"></div>
+      <div class="campo bloco-spe"><label>Razão social da SPE</label><input name="razao_social"></div>
+      <div class="campo full bloco-holding hide"><div class="info-holding" id="info-holding"></div></div>
+      <div class="sep-form full">Endereço da obra</div>
+      <div class="campo full"><label>Rua e número</label><input name="endereco" placeholder="Ex.: Av. Santos Dumont, 1500"></div>
+      <div class="campo"><label>Bairro</label><input name="bairro" list="dl-bairros" autocomplete="off"></div>
+      <div class="campo"><label>Cidade</label><input name="municipio" list="dl-municipios" autocomplete="off"></div>
+      <div class="campo"><label>UF</label><input name="uf" maxlength="2" placeholder="CE" style="text-transform:uppercase"></div>
+      <div class="campo"><label>CEP</label><input name="cep" inputmode="numeric" placeholder="00000-000" maxlength="9"></div>
       <div class="campo full"><label>Observações</label><textarea name="obs" rows="2"></textarea></div>
       <label class="chk full bloco-ativo"><input type="checkbox" name="ativo"> Ativa (aparece nas listas da licença)</label>
     </div>
@@ -531,7 +552,7 @@ h3{font-size:14px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;c
     <div class="rodape">
       <button type="button" class="btn dan esq hide" id="bt-spe-excluir">Excluir</button>
       <button type="button" class="btn" data-fechar>Cancelar</button>
-      <button type="submit" class="btn pri">Salvar SPE/obra</button>
+      <button type="submit" class="btn pri">Salvar obra</button>
     </div>
   </form>
 </div>
@@ -540,7 +561,7 @@ h3{font-size:14px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;c
 <div class="fundo hide" id="md-mesclar">
   <form class="modal" id="fm-mesclar" novalidate>
     <h2>Mesclar grupos</h2>
-    <p>Use quando o mesmo cliente foi cadastrado duas vezes. As SPEs/obras e as licenças de
+    <p>Use quando o mesmo cliente foi cadastrado duas vezes. As obras e as licenças de
       <b id="mesclar-origem"></b> passam para o grupo escolhido abaixo, e <b id="mesclar-origem2"></b> é apagado.</p>
     <div class="campo"><label>Manter o grupo *</label><select name="destino"></select></div>
     <div id="mesclar-erro" class="aviso err hide" style="margin-top:12px"></div>
@@ -572,13 +593,14 @@ h3{font-size:14px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;c
 
 <datalist id="dl-resp"></datalist>
 <datalist id="dl-municipios"></datalist>
+<datalist id="dl-bairros"></datalist>
 <datalist id="dl-tipos"></datalist>
 <datalist id="dl-orgaos"></datalist>
 
 <script>
 (function(){
 'use strict';
-const VERSAO_ESPERADA = 3;
+const VERSAO_ESPERADA = 4;
 const PREPARO_PADRAO = 30;
 const CHAVE_LOCAL = 'mannare_licencas_acesso';
 const TIPOS = [
@@ -761,8 +783,12 @@ function unicos(campo){
 function opcoes(lista){ return lista.map(function(v){ return '<option value="'+esc(v)+'"></option>'; }).join(''); }
 
 function preencherListas(){
-  const munis = {}; dados.spes.forEach(function(x){ if (x.municipio) munis[x.municipio] = 1; });
-  $('#dl-municipios').innerHTML = opcoes(['Fortaleza'].concat(Object.keys(munis).filter(function(m){ return m !== 'Fortaleza'; })));
+  const munis = cidades();
+  $('#dl-municipios').innerHTML = opcoes(['Fortaleza'].concat(munis.filter(function(m){ return m !== 'Fortaleza'; })));
+  const fc = $('#f-cidade'), vfc = fc.value;
+  fc.innerHTML = '<option value="">Todas as cidades</option>' + munis.map(function(c){ return '<option>'+esc(c)+'</option>'; }).join('');
+  fc.value = munis.indexOf(vfc) >= 0 ? vfc : '';
+  preencherFiltroBairro();
   $('#dl-resp').innerHTML = opcoes(unicos('responsavel'));
   const tipos = TIPOS.concat(unicos('tipo').filter(function(t){ return TIPOS.indexOf(t)<0; }));
   $('#dl-tipos').innerHTML = opcoes(tipos);
@@ -773,6 +799,24 @@ function preencherListas(){
   const st = $('#f-tipo'), vt = st.value;
   st.innerHTML = '<option value="">Todos os tipos</option>' + unicos('tipo').map(function(c){ return '<option>'+esc(c)+'</option>'; }).join('');
   st.value = vt;
+}
+
+function cidades(){
+  const m = {}; dados.spes.forEach(function(x){ if (x.municipio) m[chaveLugar(x.municipio)] = m[chaveLugar(x.municipio)] || x.municipio; });
+  return Object.keys(m).map(function(k){ return m[k]; }).sort(function(a, b){ return a.localeCompare(b, 'pt-BR'); });
+}
+function bairros(cidade){
+  const m = {};
+  dados.spes.forEach(function(x){
+    if (!x.bairro || (cidade && chaveLugar(x.municipio) !== chaveLugar(cidade))) return;
+    m[chaveLugar(x.bairro)] = m[chaveLugar(x.bairro)] || x.bairro;
+  });
+  return Object.keys(m).map(function(k){ return m[k]; }).sort(function(a, b){ return a.localeCompare(b, 'pt-BR'); });
+}
+function preencherFiltroBairro(){
+  const fb = $('#f-bairro'), v = fb.value, lista = bairros($('#f-cidade').value);
+  fb.innerHTML = '<option value="">Todos os bairros</option>' + lista.map(function(b){ return '<option>'+esc(b)+'</option>'; }).join('');
+  fb.value = lista.indexOf(v) >= 0 ? v : '';
 }
 
 function render(){
@@ -789,14 +833,19 @@ function render(){
 
   const busca = $('#f-busca').value.trim().toLowerCase();
   const cli = $('#f-cliente').value, tipo = $('#f-tipo').value, hist = $('#f-hist').checked;
+  const fCid = chaveLugar($('#f-cidade').value), fBai = chaveLugar($('#f-bairro').value);
   const lista = dados.licencas.filter(function(l){
     const e = estado(l);
     if (e === 'historico' && !hist) return false;
     if (filtroKpi && e !== filtroKpi) return false;
     if (cli && l.cliente !== cli) return false;
     if (tipo && l.tipo !== tipo) return false;
+    const ob = spePorId(l.spe_id);
+    if (fCid && (!ob || chaveLugar(ob.municipio) !== fCid)) return false;
+    if (fBai && (!ob || chaveLugar(ob.bairro) !== fBai)) return false;
     if (busca){
-      const t = [l.cliente,l.empreendimento,l.cnpj,l.tipo,l.numero,l.orgao,l.processo,l.responsavel,l.protocolo_numero,l.obs].join(' ').toLowerCase();
+      const t = [l.cliente,l.empreendimento,l.cnpj,l.tipo,l.numero,l.orgao,l.processo,l.responsavel,l.protocolo_numero,l.obs,
+        ob ? ob.bairro : '', ob ? ob.municipio : '', ob ? ob.endereco : ''].join(' ').toLowerCase();
       if (t.indexOf(busca) < 0) return false;
     }
     return true;
@@ -821,7 +870,7 @@ function render(){
     const doc = l.documento_url && /^https?:\/\//i.test(l.documento_url) ? ' · <a href="'+esc(l.documento_url)+'" target="_blank" rel="noopener">documento</a>' : '';
     return '<tr data-id="'+esc(l.id)+'">'+
       '<td><span class="badge '+rot[1]+'">'+esc(rot[0])+'</span></td>'+
-      '<td><b>'+esc(l.cliente)+'</b>'+(l.empreendimento?'<div class="sub">'+esc(l.empreendimento)+'</div>':'')+(l.cnpj?'<div class="sub">'+esc(l.cnpj)+'</div>':'')+(l.spe_id?'':'<div><span class="sem-cad" title="Edite a licença e escolha a SPE/obra">Completar SPE/obra</span></div>')+'</td>'+
+      '<td><b>'+esc(l.cliente)+'</b>'+(l.empreendimento?'<div class="sub">'+esc(l.empreendimento)+'</div>':'')+(lugarObra(spePorId(l.spe_id))?'<div class="sub">'+esc(lugarObra(spePorId(l.spe_id)))+'</div>':'')+(l.cnpj?'<div class="sub"><span class="nowrap">'+esc(l.cnpj)+'</span>'+(spePorId(l.spe_id) && spePorId(l.spe_id).titular === 'holding' ? '<span class="tag-holding">holding</span>' : '')+'</div>':'')+(l.spe_id?'':'<div><span class="sem-cad" title="Edite a licença e escolha a obra">Completar obra</span></div>')+'</td>'+
       '<td>'+esc(l.tipo)+'<div class="sub">'+(l.numero?'nº '+esc(l.numero):'sem número')+(l.orgao?' · '+esc(l.orgao):'')+doc+'</div></td>'+
       '<td data-rotulo="Protocolar até">'+celulaProtocolo(l, e, p)+'</td>'+
       '<td data-rotulo="Validade">'+celulaValidade(l, e, p)+'</td>'+
@@ -903,6 +952,11 @@ function formatarCnpj(t){
   return d.replace(/^(\d{2})(\d)/,'$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3').replace(/\.(\d{3})(\d)/,'.$1/$2').replace(/(\d{4})(\d)/,'$1-$2');
 }
 function grupoPorId(id){ return dados.grupos.filter(function(g){ return g.id === id; })[0]; }
+/** Nome de lugar comparável (mesma regra do backend). */
+function chaveLugar(t){ return String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); }
+/** CNPJ efetivo da obra: o da SPE ou, se a titular é a holding, o do grupo. */
+function cnpjObra(x){ if (!x) return ''; if (x.titular === 'holding'){ const g = grupoPorId(x.grupo_id); return g ? g.cnpj : ''; } return x.cnpj; }
+function lugarObra(x){ return x ? [x.bairro, x.municipio].filter(Boolean).join(' · ') : ''; }
 function spePorId(id){ return dados.spes.filter(function(x){ return x.id === id; })[0]; }
 function ordenarNome(campo){ return function(a, b){ return String(a[campo]).localeCompare(String(b[campo]), 'pt-BR'); }; }
 
@@ -916,14 +970,15 @@ function preencherSelSpe(sel, grupoId, valor){
   if (!grupoId){ sel.innerHTML = '<option value="">Escolha primeiro o grupo</option>'; sel.disabled = true; return; }
   const lista = dados.spes.filter(function(x){ return x.grupo_id === grupoId && (x.ativo || x.id === valor); }).sort(ordenarNome('obra'));
   sel.disabled = false;
-  sel.innerHTML = '<option value="">'+(lista.length ? 'Escolha a SPE/obra…' : 'Este grupo ainda não tem SPE/obra')+'</option>' +
-    lista.map(function(x){ return '<option value="'+esc(x.id)+'">'+esc(x.obra)+(x.cnpj?' · '+esc(x.cnpj):'')+(x.ativo?'':' (inativa)')+'</option>'; }).join('');
+  sel.innerHTML = '<option value="">'+(lista.length ? 'Escolha a obra…' : 'Este grupo ainda não tem obra cadastrada')+'</option>' +
+    lista.map(function(x){ const c = cnpjObra(x); return '<option value="'+esc(x.id)+'">'+esc(x.obra)+(x.titular === 'holding' ? ' · holding' : '')+(c?' · '+esc(c):'')+(x.ativo?'':' (inativa)')+'</option>'; }).join('');
   sel.value = valor || '';
   if (!valor && lista.length === 1) sel.value = lista[0].id;
 }
 function mostrarCnpjLic(){
   const f = $('#fm-lic'), s = spePorId(f.spe_id.value);
-  $('#lic-cnpj').value = s ? (s.cnpj || 'SPE sem CNPJ cadastrado') : '';
+  const c = cnpjObra(s);
+  $('#lic-cnpj').value = !s ? '' : c ? c + (s.titular === 'holding' ? ' (holding)' : '') : (s.titular === 'holding' ? 'Holding sem CNPJ cadastrado' : 'SPE sem CNPJ cadastrado');
 }
 /** Depois de recarregar os dados, mantém o formulário da licença aberto em dia. */
 function atualizarFormLicencaAberto(){
@@ -948,8 +1003,8 @@ function pontos(c){
 
 function renderClientes(){
   const aviso = $('#cli-aviso');
-  if (!Array.isArray(dados.grupos) || (dados.versao && dados.versao < 3)){
-    aviso.textContent = 'Para usar o cadastro de clientes, publique a versão 3 do Apps Script.'; aviso.classList.remove('hide');
+  if (!Array.isArray(dados.grupos) || (dados.versao && dados.versao < 4)){
+    aviso.textContent = 'Para usar o cadastro de clientes, publique a versão 4 do Apps Script.'; aviso.classList.remove('hide');
   } else aviso.classList.add('hide');
   const busca = chaveNome($('#c-busca').value), buscaNum = digitos($('#c-busca').value);
   const inat = $('#c-inativos').checked;
@@ -957,7 +1012,7 @@ function renderClientes(){
     if (!g.ativo && !inat && g.id !== grupoSel) return false;
     if (!busca && !buscaNum) return true;
     const spes = dados.spes.filter(function(x){ return x.grupo_id === g.id; });
-    const texto = chaveNome([g.nome].concat(spes.map(function(x){ return x.obra+' '+x.razao_social; })).join(' '));
+    const texto = chaveNome([g.nome].concat(spes.map(function(x){ return [x.obra, x.razao_social, x.bairro, x.municipio, x.endereco].join(' '); })).join(' '));
     const nums = [g.cnpj].concat(spes.map(function(x){ return x.cnpj; })).map(digitos).join(' ');
     return (busca && texto.indexOf(busca) >= 0) || (buscaNum.length >= 3 && nums.indexOf(buscaNum) >= 0);
   }).sort(ordenarNome('nome'));
@@ -977,25 +1032,27 @@ function renderClientes(){
 
 function renderDetalhe(){
   const el = $('#cli-detalhe'), g = grupoPorId(grupoSel);
-  if (!g){ el.innerHTML = '<div class="det-vazio">Escolha um grupo para ver as SPEs e obras.</div>'; return; }
+  if (!g){ el.innerHTML = '<div class="det-vazio">Escolha um grupo para ver as obras.</div>'; return; }
   const spes = dados.spes.filter(function(x){ return x.grupo_id === g.id; }).sort(function(a, b){ return (b.ativo - a.ativo) || String(a.obra).localeCompare(String(b.obra), 'pt-BR'); });
   const lics = dados.licencas.filter(function(l){ return l.grupo_id === g.id; });
   let corpo;
   if (abaDet === 'spes'){
-    corpo = '<div class="acoes-topo"><span>'+spes.length+(spes.length===1?' SPE/obra cadastrada':' SPEs/obras cadastradas')+'</span>'+
-      '<button class="btn sm pri" data-acao="nova-spe">+ Nova SPE/obra</button></div>'+
-      (spes.length ? '<table><thead><tr><th>Obra</th><th>CNPJ</th><th>Razão social</th><th>Município</th><th>Licenças</th><th></th></tr></thead><tbody>'+
+    corpo = '<div class="acoes-topo"><span>'+spes.length+(spes.length===1?' obra cadastrada':' obras cadastradas')+'</span>'+
+      '<button class="btn sm pri" data-acao="nova-spe">+ Nova obra</button></div>'+
+      (spes.length ? '<table><thead><tr><th>Obra</th><th>CNPJ</th><th>Bairro</th><th>Cidade</th><th>Licenças</th><th></th></tr></thead><tbody>'+
         spes.map(function(x){
           const c = statusLic(lics.filter(function(l){ return l.spe_id === x.id; }));
+          const cn = cnpjObra(x);
           return '<tr class="'+(x.ativo?'':'inativo')+'" data-spe="'+esc(x.id)+'">'+
-            '<td data-rotulo="Obra"><b>'+esc(x.obra)+'</b>'+(x.ativo?'':' <span class="badge b-h">Inativa</span>')+'</td>'+
-            '<td data-rotulo="CNPJ" class="nowrap">'+(x.cnpj?esc(x.cnpj):'<span class="sub">sem CNPJ</span>')+'</td>'+
-            '<td data-rotulo="Razão social">'+esc(x.razao_social||'—')+'</td>'+
-            '<td data-rotulo="Município">'+esc(x.municipio||'—')+'</td>'+
+            '<td data-rotulo="Obra"><b>'+esc(x.obra)+'</b>'+(x.ativo?'':' <span class="badge b-h">Inativa</span>')+
+              (x.endereco?'<div class="sub">'+esc(x.endereco)+'</div>':'')+(x.titular !== 'holding' && x.razao_social?'<div class="sub">'+esc(x.razao_social)+'</div>':'')+'</td>'+
+            '<td data-rotulo="CNPJ" class="nowrap">'+(cn?esc(cn):'<span class="sub">sem CNPJ</span>')+(x.titular === 'holding' ? '<div><span class="tag-holding">holding</span></div>' : '<div class="sub">SPE</div>')+'</td>'+
+            '<td data-rotulo="Bairro">'+esc(x.bairro||'—')+'</td>'+
+            '<td data-rotulo="Cidade">'+esc(x.municipio||'—')+(x.uf?' / '+esc(x.uf):'')+'</td>'+
             '<td data-rotulo="Licenças">'+c.total+' '+pontos(c)+'</td>'+
             '<td class="acoes"><button class="btn sm" data-acao="editar-spe">Editar</button></td></tr>';
         }).join('')+'</tbody></table>'
-      : '<div class="det-vazio">Nenhuma SPE/obra neste grupo. Clique em <b>+ Nova SPE/obra</b>.</div>');
+      : '<div class="det-vazio">Nenhuma obra neste grupo. Clique em <b>+ Nova obra</b>.</div>');
   } else {
     const campo = function(r, v){ return '<dt>'+r+'</dt><dd>'+(v ? esc(v) : '<span class="sub">—</span>')+'</dd>'; };
     corpo = '<dl class="dl">'+campo('Nome', g.nome)+campo('CNPJ da holding', g.cnpj)+campo('Contato', g.contato)+
@@ -1007,7 +1064,7 @@ function renderDetalhe(){
     '<div class="det-acoes"><button class="btn sm" data-acao="ver-licencas">Ver licenças</button>'+
       '<button class="btn sm" data-acao="editar-grupo">Editar grupo</button>'+
       '<button class="btn sm" data-acao="mesclar">Mesclar…</button></div></div>'+
-    '<div class="det-abas" role="tablist"><button role="tab" data-aba="spes" class="'+(abaDet==='spes'?'on':'')+'">SPEs e obras</button>'+
+    '<div class="det-abas" role="tablist"><button role="tab" data-aba="spes" class="'+(abaDet==='spes'?'on':'')+'">Obras e SPEs</button>'+
       '<button role="tab" data-aba="dados" class="'+(abaDet==='dados'?'on':'')+'">Dados do grupo</button></div>'+
     '<div class="det-corpo">'+corpo+'</div>';
 }
@@ -1079,13 +1136,30 @@ async function excluirGrupo(){
 function abrirSpe(x, grupoId, aposSalvar){
   const f = $('#fm-spe'); f.reset(); erroEm('#spe-erro');
   f.dataset.aposSalvar = aposSalvar || '';
-  $('#md-spe-tit').textContent = x ? 'Editar SPE / obra' : 'Nova SPE / obra';
+  $('#md-spe-tit').textContent = x ? 'Editar obra' : 'Nova obra';
   $('#bt-spe-excluir').classList.toggle('hide', !x);
   $('.bloco-ativo', f).classList.toggle('hide', !x);
   preencherSelGrupo(f.grupo_id, x ? x.grupo_id : (grupoId || ''), !(x || grupoId));
-  ['id','obra','razao_social','cnpj','municipio','obs'].forEach(function(c){ f.elements.namedItem(c).value = x ? (x[c] || '') : ''; });
+  ['id','obra','razao_social','cnpj','municipio','obs','endereco','bairro','uf','cep'].forEach(function(c){ f.elements.namedItem(c).value = x ? (x[c] || '') : ''; });
+  if (!x){ f.uf.value = 'CE'; f.municipio.value = 'Fortaleza'; }
+  const tit = x ? x.titular : 'spe';
+  $$('input[name=titular]', f).forEach(function(r){ r.checked = r.value === tit; });
   f.ativo.checked = x ? x.ativo : true;
-  avisoSpe(); abrir('#md-spe'); (f.grupo_id.value ? f.obra : f.grupo_id).focus();
+  atualizarTitular(); atualizarBairros(); avisoSpe(); abrir('#md-spe'); (f.grupo_id.value ? f.obra : f.grupo_id).focus();
+}
+function titularSel(){ const r = $('#fm-spe input[name=titular]:checked'); return r ? r.value : 'spe'; }
+function atualizarTitular(){
+  const f = $('#fm-spe'), hold = titularSel() === 'holding', g = grupoPorId(f.grupo_id.value);
+  $$('.bloco-spe', f).forEach(function(b){ b.classList.toggle('hide', hold); });
+  $('.bloco-holding', f).classList.toggle('hide', !hold);
+  const info = $('#info-holding');
+  if (!hold) return;
+  if (!g){ info.className = 'info-holding'; info.textContent = 'Escolha o grupo para ver o CNPJ da holding.'; }
+  else if (g.cnpj){ info.className = 'info-holding'; info.innerHTML = 'Esta obra usa o CNPJ da holding <b>'+esc(g.nome)+'</b>: <b>'+esc(g.cnpj)+'</b>. Se ele mudar no grupo, as licenças acompanham.'; }
+  else { info.className = 'info-holding falta'; info.innerHTML = 'O grupo <b>'+esc(g.nome)+'</b> ainda não tem CNPJ da holding. <button type="button" class="link-mini" data-editar-holding="'+esc(g.id)+'">Cadastrar o CNPJ no grupo</button>'; }
+}
+function atualizarBairros(){
+  $('#dl-bairros').innerHTML = opcoes(bairros($('#fm-spe').municipio.value));
 }
 function avisoSpe(){
   const f = $('#fm-spe'), id = f.elements.namedItem('id').value, gid = f.grupo_id.value;
@@ -1094,7 +1168,7 @@ function avisoSpe(){
   if (r.igual){ el.className = 'parecido erro'; el.innerHTML = 'Este grupo já tem a obra <b>'+esc(r.igual.obra)+'</b>.'; }
   else if (r.parecidos.length){ el.className = 'parecido'; el.innerHTML = 'Parecido com: '+r.parecidos.slice(0,3).map(function(x){ return '<b>'+esc(x.obra)+'</b>'; }).join(', ')+'. Confira se não é a mesma obra.'; }
   else el.className = 'parecido hide';
-  const ec = $('#spe-cnpj-aviso'), d = digitos(f.cnpj.value);
+  const ec = $('#spe-cnpj-aviso'), d = titularSel() === 'holding' ? '' : digitos(f.cnpj.value);
   if (d.length === 14 && !cnpjValido(d)){ ec.className = 'parecido erro'; ec.textContent = 'CNPJ inválido. Confira os números.'; }
   else if (d.length === 14){
     const m = dados.spes.filter(function(x){ return x.id !== id && digitos(x.cnpj) === d; })[0];
@@ -1106,13 +1180,19 @@ async function salvarSpe(ev){
   ev.preventDefault(); erroEm('#spe-erro');
   const f = $('#fm-spe');
   const x = { id:f.elements.namedItem('id').value, grupo_id:f.grupo_id.value, obra:f.obra.value.trim(), razao_social:f.razao_social.value.trim(),
-    cnpj:f.cnpj.value.trim(), municipio:f.municipio.value.trim(), obs:f.obs.value.trim(), ativo:f.ativo.checked };
+    cnpj:f.cnpj.value.trim(), municipio:f.municipio.value.trim(), obs:f.obs.value.trim(), ativo:f.ativo.checked,
+    titular:titularSel(), endereco:f.endereco.value.trim(), bairro:f.bairro.value.trim(), uf:f.uf.value.trim().toUpperCase(), cep:f.cep.value.trim() };
   if (!x.grupo_id) return erroEm('#spe-erro','Escolha o grupo.');
   if (!x.obra) return erroEm('#spe-erro','Informe o nome da obra.');
-  if (x.cnpj && !cnpjValido(x.cnpj)) return erroEm('#spe-erro','CNPJ inválido. Confira os números.');
+  if (x.titular === 'holding'){
+    const g = grupoPorId(x.grupo_id);
+    if (!g || !g.cnpj) return erroEm('#spe-erro','O grupo ainda não tem CNPJ da holding. Cadastre o CNPJ no grupo antes.');
+    x.cnpj = ''; x.razao_social = '';
+  } else if (x.cnpj && !cnpjValido(x.cnpj)) return erroEm('#spe-erro','CNPJ inválido. Confira os números.');
+  if (x.cep && digitos(x.cep).length !== 8) return erroEm('#spe-erro','CEP inválido. Use 8 números.');
   try {
     const j = await api('spe_salvar', { spe:x });
-    fechar(f); toast('SPE/obra salva.');
+    fechar(f); toast('Obra salva.');
     await carregar();
     if (f.dataset.aposSalvar === 'licenca'){
       const fl = $('#fm-lic'); preencherSelGrupo(fl.grupo_id, j.spe.grupo_id, true); preencherSelSpe(fl.spe_id, j.spe.grupo_id, j.spe.id); mostrarCnpjLic();
@@ -1121,8 +1201,8 @@ async function salvarSpe(ev){
 }
 async function excluirSpe(){
   const f = $('#fm-spe'), id = f.elements.namedItem('id').value;
-  if (!id || !confirm('Excluir esta SPE/obra? Isso não pode ser desfeito.')) return;
-  try { await api('spe_excluir', { id:id }); fechar(f); toast('SPE/obra excluída.'); await carregar(); }
+  if (!id || !confirm('Excluir esta obra? Isso não pode ser desfeito.')) return;
+  try { await api('spe_excluir', { id:id }); fechar(f); toast('Obra excluída.'); await carregar(); }
   catch(e){ tratarErro(e, '#spe-erro'); }
 }
 
@@ -1184,7 +1264,7 @@ async function salvarLicenca(ev){
   ev.preventDefault(); erroEm('#lic-erro');
   const f = $('#fm-lic'), o = coletar(f);
   if (!o.grupo_id) return erroEm('#lic-erro','Escolha o grupo (cliente). Se ele não existir, use "+ Cadastrar grupo".');
-  if (!o.spe_id) return erroEm('#lic-erro','Escolha a SPE/obra. Se ela não existir, use "+ Cadastrar SPE/obra".');
+  if (!o.spe_id) return erroEm('#lic-erro','Escolha a obra. Se ela não existir, use "+ Cadastrar obra".');
   if (!o.tipo) return erroEm('#lic-erro','Informe o tipo de licença.');
   if (!o.validade) return erroEm('#lic-erro','Informe a validade.');
   if (o.aviso_dias === '') return erroEm('#lic-erro','Informe o prazo para protocolar a renovação (use 0 se não houver).');
@@ -1303,7 +1383,19 @@ $('#grupo-parecido').addEventListener('click', function(e){
 });
 $('#bt-grupo-excluir').addEventListener('click', excluirGrupo);
 $('#fm-spe').addEventListener('submit', salvarSpe);
-['input','change'].forEach(function(t){ $('#fm-spe').addEventListener(t, function(e){ if (e.target.name === 'obra' || e.target.name === 'cnpj' || e.target.name === 'grupo_id'){ erroEm('#spe-erro'); avisoSpe(); } }); });
+['input','change'].forEach(function(t){ $('#fm-spe').addEventListener(t, function(e){
+  const n = e.target.name;
+  if (n === 'obra' || n === 'cnpj' || n === 'grupo_id' || n === 'titular'){ erroEm('#spe-erro'); avisoSpe(); }
+  if (n === 'titular' || n === 'grupo_id') atualizarTitular();
+  if (n === 'municipio') atualizarBairros();
+  if (n === 'cep' && t === 'input'){ const d = digitos(e.target.value).slice(0, 8); e.target.value = d.length > 5 ? d.slice(0, 5)+'-'+d.slice(5) : d; }
+}); });
+$('#info-holding').addEventListener('click', function(e){
+  const b = e.target.closest('[data-editar-holding]'); if (!b) return;
+  fechar($('#fm-spe')); abrirGrupo(grupoPorId(b.dataset.editarHolding), ''); $('#fm-grupo').cnpj.focus();
+});
+$('#f-cidade').addEventListener('change', function(){ preencherFiltroBairro(); render(); });
+$('#f-bairro').addEventListener('change', render);
 $('#bt-spe-excluir').addEventListener('click', excluirSpe);
 $('#fm-mesclar').addEventListener('submit', confirmarMesclar);
 $$('input[data-cnpj]').forEach(function(el){ el.addEventListener('input', function(){ const p = el.selectionStart === el.value.length; el.value = formatarCnpj(el.value); if (p) el.selectionStart = el.selectionEnd = el.value.length; }); });
