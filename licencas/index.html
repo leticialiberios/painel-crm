@@ -176,6 +176,60 @@ footer div{max-width:1220px;margin:0 auto;padding:0 20px;display:flex;justify-co
 }
 
 /* ===== Opção B: barra lateral ===== */
+.lat-menu{display:flex;flex-direction:column;gap:3px;margin-bottom:18px}
+.lat-menu .menu{all:unset;box-sizing:border-box;cursor:pointer;padding:10px 12px;border-radius:6px;font-family:var(--titulo);font-weight:500;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.75)}
+.lat-menu .menu:hover{background:rgba(255,255,255,.07);color:#fff}
+.lat-menu .menu.on{background:var(--azul);color:#fff}
+.lat-menu .menu:focus-visible{outline:2px solid var(--ciano)}
+.lat-sec{font-family:var(--titulo);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.5);margin:0 12px 6px}
+.link-mini{all:unset;cursor:pointer;color:var(--azul);font-size:12.5px;margin-top:4px;display:inline-block}
+.link-mini:hover{text-decoration:underline}
+.link-mini:focus-visible{outline:2px solid var(--ciano)}
+input[readonly]{background:#F4F5FA;color:var(--mut)}
+.parecido{margin-top:6px;font-size:12.5px;background:var(--amarelo5);border-left:3px solid var(--amarelo);padding:6px 10px;border-radius:4px;color:#6B4A00}
+.parecido.erro{background:var(--redbg);border-color:var(--red);color:var(--red)}
+.parecido button{all:unset;cursor:pointer;color:var(--azul);font-weight:600;text-decoration:underline}
+.chk.full{grid-column:1/-1}
+.sem-cad{display:inline-block;margin-top:3px;font-size:11px;font-family:var(--titulo);letter-spacing:.04em;text-transform:uppercase;color:var(--red);border:1px solid var(--red);border-radius:4px;padding:0 6px}
+
+/* Clientes */
+.topo-acoes-cli{display:flex;gap:10px;flex:1;justify-content:flex-end;max-width:620px}
+.topo-acoes-cli input{flex:1}
+.cli-layout{display:grid;grid-template-columns:minmax(260px,340px) 1fr;gap:22px;align-items:start}
+.cli-lista-topo{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.cli-lista-topo h3{margin:0}
+#cli-lista{display:flex;flex-direction:column;gap:8px}
+.cli-item{all:unset;box-sizing:border-box;cursor:pointer;background:#fff;border:1px solid var(--ln);border-left:4px solid var(--azul5);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.cli-item:hover{border-left-color:var(--azul4)}
+.cli-item:focus-visible{outline:3px solid var(--ciano)}
+.cli-item.on{border-color:var(--azul);border-left-color:var(--azul);box-shadow:0 0 0 1px var(--azul)}
+.cli-item.inativo{opacity:.6}
+.cli-item .nome{font-weight:600;display:flex;gap:8px;align-items:center}
+.cli-item .sub{color:var(--mut);font-size:12.5px}
+.pontos{display:flex;gap:4px;margin-left:auto}
+.ponto{font-family:var(--titulo);font-size:11px;font-weight:600;border-radius:999px;padding:0 7px;line-height:18px}
+.ponto.v{background:var(--red);color:#fff} .ponto.a{box-shadow:inset 0 0 0 1.5px var(--red);color:var(--red)} .ponto.r{background:var(--amarelo);color:var(--marinho)}
+.cli-detalhe{background:#fff;border:1px solid var(--ln);border-radius:8px;overflow:hidden;min-height:200px}
+.det-topo{padding:20px 22px 0;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start}
+.det-topo h2{margin:0;font-size:22px;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.det-topo .sub{color:var(--mut)}
+.det-acoes{display:flex;gap:6px;flex-wrap:wrap}
+.det-abas{display:flex;gap:4px;padding:16px 22px 0;border-bottom:1px solid var(--ln)}
+.det-abas button{all:unset;cursor:pointer;padding:10px 14px;font-family:var(--titulo);font-weight:500;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);border-bottom:3px solid transparent;margin-bottom:-1px}
+.det-abas button.on{color:var(--azul);border-bottom-color:var(--azul)}
+.det-abas button:focus-visible{outline:2px solid var(--ciano)}
+.det-corpo{padding:18px 22px 22px}
+.det-corpo table{border-radius:6px}
+.det-corpo .acoes-topo{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;flex-wrap:wrap}
+.det-corpo .acoes-topo span{color:var(--mut);font-size:13px}
+tr.inativo td{color:var(--mut)}
+.nowrap{white-space:nowrap}
+.dl{display:grid;grid-template-columns:160px 1fr;gap:10px 18px;margin:0}
+.dl dt{color:var(--mut);font-size:13px}
+.dl dd{margin:0}
+.det-vazio{padding:40px 22px;text-align:center;color:var(--mut)}
+.det-vazio::before{content:"";display:block;width:56px;height:56px;margin:0 auto 12px;background:var(--simbolo) center/contain no-repeat}
+@media (max-width:1100px){ .cli-layout{grid-template-columns:1fr} }
 body{display:block}
 body.em-login .app{display:none}
 .app{display:grid;grid-template-columns:272px 1fr;min-height:100vh}
@@ -244,6 +298,12 @@ h3{font-size:14px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;c
   main{padding:20px 16px 30px}
   .topo-main h2{font-size:22px}
   .topo-main input{max-width:none}
+  .lat-menu{flex-direction:row;margin-bottom:10px}
+  .lat-sec{display:none}
+  .topo-acoes-cli{max-width:none;flex-wrap:wrap}
+  .dl{grid-template-columns:1fr;gap:2px}
+  .dl dd{margin-bottom:8px}
+  .det-topo,.det-abas,.det-corpo{padding-left:16px;padding-right:16px}
 }
 </style>
 </head>
@@ -274,6 +334,11 @@ h3{font-size:14px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;c
   <img class="lat-logo" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2296 100 708 100%22 fill=%22%23fff%22%3E%3Cpath d=%22M660.5,146.4c-5,0-7.8-3.4-7.8-8.6s2.8-8.7,7.8-8.7c4.1,0,6.7,2.4,7,5.9c0,0.1-0.1,0.2-0.2,0.2H665 c-0.1,0-0.2-0.1-0.3-0.2c-0.4-2.4-2-3.7-4.2-3.7c-3.3,0-4.8,2.4-4.8,6.5c0,4.2,1.5,6.5,4.8,6.5c2.6,0,4.2-1.5,4.4-4.2 c0-0.1,0.1-0.2,0.3-0.2h2.3c0.1,0,0.2,0.1,0.2,0.2C667.4,143.7,664.7,146.4,660.5,146.4z%22/%3E%3Cpath d=%22M676.9,146.4c-5,0-7.9-3.4-7.9-8.6c0-5.2,2.8-8.7,7.9-8.7c5.1,0,7.9,3.4,7.9,8.7S682,146.4,676.9,146.4z M676.9,144.3c3.2,0,4.8-2.3,4.8-6.5s-1.6-6.6-4.8-6.6c-3.3,0-4.9,2.4-4.9,6.6S673.7,144.3,676.9,144.3z%22/%3E%3Cpath d=%22M687,146c-0.1,0-0.2-0.1-0.2-0.2l0.1-7.3l-0.1-8.8c0-0.1,0.1-0.2,0.2-0.2h2.4c0.1,0,0.2,0.1,0.2,0.2l-0.1,2.6 c1-1.7,2.9-3.2,5.5-3.2c3.4,0,5.6,2.3,5.6,6.6v3.3l0.1,6.9c0,0.1-0.1,0.2-0.2,0.2H698c-0.1,0-0.2-0.1-0.2-0.2l0.1-6.9v-3.2 c0-3-1.4-4.3-3.5-4.3c-2.2,0-3.9,1.7-4.6,5v2.5l0.1,6.9c0,0.1-0.1,0.2-0.2,0.2H687z%22/%3E%3Cpath d=%22M709.9,146.4c-4.4,0-7.2-2-7.3-5.9c0-0.1,0.1-0.2,0.2-0.2h2.4c0.1,0,0.2,0.1,0.2,0.2c0.1,2.6,1.7,3.8,4.6,3.8 c2.4,0,4.1-1,4.1-2.9c0-4.3-11.2-0.8-11.2-7.5c0-3.2,2.6-4.9,6.6-4.9c3.8,0,6.7,1.6,6.9,5.1c0,0.1-0.1,0.2-0.2,0.2h-2.3 c-0.1,0-0.2-0.1-0.2-0.2c-0.2-2.1-1.8-3.1-4.2-3.1c-2.3,0-3.7,0.8-3.7,2.7c0,4.1,11.2,0.5,11.2,7.5 C716.9,144.5,713.9,146.4,709.9,146.4z%22/%3E%3Cpath d=%22M724.4,146.4c-3.4,0-5.6-2.3-5.6-6.6v-3.3l0-6.9c0-0.1,0.1-0.2,0.2-0.2h2.5c0.1,0,0.2,0.1,0.2,0.2l-0.1,6.9 v3.2c0,3,1.4,4.3,3.5,4.3c2.2,0,3.9-1.7,4.6-5v-2.5l0-6.9c0-0.1,0.1-0.2,0.2-0.2h2.5c0.1,0,0.2,0.1,0.2,0.2l-0.1,7.3l0,8.8 c0,0.1-0.1,0.2-0.2,0.2H730c-0.1,0-0.2-0.1-0.2-0.2l0.1-2.6C728.9,144.9,727,146.4,724.4,146.4z%22/%3E%3Cpath d=%22M735.6,146c-0.1,0-0.2-0.1-0.2-0.2l0.1-11.2l-0.1-10.9c0-0.1,0.1-0.2,0.2-0.2h2.5c0.1,0,0.2,0.1,0.2,0.2 l-0.1,10.9l0.1,11.2c0,0.1-0.1,0.2-0.2,0.2H735.6z%22/%3E%3Cpath d=%22M749.4,145.6c0,0.1-0.1,0.3-0.2,0.3c-0.7,0.2-1.5,0.4-2.3,0.4c-2.4,0-4.5-1.3-4.5-4.9l0-9.7h-1.9 c-0.1,0-0.2-0.1-0.2-0.2v-1.8c0-0.1,0.1-0.2,0.2-0.2h1.9l0-3.9c0-0.1,0.1-0.2,0.2-0.2h2.5c0.1,0,0.2,0.1,0.2,0.2l-0.1,3.9h3.9 c0.1,0,0.2,0.1,0.2,0.2v1.8c0,0.1-0.1,0.2-0.2,0.2h-3.9l0,9.7c0,2,0.7,2.6,2.1,2.6c0.7,0,1.3-0.1,1.8-0.2c0.1,0,0.2,0.1,0.2,0.2 V145.6z%22/%3E%3Cpath d=%22M757.8,146.4c-5,0-7.9-3.4-7.9-8.6c0-5.2,2.8-8.7,7.9-8.7c5.1,0,7.9,3.4,7.9,8.7S762.8,146.4,757.8,146.4z M757.8,144.3c3.2,0,4.8-2.3,4.8-6.5s-1.6-6.6-4.8-6.6c-3.3,0-4.9,2.4-4.9,6.6S754.5,144.3,757.8,144.3z%22/%3E%3Cpath d=%22M767.9,146c-0.1,0-0.2-0.1-0.2-0.2l0.1-8.2l-0.1-7.9c0-0.1,0.1-0.2,0.2-0.2h2.5c0.1,0,0.2,0.1,0.2,0.2 l-0.1,2.8c1.2-2.1,3.3-3.2,5.6-3.2c0.4,0,0.7,0,1,0.1c0.1,0,0.2,0.2,0.2,0.3v1.9c0,0.1-0.1,0.2-0.2,0.2c-0.3,0-0.6-0.1-1-0.1 c-2.8,0-5.3,1.7-5.6,5.4l0.1,8.7c0,0.1-0.1,0.2-0.2,0.2H767.9z%22/%3E%3Cpath d=%22M779.3,146c-0.1,0-0.2-0.1-0.2-0.2l0.1-8.3l-0.1-7.8c0-0.1,0.1-0.2,0.2-0.2h2.5c0.1,0,0.2,0.1,0.2,0.2 l-0.1,7.8l0.1,8.3c0,0.1-0.1,0.2-0.2,0.2H779.3z M779.3,127.6c-0.1,0-0.2-0.1-0.2-0.2v-2.8c0-0.1,0.1-0.2,0.2-0.2h2.5 c0.1,0,0.2,0.1,0.2,0.2v2.8c0,0.1-0.1,0.2-0.2,0.2H779.3z%22/%3E%3Cpath d=%22M796.6,146c-0.1,0-0.2-0.1-0.2-0.2l0.1-2.4c-1.1,1.9-2.9,3-5.3,3c-4.5,0-6.9-3.8-6.9-8.6s2.5-8.7,6.9-8.7 c2.3,0,4.1,1,5.2,2.8l-0.1-2.3c0-0.1,0.1-0.2,0.2-0.2h2.5c0.1,0,0.2,0.1,0.2,0.2l-0.1,7.9l0.1,8.2c0,0.1-0.1,0.2-0.2,0.2H796.6z M791.8,144.2c2.9,0,4.6-2.1,4.6-6.3c0-4-1.5-6.4-4.2-6.6c-0.1,0-0.4,0-0.5,0c-3,0.1-4.4,2.6-4.4,6.3 C787.2,141.5,788.7,144.2,791.8,144.2z%22/%3E%3Cpath d=%22M658.7,174.1c-3.4,0-5.6-2.3-5.6-6.6v-3.3l0-6.9c0-0.1,0.1-0.2,0.2-0.2h2.5c0.1,0,0.2,0.1,0.2,0.2l-0.1,6.9 v3.2c0,3,1.4,4.3,3.5,4.3c2.2,0,3.9-1.7,4.6-5v-2.5l0-6.9c0-0.1,0.1-0.2,0.2-0.2h2.5c0.1,0,0.2,0.1,0.2,0.2l-0.1,7.3l0,8.8 c0,0.1-0.1,0.2-0.2,0.2h-2.4c-0.1,0-0.2-0.1-0.2-0.2l0.1-2.6C663.2,172.5,661.3,174.1,658.7,174.1z%22/%3E%3Cpath d=%22M669.8,173.7c-0.1,0-0.2-0.1-0.2-0.2l0.1-8.2l-0.1-7.9c0-0.1,0.1-0.2,0.2-0.2h2.5c0.1,0,0.2,0.1,0.2,0.2 l-0.1,2.8c1.2-2.1,3.3-3.2,5.6-3.2c0.4,0,0.7,0,1,0.1c0.1,0,0.2,0.2,0.2,0.3v1.9c0,0.1-0.1,0.2-0.2,0.2c-0.3,0-0.6-0.1-1-0.1 c-2.8,0-5.3,1.7-5.6,5.4l0.1,8.7c0,0.1-0.1,0.2-0.2,0.2H669.8z%22/%3E%3Cpath d=%22M689,174c-2.3,0-4.1-1-5.2-2.8l0.1,2.3c0,0.1-0.1,0.2-0.2,0.2h-2.5c-0.1,0-0.2-0.1-0.2-0.2l0.1-12.1l-0.1-9.9 c0-0.1,0.1-0.2,0.2-0.2h2.5c0.1,0,0.2,0.1,0.2,0.2l0,8.3c1.1-1.8,2.9-2.9,5.2-2.9c4.5,0,6.9,3.7,6.9,8.6 C695.9,170.1,693.3,174,689,174z M688.2,171.8c3.2,0,4.7-2.6,4.7-6.3c0-3.9-1.5-6.6-4.6-6.6c-2.8,0-4.6,2.1-4.6,6.2 C683.6,169.4,685.3,171.8,688.2,171.8z%22/%3E%3Cpath d=%22M709.7,173.7c-0.1,0-0.2-0.1-0.2-0.2l0.1-2.4c-1.1,1.9-2.9,3-5.3,3c-4.5,0-6.9-3.8-6.9-8.6 c0-4.8,2.5-8.7,6.9-8.7c2.3,0,4.1,1,5.2,2.8l-0.1-2.3c0-0.1,0.1-0.2,0.2-0.2h2.5c0.1,0,0.2,0.1,0.2,0.2l-0.1,7.9l0.1,8.2 c0,0.1-0.1,0.2-0.2,0.2H709.7z M705,171.8c2.9,0,4.6-2.1,4.6-6.3c0-4-1.5-6.4-4.2-6.6c-0.1,0-0.4,0-0.5,0c-3,0.1-4.4,2.6-4.4,6.3 C700.3,169.2,701.8,171.8,705,171.8z%22/%3E%3Cpath d=%22M715.1,173.7c-0.1,0-0.2-0.1-0.2-0.2l0.1-7.3l-0.1-8.8c0-0.1,0.1-0.2,0.2-0.2h2.4c0.1,0,0.2,0.1,0.2,0.2 l-0.1,2.6c1-1.7,2.9-3.2,5.5-3.2c3.4,0,5.6,2.3,5.6,6.6v3.3l0.1,6.9c0,0.1-0.1,0.2-0.2,0.2h-2.5c-0.1,0-0.2-0.1-0.2-0.2l0.1-6.9 v-3.2c0-3-1.4-4.3-3.5-4.3c-2.2,0-3.9,1.7-4.6,5v2.5l0.1,6.9c0,0.1-0.1,0.2-0.2,0.2H715.1z%22/%3E%3Cpath d=%22M730.4,155.7c-0.1,0-0.3,0-0.3-0.1l-0.5-1.1c-0.1-0.1,0-0.2,0.1-0.3l7.1-3.3c0.1-0.1,0.2,0,0.3,0.1l0.7,1.9 c0,0.1,0,0.3-0.2,0.3L730.4,155.7z M731.6,173.7c-0.1,0-0.2-0.1-0.2-0.2l0.1-8.3l-0.1-7.8c0-0.1,0.1-0.2,0.2-0.2h2.5 c0.1,0,0.2,0.1,0.2,0.2l-0.1,7.8l0.1,8.3c0,0.1-0.1,0.2-0.2,0.2H731.6z%22/%3E%3Cpath d=%22M743.8,174c-4.4,0-7.2-2-7.3-5.9c0-0.1,0.1-0.2,0.2-0.2h2.4c0.1,0,0.2,0.1,0.2,0.2c0.1,2.6,1.7,3.8,4.6,3.8 c2.4,0,4.1-1,4.1-2.9c0-4.3-11.2-0.8-11.2-7.5c0-3.2,2.6-4.9,6.6-4.9c3.8,0,6.7,1.6,6.9,5.1c0,0.1-0.1,0.2-0.2,0.2h-2.3 c-0.1,0-0.2-0.1-0.2-0.2c-0.2-2.1-1.8-3.1-4.2-3.1c-2.3,0-3.7,0.8-3.7,2.7c0,4.1,11.2,0.5,11.2,7.5 C750.8,172.2,747.8,174,743.8,174z%22/%3E%3Cpath d=%22M760.7,173.3c0,0.1-0.1,0.3-0.2,0.3c-0.7,0.2-1.5,0.4-2.3,0.4c-2.4,0-4.5-1.3-4.5-4.9l0-9.7h-1.9 c-0.1,0-0.2-0.1-0.2-0.2v-1.8c0-0.1,0.1-0.2,0.2-0.2h1.9l0-3.9c0-0.1,0.1-0.2,0.2-0.2h2.5c0.1,0,0.2,0.1,0.2,0.2l-0.1,3.9h3.9 c0.1,0,0.2,0.1,0.2,0.2v1.8c0,0.1-0.1,0.2-0.2,0.2h-3.9l0,9.7c0,2,0.7,2.6,2.1,2.6c0.7,0,1.3-0.1,1.8-0.2c0.1,0,0.2,0.1,0.2,0.2 V173.3z%22/%3E%3Cpath d=%22M762.9,173.7c-0.1,0-0.2-0.1-0.2-0.2l0.1-8.3l-0.1-7.8c0-0.1,0.1-0.2,0.2-0.2h2.5c0.1,0,0.2,0.1,0.2,0.2 l-0.1,7.8l0.1,8.3c0,0.1-0.1,0.2-0.2,0.2H762.9z M762.9,155.3c-0.1,0-0.2-0.1-0.2-0.2v-2.8c0-0.1,0.1-0.2,0.2-0.2h2.5 c0.1,0,0.2,0.1,0.2,0.2v2.8c0,0.1-0.1,0.2-0.2,0.2H762.9z%22/%3E%3Cpath d=%22M775.5,174.1c-5,0-7.8-3.4-7.8-8.6c0-5.2,2.8-8.7,7.8-8.7c4.1,0,6.7,2.4,7,5.9c0,0.1-0.1,0.2-0.2,0.2h-2.3 c-0.1,0-0.2-0.1-0.3-0.2c-0.4-2.4-2-3.7-4.2-3.7c-3.3,0-4.8,2.4-4.8,6.5c0,4.2,1.5,6.5,4.8,6.5c2.6,0,4.2-1.5,4.4-4.2 c0-0.1,0.1-0.2,0.3-0.2h2.3c0.1,0,0.2,0.1,0.2,0.2C782.5,171.4,779.8,174.1,775.5,174.1z%22/%3E%3Cpath d=%22M796.5,173.7c-0.1,0-0.2-0.1-0.2-0.2l0.1-2.4c-1.1,1.9-2.9,3-5.3,3c-4.5,0-6.9-3.8-6.9-8.6 c0-4.8,2.5-8.7,6.9-8.7c2.3,0,4.1,1,5.2,2.8l-0.1-2.3c0-0.1,0.1-0.2,0.2-0.2h2.5c0.1,0,0.2,0.1,0.2,0.2l-0.1,7.9l0.1,8.2 c0,0.1-0.1,0.2-0.2,0.2H796.5z M791.7,171.8c2.9,0,4.6-2.1,4.6-6.3c0-4-1.5-6.4-4.2-6.6c-0.1,0-0.4,0-0.5,0 c-3,0.1-4.4,2.6-4.4,6.3C787.1,169.2,788.6,171.8,791.7,171.8z%22/%3E%3Cpath d=%22M161.4,134.8v-30.3h-30.3c-16.7,0-30.3,13.6-30.3,30.3h0v30.3h30.3v-30.3H161.4z%22/%3E%3Cpath d=%22M161.4,134.8v30.3h-30.3v30.3h30.3v0c16.7,0,30.3-13.6,30.3-30.3v-30.3H161.4z%22/%3E%3Cpath d=%22M222,174V126h15.1l0.5,4.3c2.2-1.6,4.6-2.8,7.3-3.8c2.7-1,5.6-1.5,8.7-1.5c3.2,0,5.8,0.5,7.6,1.5 c1.8,1,3.2,2.4,4.3,4.1c2.2-1.6,4.7-3,7.6-4c2.8-1,6.1-1.6,9.9-1.6c5.6,0,9.7,1.5,12.4,4.4c2.6,2.9,4,7.3,4,13.3V174h-16.1v-29.5 c0-2.6-0.6-4.5-1.7-5.7c-1.1-1.2-2.9-1.8-5.4-1.8c-1.6,0-3.1,0.3-4.6,1c-1.5,0.6-2.7,1.5-3.8,2.7c0.1,0.7,0.2,1.5,0.3,2.1 c0,0.7,0.1,1.5,0.1,2.4V174h-15.2v-29.7c0-2.4-0.4-4.3-1.3-5.5c-0.8-1.2-2.5-1.8-4.8-1.8c-1.7,0-3.3,0.4-4.8,1.3 c-1.5,0.9-2.8,1.9-4.1,3V174H222z%22/%3E%3Cpath d=%22M322.6,175c-3,0-5.9-0.5-8.5-1.6c-2.6-1.1-4.7-2.8-6.2-5c-1.6-2.3-2.3-5.1-2.3-8.5c0-4.9,1.7-8.8,5-11.6 c3.3-2.8,8.4-4.2,15.1-4.2H339V143c0-2.4-0.8-4.2-2.4-5.2c-1.6-1-4.7-1.6-9.1-1.6c-5.5,0-10.9,0.8-16.1,2.5v-10.5 c2.4-0.9,5.3-1.7,8.7-2.3c3.4-0.6,7-0.9,10.8-0.9c7.4,0,13.3,1.5,17.5,4.6c4.2,3,6.3,7.9,6.3,14.5v30h-14.3l-0.8-4.1 c-1.8,1.6-4,2.9-6.7,3.8C330.1,174.6,326.7,175,322.6,175z M327.8,165c2.6,0,4.8-0.4,6.7-1.3c1.9-0.9,3.4-2,4.6-3.3v-6.8h-11.6 c-4.8,0-7.2,1.9-7.2,5.8c0,1.8,0.6,3.1,1.8,4.2C323.3,164.5,325.2,165,327.8,165z%22/%3E%3Cpath d=%22M364.5,174V126h15.2l0.5,4.2c2-1.4,4.4-2.6,7.4-3.6c3-1,6.2-1.6,9.5-1.6c6.2,0,10.7,1.5,13.6,4.5 c2.8,3,4.3,7.6,4.3,13.8V174h-16.3v-29.5c0-2.7-0.6-4.6-1.7-5.8c-1.1-1.1-3.2-1.7-6.2-1.7c-1.8,0-3.5,0.4-5.4,1.2 c-1.8,0.8-3.3,1.8-4.6,3V174H364.5z%22/%3E%3Cpath d=%22M424.8,174V126H440l0.5,4.2c2-1.4,4.4-2.6,7.4-3.6c3-1,6.2-1.6,9.5-1.6c6.2,0,10.7,1.5,13.6,4.5 c2.8,3,4.3,7.6,4.3,13.8V174H459v-29.5c0-2.7-0.6-4.6-1.7-5.8c-1.1-1.1-3.2-1.7-6.2-1.7c-1.8,0-3.5,0.4-5.4,1.2 c-1.8,0.8-3.3,1.8-4.6,3V174H424.8z%22/%3E%3Cpath d=%22M498.7,175c-3,0-5.9-0.5-8.5-1.6c-2.6-1.1-4.7-2.8-6.2-5c-1.6-2.3-2.3-5.1-2.3-8.5c0-4.9,1.7-8.8,5-11.6 c3.3-2.8,8.4-4.2,15.1-4.2h13.4V143c0-2.4-0.8-4.2-2.4-5.2c-1.6-1-4.7-1.6-9.1-1.6c-5.5,0-10.9,0.8-16.1,2.5v-10.5 c2.4-0.9,5.3-1.7,8.7-2.3c3.4-0.6,7-0.9,10.8-0.9c7.4,0,13.3,1.5,17.5,4.6c4.2,3,6.3,7.9,6.3,14.5v30h-14.3l-0.8-4.1 c-1.8,1.6-4,2.9-6.7,3.8C506.1,174.6,502.7,175,498.7,175z M503.8,165c2.6,0,4.8-0.4,6.7-1.3c1.9-0.9,3.4-2,4.6-3.3v-6.8h-11.6 c-4.8,0-7.2,1.9-7.2,5.8c0,1.8,0.6,3.1,1.8,4.2C499.4,164.5,501.3,165,503.8,165z%22/%3E%3Cpath d=%22M540.5,174V126h15.5l0.5,4.5c2.1-1.3,4.7-2.4,7.8-3.5c3.1-1,6.2-1.7,9.3-2v12.3c-1.8,0.2-3.7,0.5-5.8,1 c-2.1,0.4-4.2,1-6.1,1.6c-1.9,0.6-3.6,1.3-4.9,1.9V174H540.5z%22/%3E%3Cpath d=%22M603.6,175c-8.4,0-15.1-2.1-20.2-6.2c-5.1-4.2-7.6-10.4-7.6-18.8c0-7.6,2.1-13.7,6.3-18.3 c4.2-4.5,10.5-6.8,18.9-6.8c7.6,0,13.6,2,17.7,5.9c4.2,3.9,6.3,9.2,6.3,15.8v8.6h-34.1c0.7,3.2,2.5,5.4,5.2,6.6 c2.7,1.3,6.5,1.9,11.2,1.9c2.6,0,5.3-0.2,8.1-0.7c2.7-0.5,5-1.1,6.8-1.8v10.6c-2.3,1.1-5,1.9-8.2,2.4 C610.9,174.8,607.4,175,603.6,175z M590.9,145.8h19.9v-2.1c0-2.4-0.7-4.2-2.1-5.6c-1.4-1.4-3.8-2.1-7.2-2.1 c-3.9,0-6.7,0.8-8.2,2.4C591.7,140,590.9,142.5,590.9,145.8z%22/%3E%3Crect x=%22638.9%22 y=%22125%22 width=%222.5%22 height=%2250.1%22/%3E%3C/svg%3E" alt="Mannare Consultoria Urbanística">
   <div class="lat-tit">Controle de<br>Licenças</div>
   <button class="btn pri lat-nova" id="bt-nova">+ Nova licença</button>
+  <nav class="lat-menu" aria-label="Seções">
+    <button class="menu on" data-view="licencas">Licenças</button>
+    <button class="menu" data-view="clientes">Clientes</button>
+  </nav>
+  <div class="lat-sec" id="lat-sec-sit">Situação</div>
   <nav class="lat-filtros" aria-label="Filtrar por situação">
     <button class="kpi t" data-f=""><span>Todas</span><b id="k-t">0</b></button>
     <button class="kpi v" data-f="vencida"><span>Vencidas</span><b id="k-v">0</b></button>
@@ -293,6 +358,7 @@ h3{font-size:14px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;c
   <div id="msg-versao" class="aviso warn hide"></div>
   <div id="msg-aviso" class="aviso warn hide"></div>
 
+  <div id="view-licencas">
   <div class="topo-main">
     <div>
       <h2>Licenças dos clientes</h2>
@@ -314,6 +380,28 @@ h3{font-size:14px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;c
   </div>
 
   <div id="lista"><div class="carregando">Carregando…</div></div>
+  </div>
+
+  <div id="view-clientes" class="hide">
+    <div class="topo-main">
+      <div>
+        <h2>Clientes</h2>
+        <span>Grupos, SPEs e obras. É daqui que saem os nomes usados nas licenças.</span>
+      </div>
+      <div class="topo-acoes-cli">
+        <input type="search" id="c-busca" placeholder="Buscar grupo, obra ou CNPJ…">
+        <button class="btn pri" id="bt-novo-grupo">+ Novo grupo</button>
+      </div>
+    </div>
+    <div id="cli-aviso" class="aviso warn hide"></div>
+    <div class="cli-layout">
+      <div class="cli-lista-col">
+        <div class="cli-lista-topo"><h3>Grupos</h3><label class="chk"><input type="checkbox" id="c-inativos"> Mostrar inativos</label></div>
+        <div id="cli-lista"></div>
+      </div>
+      <section id="cli-detalhe" class="cli-detalhe"></section>
+    </div>
+  </div>
 
   <footer id="rodape" class="hide"><span>Mannare</span><span>Painel de Licenças</span></footer>
 </main>
@@ -325,9 +413,11 @@ h3{font-size:14px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;c
     <h2 id="md-lic-tit">Nova licença</h2>
     <input type="hidden" name="id">
     <div class="grid">
-      <div class="campo"><label>Cliente *</label><input name="cliente" list="dl-clientes" required></div>
-      <div class="campo"><label>Empreendimento / SPE</label><input name="empreendimento" list="dl-emps"></div>
-      <div class="campo"><label>CNPJ</label><input name="cnpj" placeholder="00.000.000/0000-00"></div>
+      <div class="campo"><label for="lic-grupo">Grupo (cliente) *</label><select name="grupo_id" id="lic-grupo" required></select>
+        <button type="button" class="link-mini" data-novo="grupo">+ Cadastrar grupo</button></div>
+      <div class="campo"><label for="lic-spe">SPE / obra *</label><select name="spe_id" id="lic-spe" required></select>
+        <button type="button" class="link-mini" data-novo="spe">+ Cadastrar SPE/obra</button></div>
+      <div class="campo"><label for="lic-cnpj">CNPJ da SPE</label><input id="lic-cnpj" readonly tabindex="-1" placeholder="preenchido pelo cadastro"></div>
       <div class="campo"><label>Tipo de licença *</label><input name="tipo" list="dl-tipos" required></div>
       <div class="campo"><label>Número da licença</label><input name="numero"></div>
       <div class="campo"><label>Órgão emissor</label><input name="orgao" list="dl-orgaos"></div>
@@ -397,6 +487,70 @@ h3{font-size:14px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;c
   </form>
 </div>
 
+<!-- Modal grupo -->
+<div class="fundo hide" id="md-grupo">
+  <form class="modal" id="fm-grupo" novalidate>
+    <h2 id="md-grupo-tit">Novo grupo</h2>
+    <input type="hidden" name="id">
+    <div class="grid">
+      <div class="campo full"><label>Nome do grupo *</label><input name="nome" required autocomplete="off">
+        <div class="parecido hide" id="grupo-parecido"></div></div>
+      <div class="campo"><label>CNPJ da holding</label><input name="cnpj" data-cnpj placeholder="00.000.000/0000-00" inputmode="numeric"></div>
+      <div class="campo"><label>Contato</label><input name="contato"></div>
+      <div class="campo"><label>E-mail</label><input name="email" type="email"></div>
+      <div class="campo"><label>Telefone</label><input name="telefone" inputmode="tel"></div>
+      <div class="campo full"><label>Observações</label><textarea name="obs" rows="2"></textarea></div>
+      <label class="chk full bloco-ativo"><input type="checkbox" name="ativo"> Ativo (aparece nas listas da licença)</label>
+    </div>
+    <div id="grupo-erro" class="aviso err hide" style="margin-top:12px"></div>
+    <div class="rodape">
+      <button type="button" class="btn dan esq hide" id="bt-grupo-excluir">Excluir</button>
+      <button type="button" class="btn" data-fechar>Cancelar</button>
+      <button type="submit" class="btn pri">Salvar grupo</button>
+    </div>
+  </form>
+</div>
+
+<!-- Modal SPE/obra -->
+<div class="fundo hide" id="md-spe">
+  <form class="modal" id="fm-spe" novalidate>
+    <h2 id="md-spe-tit">Nova SPE / obra</h2>
+    <input type="hidden" name="id">
+    <div class="grid">
+      <div class="campo full"><label>Grupo *</label><select name="grupo_id" required></select></div>
+      <div class="campo"><label>Nome da obra *</label><input name="obra" required autocomplete="off">
+        <div class="parecido hide" id="spe-parecido"></div></div>
+      <div class="campo"><label>CNPJ da SPE</label><input name="cnpj" data-cnpj placeholder="00.000.000/0000-00" inputmode="numeric">
+        <div class="parecido hide" id="spe-cnpj-aviso"></div></div>
+      <div class="campo"><label>Razão social</label><input name="razao_social"></div>
+      <div class="campo"><label>Município</label><input name="municipio" list="dl-municipios"></div>
+      <div class="campo full"><label>Observações</label><textarea name="obs" rows="2"></textarea></div>
+      <label class="chk full bloco-ativo"><input type="checkbox" name="ativo"> Ativa (aparece nas listas da licença)</label>
+    </div>
+    <div id="spe-erro" class="aviso err hide" style="margin-top:12px"></div>
+    <div class="rodape">
+      <button type="button" class="btn dan esq hide" id="bt-spe-excluir">Excluir</button>
+      <button type="button" class="btn" data-fechar>Cancelar</button>
+      <button type="submit" class="btn pri">Salvar SPE/obra</button>
+    </div>
+  </form>
+</div>
+
+<!-- Modal mesclar -->
+<div class="fundo hide" id="md-mesclar">
+  <form class="modal" id="fm-mesclar" novalidate>
+    <h2>Mesclar grupos</h2>
+    <p>Use quando o mesmo cliente foi cadastrado duas vezes. As SPEs/obras e as licenças de
+      <b id="mesclar-origem"></b> passam para o grupo escolhido abaixo, e <b id="mesclar-origem2"></b> é apagado.</p>
+    <div class="campo"><label>Manter o grupo *</label><select name="destino"></select></div>
+    <div id="mesclar-erro" class="aviso err hide" style="margin-top:12px"></div>
+    <div class="rodape">
+      <button type="button" class="btn" data-fechar>Cancelar</button>
+      <button type="submit" class="btn pri">Mesclar</button>
+    </div>
+  </form>
+</div>
+
 <!-- Modal configurações -->
 <div class="fundo hide" id="md-cfg">
   <form class="modal" id="fm-cfg" novalidate>
@@ -416,16 +570,15 @@ h3{font-size:14px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;c
   </form>
 </div>
 
-<datalist id="dl-clientes"></datalist>
-<datalist id="dl-emps"></datalist>
 <datalist id="dl-resp"></datalist>
+<datalist id="dl-municipios"></datalist>
 <datalist id="dl-tipos"></datalist>
 <datalist id="dl-orgaos"></datalist>
 
 <script>
 (function(){
 'use strict';
-const VERSAO_ESPERADA = 2;
+const VERSAO_ESPERADA = 3;
 const PREPARO_PADRAO = 30;
 const CHAVE_LOCAL = 'mannare_licencas_acesso';
 const TIPOS = [
@@ -442,7 +595,8 @@ const $ = function(s,el){ return (el||document).querySelector(s); };
 const $$ = function(s,el){ return Array.prototype.slice.call((el||document).querySelectorAll(s)); };
 const esc = function(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); };
 
-let acesso = null, dados = { licencas:[], config:{}, aviso_ativo:null, hoje:'' }, filtroKpi = '';
+let acesso = null, dados = { licencas:[], grupos:[], spes:[], config:{}, aviso_ativo:null, hoje:'' }, filtroKpi = '';
+let vista = 'licencas', grupoSel = null, abaDet = 'spes';
 
 function lerAcesso(){ try { return JSON.parse(localStorage.getItem(CHAVE_LOCAL)||'null'); } catch(e){ return null; } }
 function gravarAcesso(a){ try { a ? localStorage.setItem(CHAVE_LOCAL, JSON.stringify(a)) : localStorage.removeItem(CHAVE_LOCAL); } catch(e){} }
@@ -472,6 +626,7 @@ function avisoVersao(v){
 }
 
 function toast(t){
+  $$('.toast').forEach(function(x){ x.remove(); });
   const d = document.createElement('div'); d.className='toast'; d.textContent=t;
   document.body.appendChild(d); setTimeout(function(){ d.remove(); }, 3200);
 }
@@ -578,6 +733,7 @@ async function entrar(){
 async function carregar(){
   const j = await api('listar');
   dados = j;
+  dados.grupos = j.grupos || []; dados.spes = j.spes || [];
   $('#tela-login').classList.add('hide');
   $('#tela-painel').classList.remove('hide');
   $('#topo-acoes').classList.remove('hide');
@@ -586,6 +742,8 @@ async function carregar(){
   avisoConfig();
   preencherListas();
   render();
+  renderClientes();
+  atualizarFormLicencaAberto();
 }
 
 function avisoConfig(){
@@ -603,8 +761,8 @@ function unicos(campo){
 function opcoes(lista){ return lista.map(function(v){ return '<option value="'+esc(v)+'"></option>'; }).join(''); }
 
 function preencherListas(){
-  $('#dl-clientes').innerHTML = opcoes(unicos('cliente'));
-  $('#dl-emps').innerHTML = opcoes(unicos('empreendimento'));
+  const munis = {}; dados.spes.forEach(function(x){ if (x.municipio) munis[x.municipio] = 1; });
+  $('#dl-municipios').innerHTML = opcoes(['Fortaleza'].concat(Object.keys(munis).filter(function(m){ return m !== 'Fortaleza'; })));
   $('#dl-resp').innerHTML = opcoes(unicos('responsavel'));
   const tipos = TIPOS.concat(unicos('tipo').filter(function(t){ return TIPOS.indexOf(t)<0; }));
   $('#dl-tipos').innerHTML = opcoes(tipos);
@@ -663,7 +821,7 @@ function render(){
     const doc = l.documento_url && /^https?:\/\//i.test(l.documento_url) ? ' · <a href="'+esc(l.documento_url)+'" target="_blank" rel="noopener">documento</a>' : '';
     return '<tr data-id="'+esc(l.id)+'">'+
       '<td><span class="badge '+rot[1]+'">'+esc(rot[0])+'</span></td>'+
-      '<td><b>'+esc(l.cliente)+'</b>'+(l.empreendimento?'<div class="sub">'+esc(l.empreendimento)+'</div>':'')+(l.cnpj?'<div class="sub">'+esc(l.cnpj)+'</div>':'')+'</td>'+
+      '<td><b>'+esc(l.cliente)+'</b>'+(l.empreendimento?'<div class="sub">'+esc(l.empreendimento)+'</div>':'')+(l.cnpj?'<div class="sub">'+esc(l.cnpj)+'</div>':'')+(l.spe_id?'':'<div><span class="sem-cad" title="Edite a licença e escolha a SPE/obra">Completar SPE/obra</span></div>')+'</td>'+
       '<td>'+esc(l.tipo)+'<div class="sub">'+(l.numero?'nº '+esc(l.numero):'sem número')+(l.orgao?' · '+esc(l.orgao):'')+doc+'</div></td>'+
       '<td data-rotulo="Protocolar até">'+celulaProtocolo(l, e, p)+'</td>'+
       '<td data-rotulo="Validade">'+celulaValidade(l, e, p)+'</td>'+
@@ -703,6 +861,295 @@ function renderDestaques(){
   }).join('');
 }
 
+/* ---------- Cadastro de clientes ---------- */
+const IGNORAR_NOME = ['grupo','ltda','sa','s','a','me','eireli','spe','de','da','do','das','dos','e'];
+/** Mesma regra do backend: ignora acentos, maiúsculas, pontuação, "Grupo", "Ltda", "S/A"… */
+function chaveNome(t){
+  return String(t||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()
+    .replace(/[^a-z0-9]+/g,' ').split(' ').filter(function(p){ return p && IGNORAR_NOME.indexOf(p) < 0; }).join(' ');
+}
+function distancia(a, b){
+  const m = a.length, n = b.length; if (!m) return n; if (!n) return m;
+  let ant = []; for (let j = 0; j <= n; j++) ant[j] = j;
+  for (let i = 1; i <= m; i++){
+    const cur = [i];
+    for (let j = 1; j <= n; j++) cur[j] = Math.min(ant[j]+1, cur[j-1]+1, ant[j-1]+(a[i-1]===b[j-1]?0:1));
+    ant = cur;
+  }
+  return ant[n];
+}
+/** Nomes iguais (bloqueia) ou parecidos (avisa). */
+function compararNome(nome, lista, campo, idAtual){
+  const k = chaveNome(nome); if (!k) return { igual:null, parecidos:[] };
+  let igual = null; const parecidos = [];
+  lista.forEach(function(x){
+    if (x.id === idAtual) return;
+    const kx = chaveNome(x[campo]); if (!kx) return;
+    if (kx === k) igual = x;
+    else if (distancia(k, kx) <= Math.max(1, Math.floor(Math.min(k.length, kx.length) / 5)) ||
+      (k.length >= 4 && kx.length >= 4 && (kx.indexOf(k) >= 0 || k.indexOf(kx) >= 0))) parecidos.push(x);
+  });
+  return { igual:igual, parecidos:parecidos };
+}
+function digitos(t){ return String(t||'').replace(/\D/g,''); }
+function cnpjValido(t){
+  const d = digitos(t);
+  if (d.length !== 14 || /^(\d)\1+$/.test(d)) return false;
+  const calc = function(n){ let soma = 0, peso = n - 7; for (let i = 0; i < n; i++){ soma += Number(d[i]) * peso--; if (peso < 2) peso = 9; } const r = soma % 11; return r < 2 ? 0 : 11 - r; };
+  return calc(12) === Number(d[12]) && calc(13) === Number(d[13]);
+}
+function formatarCnpj(t){
+  const d = digitos(t).slice(0,14);
+  return d.replace(/^(\d{2})(\d)/,'$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3').replace(/\.(\d{3})(\d)/,'.$1/$2').replace(/(\d{4})(\d)/,'$1-$2');
+}
+function grupoPorId(id){ return dados.grupos.filter(function(g){ return g.id === id; })[0]; }
+function spePorId(id){ return dados.spes.filter(function(x){ return x.id === id; })[0]; }
+function ordenarNome(campo){ return function(a, b){ return String(a[campo]).localeCompare(String(b[campo]), 'pt-BR'); }; }
+
+function preencherSelGrupo(sel, valor, comVazio){
+  const lista = dados.grupos.filter(function(g){ return g.ativo || g.id === valor; }).sort(ordenarNome('nome'));
+  sel.innerHTML = (comVazio ? '<option value="">Escolha o grupo…</option>' : '') +
+    lista.map(function(g){ return '<option value="'+esc(g.id)+'">'+esc(g.nome)+(g.ativo?'':' (inativo)')+'</option>'; }).join('');
+  sel.value = valor || '';
+}
+function preencherSelSpe(sel, grupoId, valor){
+  if (!grupoId){ sel.innerHTML = '<option value="">Escolha primeiro o grupo</option>'; sel.disabled = true; return; }
+  const lista = dados.spes.filter(function(x){ return x.grupo_id === grupoId && (x.ativo || x.id === valor); }).sort(ordenarNome('obra'));
+  sel.disabled = false;
+  sel.innerHTML = '<option value="">'+(lista.length ? 'Escolha a SPE/obra…' : 'Este grupo ainda não tem SPE/obra')+'</option>' +
+    lista.map(function(x){ return '<option value="'+esc(x.id)+'">'+esc(x.obra)+(x.cnpj?' · '+esc(x.cnpj):'')+(x.ativo?'':' (inativa)')+'</option>'; }).join('');
+  sel.value = valor || '';
+  if (!valor && lista.length === 1) sel.value = lista[0].id;
+}
+function mostrarCnpjLic(){
+  const f = $('#fm-lic'), s = spePorId(f.spe_id.value);
+  $('#lic-cnpj').value = s ? (s.cnpj || 'SPE sem CNPJ cadastrado') : '';
+}
+/** Depois de recarregar os dados, mantém o formulário da licença aberto em dia. */
+function atualizarFormLicencaAberto(){
+  if ($('#md-lic').classList.contains('hide')) return;
+  const f = $('#fm-lic'), g = f.grupo_id.value, sp = f.spe_id.value;
+  preencherSelGrupo(f.grupo_id, g, true);
+  preencherSelSpe(f.spe_id, f.grupo_id.value, sp);
+  mostrarCnpjLic();
+}
+
+function statusLic(lista){
+  const c = { v:0, a:0, r:0, total:0 };
+  lista.forEach(function(l){ const e = estado(l); if (e === 'historico') return; c.total++;
+    if (e === 'vencida') c.v++; else if (e === 'atrasado') c.a++; else if (e === 'preparar') c.r++; });
+  return c;
+}
+function pontos(c){
+  return '<span class="pontos">'+(c.v?'<span class="ponto v" title="Vencidas">'+c.v+'</span>':'')+
+    (c.a?'<span class="ponto a" title="Protocolo atrasado">'+c.a+'</span>':'')+
+    (c.r?'<span class="ponto r" title="Preparar documentação">'+c.r+'</span>':'')+'</span>';
+}
+
+function renderClientes(){
+  const aviso = $('#cli-aviso');
+  if (!Array.isArray(dados.grupos) || (dados.versao && dados.versao < 3)){
+    aviso.textContent = 'Para usar o cadastro de clientes, publique a versão 3 do Apps Script.'; aviso.classList.remove('hide');
+  } else aviso.classList.add('hide');
+  const busca = chaveNome($('#c-busca').value), buscaNum = digitos($('#c-busca').value);
+  const inat = $('#c-inativos').checked;
+  const lista = dados.grupos.filter(function(g){
+    if (!g.ativo && !inat && g.id !== grupoSel) return false;
+    if (!busca && !buscaNum) return true;
+    const spes = dados.spes.filter(function(x){ return x.grupo_id === g.id; });
+    const texto = chaveNome([g.nome].concat(spes.map(function(x){ return x.obra+' '+x.razao_social; })).join(' '));
+    const nums = [g.cnpj].concat(spes.map(function(x){ return x.cnpj; })).map(digitos).join(' ');
+    return (busca && texto.indexOf(busca) >= 0) || (buscaNum.length >= 3 && nums.indexOf(buscaNum) >= 0);
+  }).sort(ordenarNome('nome'));
+  if (grupoSel && !grupoPorId(grupoSel)) grupoSel = null;
+  if (!grupoSel && lista.length) grupoSel = lista[0].id;
+  $('#cli-lista').innerHTML = lista.length ? lista.map(function(g){
+    const nSpe = dados.spes.filter(function(x){ return x.grupo_id === g.id && x.ativo; }).length;
+    const c = statusLic(dados.licencas.filter(function(l){ return l.grupo_id === g.id; }));
+    return '<button class="cli-item'+(g.id === grupoSel ? ' on' : '')+(g.ativo ? '' : ' inativo')+'" data-grupo="'+esc(g.id)+'">'+
+      '<span class="nome">'+esc(g.nome)+(g.ativo?'':' <span class="badge b-h">Inativo</span>')+pontos(c)+'</span>'+
+      '<span class="sub">'+nSpe+(nSpe===1?' obra':' obras')+' · '+c.total+(c.total===1?' licença ativa':' licenças ativas')+'</span>'+
+      (g.cnpj?'<span class="sub">'+esc(g.cnpj)+'</span>':'')+
+    '</button>';
+  }).join('') : '<div class="dest-vazio"><span>'+(dados.grupos.length ? 'Nenhum grupo encontrado.' : 'Nenhum cliente cadastrado. Clique em <b>+ Novo grupo</b>.')+'</span></div>';
+  renderDetalhe();
+}
+
+function renderDetalhe(){
+  const el = $('#cli-detalhe'), g = grupoPorId(grupoSel);
+  if (!g){ el.innerHTML = '<div class="det-vazio">Escolha um grupo para ver as SPEs e obras.</div>'; return; }
+  const spes = dados.spes.filter(function(x){ return x.grupo_id === g.id; }).sort(function(a, b){ return (b.ativo - a.ativo) || String(a.obra).localeCompare(String(b.obra), 'pt-BR'); });
+  const lics = dados.licencas.filter(function(l){ return l.grupo_id === g.id; });
+  let corpo;
+  if (abaDet === 'spes'){
+    corpo = '<div class="acoes-topo"><span>'+spes.length+(spes.length===1?' SPE/obra cadastrada':' SPEs/obras cadastradas')+'</span>'+
+      '<button class="btn sm pri" data-acao="nova-spe">+ Nova SPE/obra</button></div>'+
+      (spes.length ? '<table><thead><tr><th>Obra</th><th>CNPJ</th><th>Razão social</th><th>Município</th><th>Licenças</th><th></th></tr></thead><tbody>'+
+        spes.map(function(x){
+          const c = statusLic(lics.filter(function(l){ return l.spe_id === x.id; }));
+          return '<tr class="'+(x.ativo?'':'inativo')+'" data-spe="'+esc(x.id)+'">'+
+            '<td data-rotulo="Obra"><b>'+esc(x.obra)+'</b>'+(x.ativo?'':' <span class="badge b-h">Inativa</span>')+'</td>'+
+            '<td data-rotulo="CNPJ" class="nowrap">'+(x.cnpj?esc(x.cnpj):'<span class="sub">sem CNPJ</span>')+'</td>'+
+            '<td data-rotulo="Razão social">'+esc(x.razao_social||'—')+'</td>'+
+            '<td data-rotulo="Município">'+esc(x.municipio||'—')+'</td>'+
+            '<td data-rotulo="Licenças">'+c.total+' '+pontos(c)+'</td>'+
+            '<td class="acoes"><button class="btn sm" data-acao="editar-spe">Editar</button></td></tr>';
+        }).join('')+'</tbody></table>'
+      : '<div class="det-vazio">Nenhuma SPE/obra neste grupo. Clique em <b>+ Nova SPE/obra</b>.</div>');
+  } else {
+    const campo = function(r, v){ return '<dt>'+r+'</dt><dd>'+(v ? esc(v) : '<span class="sub">—</span>')+'</dd>'; };
+    corpo = '<dl class="dl">'+campo('Nome', g.nome)+campo('CNPJ da holding', g.cnpj)+campo('Contato', g.contato)+
+      campo('E-mail', g.email)+campo('Telefone', g.telefone)+campo('Observações', g.obs)+campo('Situação', g.ativo ? 'Ativo' : 'Inativo')+'</dl>';
+  }
+  const c = statusLic(lics);
+  el.innerHTML = '<div class="det-topo"><div><h2>'+esc(g.nome)+'</h2><span class="sub">'+(g.cnpj?esc(g.cnpj)+' · ':'')+
+      c.total+(c.total===1?' licença ativa':' licenças ativas')+'</span></div>'+
+    '<div class="det-acoes"><button class="btn sm" data-acao="ver-licencas">Ver licenças</button>'+
+      '<button class="btn sm" data-acao="editar-grupo">Editar grupo</button>'+
+      '<button class="btn sm" data-acao="mesclar">Mesclar…</button></div></div>'+
+    '<div class="det-abas" role="tablist"><button role="tab" data-aba="spes" class="'+(abaDet==='spes'?'on':'')+'">SPEs e obras</button>'+
+      '<button role="tab" data-aba="dados" class="'+(abaDet==='dados'?'on':'')+'">Dados do grupo</button></div>'+
+    '<div class="det-corpo">'+corpo+'</div>';
+}
+
+function trocarVista(v){
+  vista = v;
+  $$('.lat-menu .menu').forEach(function(b){ b.classList.toggle('on', b.dataset.view === v); });
+  $('#view-licencas').classList.toggle('hide', v !== 'licencas');
+  $('#view-clientes').classList.toggle('hide', v !== 'clientes');
+  $('#lat-sec-sit').classList.toggle('hide', v !== 'licencas');
+  $('.lat-filtros').classList.toggle('hide', v !== 'licencas');
+  if (v === 'clientes') renderClientes();
+  window.scrollTo(0, 0);
+}
+
+/* Grupo */
+function abrirGrupo(g, aposSalvar){
+  const f = $('#fm-grupo'); f.reset(); erroEm('#grupo-erro');
+  f.dataset.aposSalvar = aposSalvar || '';
+  $('#md-grupo-tit').textContent = g ? 'Editar grupo' : 'Novo grupo';
+  $('#bt-grupo-excluir').classList.toggle('hide', !g);
+  $('.bloco-ativo', f).classList.toggle('hide', !g);
+  ['id','nome','cnpj','contato','email','telefone','obs'].forEach(function(c){ f.elements.namedItem(c).value = g ? (g[c] || '') : ''; });
+  f.ativo.checked = g ? g.ativo : true;
+  avisoNomeGrupo(); abrir('#md-grupo'); f.nome.focus();
+}
+function avisoNomeGrupo(){
+  const f = $('#fm-grupo'), el = $('#grupo-parecido');
+  const r = compararNome(f.nome.value, dados.grupos, 'nome', f.elements.namedItem('id').value);
+  if (r.igual){
+    el.className = 'parecido erro';
+    el.innerHTML = 'Já existe o grupo <b>'+esc(r.igual.nome)+'</b>. <button type="button" data-usar-grupo="'+esc(r.igual.id)+'">Usar este grupo</button>';
+  } else if (r.parecidos.length){
+    el.className = 'parecido';
+    el.innerHTML = 'Parecido com: '+r.parecidos.slice(0,3).map(function(x){ return '<b>'+esc(x.nome)+'</b> <button type="button" data-usar-grupo="'+esc(x.id)+'">usar</button>'; }).join(' · ')+'. Confira se não é o mesmo cliente.';
+  } else el.className = 'parecido hide';
+}
+async function salvarGrupo(ev){
+  ev.preventDefault(); erroEm('#grupo-erro');
+  const f = $('#fm-grupo');
+  const g = { id:f.elements.namedItem('id').value, nome:f.nome.value.trim(), cnpj:f.cnpj.value.trim(), contato:f.contato.value.trim(),
+    email:f.email.value.trim(), telefone:f.telefone.value.trim(), obs:f.obs.value.trim(), ativo:f.ativo.checked };
+  if (!g.nome) return erroEm('#grupo-erro','Informe o nome do grupo.');
+  const r = compararNome(g.nome, dados.grupos, 'nome', g.id);
+  if (r.igual) return erroEm('#grupo-erro','Já existe o grupo "'+r.igual.nome+'". Use o cadastro existente.');
+  if (g.cnpj && !cnpjValido(g.cnpj)) return erroEm('#grupo-erro','CNPJ inválido. Confira os números.');
+  try {
+    const j = await api('grupo_salvar', { grupo:g });
+    fechar(f); toast('Grupo salvo.');
+    await carregar();
+    usarGrupoSalvo(j.grupo.id, f.dataset.aposSalvar);
+  } catch(e){ tratarErro(e, '#grupo-erro'); }
+}
+function usarGrupoSalvo(id, destino){
+  if (destino === 'licenca'){
+    const fl = $('#fm-lic'); preencherSelGrupo(fl.grupo_id, id, true); preencherSelSpe(fl.spe_id, id, ''); mostrarCnpjLic();
+  } else if (destino === 'spe'){
+    const fs = $('#fm-spe'); preencherSelGrupo(fs.grupo_id, id, false);
+  } else { grupoSel = id; renderClientes(); }
+}
+async function excluirGrupo(){
+  const f = $('#fm-grupo'), id = f.elements.namedItem('id').value;
+  if (!id || !confirm('Excluir este grupo? Isso não pode ser desfeito.')) return;
+  try { await api('grupo_excluir', { id:id }); fechar(f); toast('Grupo excluído.'); grupoSel = null; await carregar(); }
+  catch(e){ tratarErro(e, '#grupo-erro'); }
+}
+
+/* SPE/obra */
+function abrirSpe(x, grupoId, aposSalvar){
+  const f = $('#fm-spe'); f.reset(); erroEm('#spe-erro');
+  f.dataset.aposSalvar = aposSalvar || '';
+  $('#md-spe-tit').textContent = x ? 'Editar SPE / obra' : 'Nova SPE / obra';
+  $('#bt-spe-excluir').classList.toggle('hide', !x);
+  $('.bloco-ativo', f).classList.toggle('hide', !x);
+  preencherSelGrupo(f.grupo_id, x ? x.grupo_id : (grupoId || ''), !(x || grupoId));
+  ['id','obra','razao_social','cnpj','municipio','obs'].forEach(function(c){ f.elements.namedItem(c).value = x ? (x[c] || '') : ''; });
+  f.ativo.checked = x ? x.ativo : true;
+  avisoSpe(); abrir('#md-spe'); (f.grupo_id.value ? f.obra : f.grupo_id).focus();
+}
+function avisoSpe(){
+  const f = $('#fm-spe'), id = f.elements.namedItem('id').value, gid = f.grupo_id.value;
+  const el = $('#spe-parecido');
+  const r = compararNome(f.obra.value, dados.spes.filter(function(x){ return x.grupo_id === gid; }), 'obra', id);
+  if (r.igual){ el.className = 'parecido erro'; el.innerHTML = 'Este grupo já tem a obra <b>'+esc(r.igual.obra)+'</b>.'; }
+  else if (r.parecidos.length){ el.className = 'parecido'; el.innerHTML = 'Parecido com: '+r.parecidos.slice(0,3).map(function(x){ return '<b>'+esc(x.obra)+'</b>'; }).join(', ')+'. Confira se não é a mesma obra.'; }
+  else el.className = 'parecido hide';
+  const ec = $('#spe-cnpj-aviso'), d = digitos(f.cnpj.value);
+  if (d.length === 14 && !cnpjValido(d)){ ec.className = 'parecido erro'; ec.textContent = 'CNPJ inválido. Confira os números.'; }
+  else if (d.length === 14){
+    const m = dados.spes.filter(function(x){ return x.id !== id && digitos(x.cnpj) === d; })[0];
+    if (m){ const gm = grupoPorId(m.grupo_id); ec.className = 'parecido erro'; ec.innerHTML = 'Este CNPJ já está na obra <b>'+esc(m.obra)+'</b>'+(gm?' ('+esc(gm.nome)+')':'')+'.'; }
+    else ec.className = 'parecido hide';
+  } else ec.className = 'parecido hide';
+}
+async function salvarSpe(ev){
+  ev.preventDefault(); erroEm('#spe-erro');
+  const f = $('#fm-spe');
+  const x = { id:f.elements.namedItem('id').value, grupo_id:f.grupo_id.value, obra:f.obra.value.trim(), razao_social:f.razao_social.value.trim(),
+    cnpj:f.cnpj.value.trim(), municipio:f.municipio.value.trim(), obs:f.obs.value.trim(), ativo:f.ativo.checked };
+  if (!x.grupo_id) return erroEm('#spe-erro','Escolha o grupo.');
+  if (!x.obra) return erroEm('#spe-erro','Informe o nome da obra.');
+  if (x.cnpj && !cnpjValido(x.cnpj)) return erroEm('#spe-erro','CNPJ inválido. Confira os números.');
+  try {
+    const j = await api('spe_salvar', { spe:x });
+    fechar(f); toast('SPE/obra salva.');
+    await carregar();
+    if (f.dataset.aposSalvar === 'licenca'){
+      const fl = $('#fm-lic'); preencherSelGrupo(fl.grupo_id, j.spe.grupo_id, true); preencherSelSpe(fl.spe_id, j.spe.grupo_id, j.spe.id); mostrarCnpjLic();
+    } else { grupoSel = j.spe.grupo_id; renderClientes(); }
+  } catch(e){ tratarErro(e, '#spe-erro'); }
+}
+async function excluirSpe(){
+  const f = $('#fm-spe'), id = f.elements.namedItem('id').value;
+  if (!id || !confirm('Excluir esta SPE/obra? Isso não pode ser desfeito.')) return;
+  try { await api('spe_excluir', { id:id }); fechar(f); toast('SPE/obra excluída.'); await carregar(); }
+  catch(e){ tratarErro(e, '#spe-erro'); }
+}
+
+/* Mesclar */
+function abrirMesclar(){
+  const g = grupoPorId(grupoSel); if (!g) return;
+  const f = $('#fm-mesclar'); erroEm('#mesclar-erro');
+  $('#mesclar-origem').textContent = g.nome; $('#mesclar-origem2').textContent = g.nome;
+  const outros = dados.grupos.filter(function(x){ return x.id !== g.id; }).sort(ordenarNome('nome'));
+  const sugeridos = compararNome(g.nome, outros, 'nome', g.id).parecidos.map(function(x){ return x.id; });
+  f.destino.innerHTML = '<option value="">Escolha…</option>'+outros.map(function(x){
+    return '<option value="'+esc(x.id)+'">'+esc(x.nome)+(sugeridos.indexOf(x.id) >= 0 ? ' (nome parecido)' : '')+'</option>'; }).join('');
+  if (sugeridos.length) f.destino.value = sugeridos[0];
+  abrir('#md-mesclar');
+}
+async function confirmarMesclar(ev){
+  ev.preventDefault(); erroEm('#mesclar-erro');
+  const f = $('#fm-mesclar'), origem = grupoPorId(grupoSel), destino = grupoPorId(f.destino.value);
+  if (!destino) return erroEm('#mesclar-erro','Escolha o grupo que será mantido.');
+  if (!confirm('Mover tudo de "'+origem.nome+'" para "'+destino.nome+'" e apagar "'+origem.nome+'"?')) return;
+  try {
+    const j = await api('grupo_mesclar', { origem:origem.id, destino:destino.id });
+    fechar(f); toast(j.spes_movidas+' obra(s) e '+j.licencas_movidas+' licença(s) movidas para '+destino.nome+'.');
+    grupoSel = destino.id; await carregar();
+  } catch(e){ tratarErro(e, '#mesclar-erro'); }
+}
+
 /* ---------- Modais ---------- */
 function abrir(id){ $(id).classList.remove('hide'); }
 function fechar(el){ el.closest('.fundo').classList.add('hide'); }
@@ -713,11 +1160,14 @@ function abrirLicenca(l){
   $('#md-lic-tit').textContent = l ? 'Editar licença' : 'Nova licença';
   $('#bt-excluir').classList.toggle('hide', !l);
   const v = l || { situacao:'Vigente', aviso_dias:'', preparo_dias:PREPARO_PADRAO };
-  Array.prototype.forEach.call(f.elements, function(el){ if (el.name) el.value = v[el.name] == null ? '' : v[el.name]; });
+  Array.prototype.forEach.call(f.elements, function(el){ if (el.name && el.name !== 'grupo_id' && el.name !== 'spe_id') el.value = v[el.name] == null ? '' : v[el.name]; });
+  preencherSelGrupo(f.grupo_id, v.grupo_id || '', true);
+  preencherSelSpe(f.spe_id, f.grupo_id.value, v.spe_id || '');
+  mostrarCnpjLic();
   if (l && (l.preparo_dias === '' || l.preparo_dias == null)) f.preparo_dias.value = PREPARO_PADRAO;
   f.dataset.avisoManual = l ? '1' : '';
   resumoPrazos(f, '#resumo-lic');
-  atualizaProt(); abrir('#md-lic'); f.cliente.focus();
+  atualizaProt(); abrir('#md-lic'); (f.grupo_id.value ? f.tipo : f.grupo_id).focus();
 }
 function atualizaProt(){
   const f = $('#fm-lic'), on = f.situacao.value === 'Renovação protocolada';
@@ -733,7 +1183,8 @@ function coletar(f){
 async function salvarLicenca(ev){
   ev.preventDefault(); erroEm('#lic-erro');
   const f = $('#fm-lic'), o = coletar(f);
-  if (!o.cliente) return erroEm('#lic-erro','Informe o cliente.');
+  if (!o.grupo_id) return erroEm('#lic-erro','Escolha o grupo (cliente). Se ele não existir, use "+ Cadastrar grupo".');
+  if (!o.spe_id) return erroEm('#lic-erro','Escolha a SPE/obra. Se ela não existir, use "+ Cadastrar SPE/obra".');
   if (!o.tipo) return erroEm('#lic-erro','Informe o tipo de licença.');
   if (!o.validade) return erroEm('#lic-erro','Informe a validade.');
   if (o.aviso_dias === '') return erroEm('#lic-erro','Informe o prazo para protocolar a renovação (use 0 se não houver).');
@@ -836,6 +1287,47 @@ function tratarErro(e, alvo){
 $('#lg-entrar').addEventListener('click', entrar);
 $('#lg-token').addEventListener('keydown', function(e){ if (e.key === 'Enter') entrar(); });
 $('#bt-nova').addEventListener('click', function(){ abrirLicenca(null); });
+$$('.lat-menu .menu').forEach(function(b){ b.addEventListener('click', function(){ trocarVista(b.dataset.view); }); });
+$('#fm-lic').grupo_id.addEventListener('change', function(){ const f = $('#fm-lic'); preencherSelSpe(f.spe_id, f.grupo_id.value, ''); mostrarCnpjLic(); });
+$('#fm-lic').spe_id.addEventListener('change', mostrarCnpjLic);
+$$('#fm-lic [data-novo]').forEach(function(b){ b.addEventListener('click', function(){
+  if (b.dataset.novo === 'grupo') abrirGrupo(null, 'licenca');
+  else abrirSpe(null, $('#fm-lic').grupo_id.value, 'licenca');
+}); });
+$('#bt-novo-grupo').addEventListener('click', function(){ abrirGrupo(null, ''); });
+$('#fm-grupo').addEventListener('submit', salvarGrupo);
+$('#fm-grupo').nome.addEventListener('input', function(){ erroEm('#grupo-erro'); avisoNomeGrupo(); });
+$('#grupo-parecido').addEventListener('click', function(e){
+  const b = e.target.closest('[data-usar-grupo]'); if (!b) return;
+  const f = $('#fm-grupo'); fechar(f); usarGrupoSalvo(b.dataset.usarGrupo, f.dataset.aposSalvar);
+});
+$('#bt-grupo-excluir').addEventListener('click', excluirGrupo);
+$('#fm-spe').addEventListener('submit', salvarSpe);
+['input','change'].forEach(function(t){ $('#fm-spe').addEventListener(t, function(e){ if (e.target.name === 'obra' || e.target.name === 'cnpj' || e.target.name === 'grupo_id'){ erroEm('#spe-erro'); avisoSpe(); } }); });
+$('#bt-spe-excluir').addEventListener('click', excluirSpe);
+$('#fm-mesclar').addEventListener('submit', confirmarMesclar);
+$$('input[data-cnpj]').forEach(function(el){ el.addEventListener('input', function(){ const p = el.selectionStart === el.value.length; el.value = formatarCnpj(el.value); if (p) el.selectionStart = el.selectionEnd = el.value.length; }); });
+$('#c-busca').addEventListener('input', renderClientes);
+$('#c-inativos').addEventListener('change', renderClientes);
+$('#cli-lista').addEventListener('click', function(e){
+  const b = e.target.closest('[data-grupo]'); if (!b) return;
+  grupoSel = b.dataset.grupo; abaDet = 'spes'; renderClientes();
+  if (window.innerWidth < 1100) $('#cli-detalhe').scrollIntoView({ behavior:'smooth', block:'start' });
+});
+$('#cli-detalhe').addEventListener('click', function(e){
+  const aba = e.target.closest('[data-aba]'); if (aba){ abaDet = aba.dataset.aba; renderDetalhe(); return; }
+  const b = e.target.closest('[data-acao]'); if (!b) return;
+  const g = grupoPorId(grupoSel);
+  switch (b.dataset.acao){
+    case 'nova-spe': abrirSpe(null, grupoSel, ''); break;
+    case 'editar-spe': abrirSpe(spePorId(b.closest('tr').dataset.spe), null, ''); break;
+    case 'editar-grupo': abrirGrupo(g, ''); break;
+    case 'mesclar': abrirMesclar(); break;
+    case 'ver-licencas':
+      trocarVista('licencas'); filtroKpi = ''; $('#f-hist').checked = false;
+      $('#f-cliente').value = g.nome; render(); break;
+  }
+});
 $('#bt-config').addEventListener('click', abrirConfig);
 $('#bt-sair').addEventListener('click', function(){ if (confirm('Sair deste navegador? Será preciso informar a chave de novo.')){ gravarAcesso(null); acesso = null; $('#lg-token').value=''; mostrarLogin(); } });
 $('#fm-lic').addEventListener('submit', salvarLicenca);
