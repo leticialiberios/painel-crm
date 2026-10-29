@@ -134,6 +134,13 @@ table.itens{width:100%;border-collapse:separate;border-spacing:0 6px}
 table.itens th{font-size:12px;color:var(--muted);text-align:left;font-weight:600;padding:0 6px}
 table.itens td{padding:0 4px}
 table.itens td.tot{font-weight:700;color:var(--navy);text-align:right;padding-right:10px}
+table.itens tr.grp td{padding-top:10px}
+table.itens tr.grp td.gn{font-weight:700;color:var(--navy);text-align:center;font-size:13px}
+table.itens tr.grp .gwrap{display:flex;gap:6px;align-items:center}
+table.itens tr.grp input.gt{font-weight:700;color:var(--navy);text-transform:uppercase;background:var(--indigo-soft,#eef0ff)}
+table.itens tr.gsub td{font-size:13px}
+table.itens tr.gsub td.tot{color:var(--muted,#667085);font-weight:600}
+table.itens tr.gsub td.tot b{color:var(--navy)}
 .clauses{width:100%;min-height:150px;line-height:1.55}
 .signers{display:flex;gap:10px;flex-wrap:wrap}
 .signers label{border:1px solid var(--line);border-radius:8px;padding:8px 12px;display:flex;gap:8px;align-items:center;cursor:pointer}
@@ -433,12 +440,12 @@ input[data-combo]{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://
         <thead><tr><th style="width:70px">Qtd.</th><th>Descrição dos serviços</th><th style="width:160px">Valor fixo (R$)</th><th style="width:40px"></th></tr></thead>
         <tbody id="itRows"></tbody>
         <tfoot>
-          <tr id="itSubRow" hidden><td></td><td class="tot">SUBTOTAL</td><td class="tot" id="itSub">—</td><td></td></tr>
+          <tr id="itSubRow" hidden><td></td><td class="tot" id="itSubLbl">SUBTOTAL</td><td class="tot" id="itSub">—</td><td></td></tr>
           <tr><td></td><td><div style="display:flex;gap:6px;justify-content:flex-end;align-items:center"><span class="sub" style="font-weight:600">Desconto</span><input id="d_descMotivo" class="inp" placeholder="motivo (ex.: 1º projeto)" style="max-width:240px"><select id="d_descTipo" class="inp" style="width:72px"><option value="pct">%</option><option value="valor">R$</option></select></div></td><td><input id="d_descValor" class="inp money" type="text" inputmode="decimal" autocomplete="off" placeholder="0"></td><td></td></tr>
           <tr><td></td><td class="tot">TOTAL</td><td class="tot" id="itTotal">—</td><td></td></tr>
         </tfoot>
       </table>
-      <button class="btn sm" id="btnAddItem">+ Item</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><button class="btn sm" id="btnAddItem">+ Item</button><button class="btn sm" id="btnAddGrp" title="Divide os serviços em subtópicos (02.1, 02.2…), cada um com seu subtotal">+ Seção</button><span class="sub" id="grpHint">Use “+ Seção” para dividir os serviços em subtópicos (02.1, 02.2…) com subtotais.</span></div>
       <h4 style="margin:16px 0 6px;color:var(--navy);font-size:13px;text-transform:uppercase;letter-spacing:.04em">Parcelas</h4>
       <table class="fin" id="parcTable">
         <thead><tr><th style="width:60px">Nº</th><th style="width:90px">%</th><th class="num" style="width:130px">Valor</th><th>Condição (aparece na proposta)</th><th style="width:36px"></th></tr></thead>
@@ -1561,12 +1568,39 @@ function renderStatusOptions(){
 function itemRow(r){
   return `<tr><td><input class="inp iq" value="${esc(r.qtd)}"></td><td><input class="inp idsc" data-combo="dlSrvDesc" autocomplete="off" value="${esc(r.descricao)}" placeholder="Ex.: UNIFICAÇÃO IPTU's — ou escolha um serviço cadastrado"></td><td><input class="inp ival money" type="text" inputmode="decimal" autocomplete="off" value="${esc(r.valor)}"></td><td><button class="btn sm ghost" data-delit title="Remover">✕</button></td></tr>`;
 }
+function grpRow(g){
+  return `<tr class="grp"><td class="gn"></td><td><div class="gwrap"><input class="inp gt" value="${esc(g.titulo || '')}" placeholder="Título da seção (ex.: REGULARIZAÇÃO FUNDIÁRIA)"><button class="btn sm" data-additg title="Adicionar item nesta seção">+ item</button></div></td><td class="tot gtot"></td><td><button class="btn sm ghost" data-delgrp title="Remover seção">✕</button></td></tr>`;
+}
+/* agrupa os itens do documento em seções: [{titulo, itens}] — itens sem seção ficam num bloco sem título no início */
+function docGrupos(doc){
+  const gs = (doc && doc.grupos) || [], its = (doc && doc.itens) || [];
+  if(!gs.length) return null;
+  const out = [{titulo: null, itens: []}, ...gs.map(g => ({titulo: g.titulo || '', itens: []}))];
+  its.forEach(r => { const g = Number.isInteger(r.g) && r.g >= 0 && r.g < gs.length ? r.g + 1 : 0; out[g].itens.push(r); });
+  return out.filter((g, i) => i > 0 || g.itens.length);
+}
+function layoutGrupos(){
+  const tb = $('#itRows');
+  tb.querySelectorAll('tr.gsub').forEach(t => t.remove());
+  const rows = [...tb.children], hasG = rows.some(t => t.classList.contains('grp'));
+  let k = 0;
+  rows.forEach((t, i) => {
+    if(!t.classList.contains('grp')) return;
+    t.querySelector('.gn').textContent = '02.' + (++k);
+    let j = i + 1; while(rows[j] && !rows[j].classList.contains('grp')) j++;
+    (rows[j - 1] || t).insertAdjacentHTML('afterend', '<tr class="gsub"><td></td><td class="tot">SUBTOTAL 02.' + k + '</td><td class="tot"><b class="gsv">—</b></td><td></td></tr>');
+  });
+  $('#grpHint').hidden = hasG;
+}
 function secBlock(s){
   return `<div class="sec"><div class="secbar"><span class="sn"></span><input class="st" value="${esc(s.titulo)}"><button class="btn sm" data-delsec title="Remover seção">✕</button></div><textarea class="inp clauses sx">${esc(s.texto)}</textarea></div>`;
 }
 function renderDocEditor(doc){
   $('#d_objeto').value = doc.objeto || '';
-  $('#itRows').innerHTML = (doc.itens && doc.itens.length ? doc.itens : [{qtd:'01', descricao:'', valor:''}]).map(itemRow).join('');
+  const gr = docGrupos(doc);
+  $('#itRows').innerHTML = gr ? gr.map(g => (g.titulo === null ? '' : grpRow(g)) + g.itens.map(itemRow).join('')).join('')
+    : (doc.itens && doc.itens.length ? doc.itens : [{qtd:'01', descricao:'', valor:''}]).map(itemRow).join('');
+  layoutGrupos();
   const ds = doc.desconto || {};
   $('#d_descTipo').value = ds.tipo || 'pct'; $('#d_descValor').value = ds.valor || ''; $('#d_descMotivo').value = ds.motivo || '';
   $('#d_pagamento').value = doc.pagamento || '';
@@ -1611,7 +1645,18 @@ function readDoc(){
   const dv = num($('#d_descValor').value);
   return {
     objeto: $('#d_objeto').value,
-    itens: $$('#itRows tr').map(tr => ({qtd: tr.querySelector('.iq').value.trim(), descricao: tr.querySelector('.idsc').value.trim(), valor: tr.querySelector('.ival').value})).filter(r => r.qtd || r.descricao || r.valor),
+    ...(() => {
+      const grupos = [], itens = [];
+      $$('#itRows tr').forEach(tr => {
+        if(tr.classList.contains('grp')){ grupos.push({titulo: tr.querySelector('.gt').value.trim()}); return; }
+        if(!tr.querySelector('.iq')) return;
+        const r = {qtd: tr.querySelector('.iq').value.trim(), descricao: tr.querySelector('.idsc').value.trim(), valor: tr.querySelector('.ival').value};
+        if(!(r.qtd || r.descricao || r.valor)) return;
+        if(grupos.length) r.g = grupos.length - 1;
+        itens.push(r);
+      });
+      return grupos.length ? {itens, grupos} : {itens};
+    })(),
     ...(dv > 0 ? {desconto: {tipo: $('#d_descTipo').value, valor: dv, motivo: $('#d_descMotivo').value.trim()}} : {}),
     parcelas: readParcs(),
     prazos: readPrazos(),
@@ -1636,6 +1681,8 @@ function syncTotals(){
   const dd = readDoc(), t = docTotal(dd), dsc = docDescontoValor(dd);
   $('#itSubRow').hidden = !dsc;
   $('#itSub').textContent = money(docSubtotal(dd));
+  const gr = docGrupos(dd), subs = $$('#itRows tr.gsub .gsv');
+  if(gr){ const comT = gr.filter(g => g.titulo !== null); subs.forEach((el, i) => { const g = comT[i]; el.textContent = g ? money(g.itens.reduce((a, r) => a + numBR(r.valor), 0)) : '—'; }); }
   $('#itTotal').innerHTML = t ? money(t) + (dsc ? `<div class="sub" style="font-weight:500">desconto de ${money(dsc)}</div>` : '') : '—';
   const hasVals = readDoc().itens.some(r => r.valor !== '');
   $('#i_valor').readOnly = hasVals;
@@ -1940,6 +1987,9 @@ table.val .v{width:44mm;text-align:center}
 table.val tr.tot td{background:#3c22e5;color:#fff;font-weight:700}
 table.val tr.tot td.lb{text-align:right}
 table.val tr.tot.st td{background:#1e117d}
+table.val tr.gh td{background:#dcd8f7;color:#1e117d;font-weight:700;letter-spacing:.02em}
+table.val tr.gs td{background:#e9e7f8;color:#1e117d;font-weight:700}
+table.val tr.gs td.lb{text-align:right}
 .close{break-inside:avoid;page-break-inside:avoid;padding-top:8mm}
 .close .att{font-style:italic;margin-bottom:5mm}
 .sg .sigbox{height:21mm;display:flex;align-items:flex-end;padding-left:3mm}
@@ -1991,7 +2041,19 @@ ${minuta ? '<div class="wm">MINUTA</div>' : ''}
   ${bar('Objeto da contratação')}${paras(doc.objeto)}
   ${bar('Valores e forma de pagamento')}
   <table class="val"><thead><tr><th class="q">QTD.</th><th>DESCRIÇÃO DOS SERVIÇOS</th><th class="v">VALOR FIXO</th></tr></thead><tbody>
-    ${itens.map(r => `<tr><td class="q">${esc(r.qtd)}</td><td>${esc(r.descricao)}</td><td class="v">${r.valor !== '' ? money(r.valor) : ''}</td></tr>`).join('')}
+    ${(() => {
+      const linha = r => `<tr><td class="q">${esc(r.qtd)}</td><td>${esc(r.descricao)}</td><td class="v">${r.valor !== '' ? money(r.valor) : ''}</td></tr>`;
+      const gr = docGrupos(doc), sec = String(n).padStart(2, '0');
+      if(!gr) return itens.map(linha).join('');
+      let k = 0;
+      return gr.map(g => {
+        const its = g.itens.filter(r => r.descricao || r.valor);
+        if(g.titulo === null) return its.map(linha).join('');
+        const nn = sec + '.' + (++k);
+        return `<tr class="gh"><td class="q">${nn}</td><td colspan="2">${esc(String(g.titulo || '').toUpperCase())}</td></tr>` + its.map(linha).join('') +
+          `<tr class="gs"><td></td><td class="lb">SUBTOTAL ${nn}</td><td class="v">${money(its.reduce((a, r) => a + numBR(r.valor), 0))}</td></tr>`;
+      }).join('');
+    })()}
     ${docDescontoValor(doc) ? `<tr class="tot st"><td></td><td class="lb">SUBTOTAL</td><td class="v">${money(docSubtotal(doc))}</td></tr>
     <tr class="tot"><td></td><td class="lb">TOTAL (APLICADO DESCONTO DE ${doc.desconto.tipo === 'valor' ? money(doc.desconto.valor) : fmtPct(num(doc.desconto.valor))}${doc.desconto.motivo ? ' - ' + esc(doc.desconto.motivo.toUpperCase()) : ''})</td><td class="v">${money(total)}</td></tr>`
     : `<tr class="tot"><td></td><td class="lb">TOTAL</td><td class="v">${money(total)}</td></tr>`}
@@ -2919,8 +2981,40 @@ $('#btnDel').onclick = async () => {
   catch(e){ toast('Falha ao excluir: ' + e.message); }
 };
 
-$('#btnAddItem').onclick = () => { $('#itRows').insertAdjacentHTML('beforeend', itemRow({qtd: String($$('#itRows tr').length + 1).padStart(2, '0'), descricao:'', valor:''})); markDirty(); };
-$('#itRows').onclick = e => { if(e.target.closest('[data-delit]')){ e.target.closest('tr').remove(); syncTotals(); markDirty(); } };
+const novoItem = () => itemRow({qtd: '01', descricao:'', valor:''});
+const focaUltimo = (sel) => { const els = $$('#itRows ' + sel); const el = els[els.length - 1]; if(el) el.focus(); };
+$('#btnAddItem').onclick = () => {
+  const subs = $$('#itRows tr.gsub'), last = subs[subs.length - 1];
+  const rows = [...$('#itRows').children];
+  if(last && rows[rows.length - 1] === last) last.insertAdjacentHTML('beforebegin', novoItem());
+  else $('#itRows').insertAdjacentHTML('beforeend', novoItem());
+  layoutGrupos(); syncTotals(); markDirty(); if(typeof moneyScan === 'function') moneyScan();
+};
+$('#btnAddGrp').onclick = () => {
+  const tb = $('#itRows'), temG = !!tb.querySelector('tr.grp');
+  const temItens = [...tb.querySelectorAll('tr')].some(t => t.querySelector('.iq') && (t.querySelector('.idsc').value.trim() || t.querySelector('.ival').value.trim()));
+  if(!temG && temItens){ tb.insertAdjacentHTML('afterbegin', grpRow({titulo:''})); layoutGrupos(); syncTotals(); markDirty(); tb.querySelector('tr.grp .gt').focus(); return; }
+  if(!temG) tb.innerHTML = '';
+  tb.insertAdjacentHTML('beforeend', grpRow({titulo:''}) + novoItem());
+  layoutGrupos(); syncTotals(); markDirty(); if(typeof moneyScan === 'function') moneyScan(); focaUltimo('tr.grp .gt');
+};
+$('#itRows').onclick = e => {
+  if(e.target.closest('[data-delit]')){ e.target.closest('tr').remove(); layoutGrupos(); syncTotals(); markDirty(); return; }
+  if(e.target.closest('[data-additg]')){
+    const h = e.target.closest('tr'); let t = h; while(t.nextElementSibling && !t.nextElementSibling.classList.contains('grp') && !t.nextElementSibling.classList.contains('gsub')) t = t.nextElementSibling;
+    t.insertAdjacentHTML('afterend', novoItem()); layoutGrupos(); syncTotals(); markDirty(); if(typeof moneyScan === 'function') moneyScan();
+    t.nextElementSibling.querySelector('.idsc').focus(); return;
+  }
+  if(e.target.closest('[data-delgrp]')){
+    const h = e.target.closest('tr'), del = [h]; let t = h.nextElementSibling;
+    while(t && !t.classList.contains('grp')){ del.push(t); t = t.nextElementSibling; }
+    const cheios = del.filter(x => x.querySelector('.iq') && (x.querySelector('.idsc').value.trim() || x.querySelector('.ival').value.trim())).length;
+    if(cheios && !confirm(`Remover a seção “${h.querySelector('.gt').value || 'sem título'}” e os ${cheios} item(ns) dela?`)) return;
+    del.forEach(x => x.remove());
+    if(!$('#itRows tr')) $('#itRows').innerHTML = novoItem();
+    layoutGrupos(); syncTotals(); markDirty(); if(typeof moneyScan === 'function') moneyScan();
+  }
+};
 $('#btnAddSec').onclick = () => { $('#secs').insertAdjacentHTML('beforeend', secBlock({titulo:'NOVA SEÇÃO', texto:''})); refreshSecs(); markDirty(); };
 $('#secs').onclick = e => { if(e.target.closest('[data-delsec]') && confirm('Remover esta seção?')){ e.target.closest('.sec').remove(); refreshSecs(); markDirty(); } };
 $('#btnPreview').onclick = openPreview;
@@ -2933,7 +3027,7 @@ $('#btnSaveDefault').onclick = async () => {
 $('#btnResetDoc').onclick = () => {
   if(!confirm('Substituir forma de pagamento e cláusulas desta proposta pelas cláusulas padrão? (Objeto e itens são mantidos.)')) return;
   const d = readDoc(), p = docPadrao();
-  renderDocEditor({objeto: d.objeto, itens: d.itens, pagamento: p.pagamento, secoes: clone(p.secoes)});
+  renderDocEditor({objeto: d.objeto, itens: d.itens, grupos: d.grupos, desconto: d.desconto, parcelas: d.parcelas, pagamentoAuto: d.pagamentoAuto, pagamento: p.pagamento, secoes: clone(p.secoes)});
   syncTotals(); markDirty();
 };
 
