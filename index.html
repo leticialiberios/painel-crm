@@ -139,6 +139,8 @@ table.itens tr.grp td.gn{font-weight:700;color:var(--navy);text-align:center;fon
 table.itens tr.grp .gwrap{display:flex;gap:6px;align-items:center}
 table.itens tr.grp input.gt{font-weight:700;color:var(--navy);text-transform:uppercase;background:var(--indigo-soft,#eef0ff)}
 table.itens tr.gsub td{font-size:13px}
+table.itens .ilt{white-space:nowrap;font-size:12px;color:var(--muted,#667085);text-align:right;padding:2px 4px 0}
+table.itens .ilt b{color:var(--navy)}
 table.itens tr.gsub td.tot{color:var(--muted,#667085);font-weight:600}
 table.itens tr.gsub td.tot b{color:var(--navy)}
 .clauses{width:100%;min-height:150px;line-height:1.55}
@@ -437,7 +439,7 @@ input[data-combo]{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://
 
       <div class="secbar">02. VALORES E FORMA DE PAGAMENTO</div>
       <table class="itens">
-        <thead><tr><th style="width:70px">Qtd.</th><th>Descrição dos serviços</th><th style="width:160px">Valor fixo (R$)</th><th style="width:40px"></th></tr></thead>
+        <thead><tr><th style="width:70px">Qtd.</th><th>Descrição dos serviços</th><th style="width:160px" id="itValLbl">Valor fixo (R$)</th><th style="width:40px"></th></tr></thead>
         <tbody id="itRows"></tbody>
         <tfoot>
           <tr id="itSubRow" hidden><td></td><td class="tot" id="itSubLbl">SUBTOTAL</td><td class="tot" id="itSub">—</td><td></td></tr>
@@ -445,7 +447,7 @@ input[data-combo]{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://
           <tr><td></td><td class="tot">TOTAL</td><td class="tot" id="itTotal">—</td><td></td></tr>
         </tfoot>
       </table>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><button class="btn sm" id="btnAddItem">+ Item</button><button class="btn sm" id="btnAddGrp" title="Divide os serviços em subtópicos (02.1, 02.2…), cada um com seu subtotal">+ Seção</button><span class="sub" id="grpHint">Use “+ Seção” para dividir os serviços em subtópicos (02.1, 02.2…) com subtotais.</span></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><button class="btn sm" id="btnAddItem">+ Item</button><label class="sync" style="gap:6px;font-size:13px;margin-right:6px" title="Desmarque se o valor digitado já é o total da linha"><input type="checkbox" id="d_qtdMult"> Valor unitário × quantidade</label><button class="btn sm" id="btnAddGrp" title="Divide os serviços em subtópicos (02.1, 02.2…), cada um com seu subtotal">+ Seção</button><span class="sub" id="grpHint">Use “+ Seção” para dividir os serviços em subtópicos (02.1, 02.2…) com subtotais.</span></div>
       <h4 style="margin:16px 0 6px;color:var(--navy);font-size:13px;text-transform:uppercase;letter-spacing:.04em">Parcelas</h4>
       <table class="fin" id="parcTable">
         <thead><tr><th style="width:60px">Nº</th><th style="width:90px">%</th><th class="num" style="width:130px">Valor</th><th>Condição (aparece na proposta)</th><th style="width:36px"></th></tr></thead>
@@ -1566,7 +1568,13 @@ function renderStatusOptions(){
 
 /* --- editor do documento --- */
 function itemRow(r){
-  return `<tr><td><input class="inp iq" value="${esc(r.qtd)}"></td><td><input class="inp idsc" data-combo="dlSrvDesc" autocomplete="off" value="${esc(r.descricao)}" placeholder="Ex.: UNIFICAÇÃO IPTU's — ou escolha um serviço cadastrado"></td><td><input class="inp ival money" type="text" inputmode="decimal" autocomplete="off" value="${esc(r.valor)}"></td><td><button class="btn sm ghost" data-delit title="Remover">✕</button></td></tr>`;
+  return `<tr><td><input class="inp iq" value="${esc(r.qtd)}"></td><td><input class="inp idsc" data-combo="dlSrvDesc" autocomplete="off" value="${esc(r.descricao)}" placeholder="Ex.: UNIFICAÇÃO IPTU's — ou escolha um serviço cadastrado"></td><td><input class="inp ival money" type="text" inputmode="decimal" autocomplete="off" value="${esc(r.unit !== undefined ? r.unit : r.valor)}"><div class="ilt" hidden></div></td><td><button class="btn sm ghost" data-delit title="Remover">✕</button></td></tr>`;
+}
+const qtdNum = q => { const m = String(q || '').replace(',', '.').match(/\d+(\.\d+)?/); const n = m ? parseFloat(m[0]) : 1; return n > 0 ? n : 1; };
+function qtdMultPadrao(){
+  const d = state.draft; if(!d || state.isNew) return true;
+  if(d.doc && d.doc.qtdMult !== undefined) return !!d.doc.qtdMult;
+  return !LOCKED_STATUS.includes(d.status) && apOf(d).estado !== 'aprovada';
 }
 function grpRow(g){
   return `<tr class="grp"><td class="gn"></td><td><div class="gwrap"><input class="inp gt" value="${esc(g.titulo || '')}" placeholder="Título da seção (ex.: REGULARIZAÇÃO FUNDIÁRIA)"><button class="btn sm" data-additg title="Adicionar item nesta seção">+ item</button></div></td><td class="tot gtot"></td><td><button class="btn sm ghost" data-delgrp title="Remover seção">✕</button></td></tr>`;
@@ -1597,6 +1605,7 @@ function secBlock(s){
 }
 function renderDocEditor(doc){
   $('#d_objeto').value = doc.objeto || '';
+  $('#d_qtdMult').checked = doc.qtdMult !== undefined ? !!doc.qtdMult : qtdMultPadrao();
   const gr = docGrupos(doc);
   $('#itRows').innerHTML = gr ? gr.map(g => (g.titulo === null ? '' : grpRow(g)) + g.itens.map(itemRow).join('')).join('')
     : (doc.itens && doc.itens.length ? doc.itens : [{qtd:'01', descricao:'', valor:''}]).map(itemRow).join('');
@@ -1646,16 +1655,17 @@ function readDoc(){
   return {
     objeto: $('#d_objeto').value,
     ...(() => {
-      const grupos = [], itens = [];
+      const grupos = [], itens = [], mult = $('#d_qtdMult').checked;
       $$('#itRows tr').forEach(tr => {
         if(tr.classList.contains('grp')){ grupos.push({titulo: tr.querySelector('.gt').value.trim()}); return; }
         if(!tr.querySelector('.iq')) return;
         const r = {qtd: tr.querySelector('.iq').value.trim(), descricao: tr.querySelector('.idsc').value.trim(), valor: tr.querySelector('.ival').value};
         if(!(r.qtd || r.descricao || r.valor)) return;
+        if(mult){ r.unit = r.valor; r.valor = r.unit === '' ? '' : String(round2(qtdNum(r.qtd) * numBR(r.unit))); }
         if(grupos.length) r.g = grupos.length - 1;
         itens.push(r);
       });
-      return grupos.length ? {itens, grupos} : {itens};
+      return Object.assign({itens}, grupos.length ? {grupos} : {}, mult ? {qtdMult: true} : {});
     })(),
     ...(dv > 0 ? {desconto: {tipo: $('#d_descTipo').value, valor: dv, motivo: $('#d_descMotivo').value.trim()}} : {}),
     parcelas: readParcs(),
@@ -1681,6 +1691,14 @@ function syncTotals(){
   const dd = readDoc(), t = docTotal(dd), dsc = docDescontoValor(dd);
   $('#itSubRow').hidden = !dsc;
   $('#itSub').textContent = money(docSubtotal(dd));
+  const mult = $('#d_qtdMult').checked;
+  $('#itValLbl').textContent = mult ? 'Valor unitário (R$)' : 'Valor fixo (R$)';
+  $$('#itRows tr').forEach(tr => {
+    const lt = tr.querySelector('.ilt'); if(!lt) return;
+    const q = qtdNum(tr.querySelector('.iq').value), u = tr.querySelector('.ival').value;
+    const show = mult && u !== '' && q !== 1;
+    lt.hidden = !show; if(show) lt.innerHTML = `total (× ${String(q).replace('.', ',')}): <b>${money(round2(q * numBR(u)))}</b>`;
+  });
   const gr = docGrupos(dd), subs = $$('#itRows tr.gsub .gsv');
   if(gr){ const comT = gr.filter(g => g.titulo !== null); subs.forEach((el, i) => { const g = comT[i]; el.textContent = g ? money(g.itens.reduce((a, r) => a + numBR(r.valor), 0)) : '—'; }); }
   $('#itTotal').innerHTML = t ? money(t) + (dsc ? `<div class="sub" style="font-weight:500">desconto de ${money(dsc)}</div>` : '') : '—';
@@ -1936,6 +1954,7 @@ const ICON = {
   phone: '<svg viewBox="0 0 24 24" width="11" height="11"><path fill="#1e117d" d="M6.6 10.8a15.1 15.1 0 006.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 013 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1z"/></svg>'
 };
 
+let pdfUnit = false;
 function proposalHTML(it, minuta){
   const cfg = state.config, doc = it.doc || makeDoc(it.objeto), rd = cfg.rodape;
   const itens = (doc.itens || []).filter(r => r.descricao || r.valor);
@@ -2040,9 +2059,10 @@ ${minuta ? '<div class="wm">MINUTA</div>' : ''}
   <div class="to">À ${esc(String(it.cliente || '').replace(/\.+$/, ''))}.</div>
   ${bar('Objeto da contratação')}${paras(doc.objeto)}
   ${bar('Valores e forma de pagamento')}
-  <table class="val"><thead><tr><th class="q">QTD.</th><th>DESCRIÇÃO DOS SERVIÇOS</th><th class="v">VALOR FIXO</th></tr></thead><tbody>
+  ${(() => { pdfUnit = !!doc.qtdMult && itens.some(r => r.unit !== undefined && qtdNum(r.qtd) !== 1); return ''; })()}
+  <table class="val"><thead><tr><th class="q">QTD.</th><th>DESCRIÇÃO DOS SERVIÇOS</th>${pdfUnit ? '<th class="v">VALOR UNITÁRIO</th><th class="v">VALOR TOTAL</th>' : '<th class="v">VALOR FIXO</th>'}</tr></thead><tbody>
     ${(() => {
-      const linha = r => `<tr><td class="q">${esc(r.qtd)}</td><td>${esc(r.descricao)}</td><td class="v">${r.valor !== '' ? money(r.valor) : ''}</td></tr>`;
+      const linha = r => `<tr><td class="q">${esc(r.qtd)}</td><td>${esc(r.descricao)}</td>${pdfUnit ? `<td class="v">${r.unit !== undefined && r.unit !== '' ? money(r.unit) : ''}</td>` : ''}<td class="v">${r.valor !== '' ? money(r.valor) : ''}</td></tr>`;
       const gr = docGrupos(doc), sec = String(n).padStart(2, '0');
       if(!gr) return itens.map(linha).join('');
       let k = 0;
@@ -2050,13 +2070,13 @@ ${minuta ? '<div class="wm">MINUTA</div>' : ''}
         const its = g.itens.filter(r => r.descricao || r.valor);
         if(g.titulo === null) return its.map(linha).join('');
         const nn = sec + '.' + (++k);
-        return `<tr class="gh"><td class="q">${nn}</td><td colspan="2">${esc(String(g.titulo || '').toUpperCase())}</td></tr>` + its.map(linha).join('') +
-          `<tr class="gs"><td></td><td class="lb">SUBTOTAL ${nn}</td><td class="v">${money(its.reduce((a, r) => a + numBR(r.valor), 0))}</td></tr>`;
+        return `<tr class="gh"><td class="q">${nn}</td><td colspan="${pdfUnit ? 3 : 2}">${esc(String(g.titulo || '').toUpperCase())}</td></tr>` + its.map(linha).join('') +
+          `<tr class="gs"><td></td><td class="lb"${pdfUnit ? ' colspan="2"' : ''}>SUBTOTAL ${nn}</td><td class="v">${money(its.reduce((a, r) => a + numBR(r.valor), 0))}</td></tr>`;
       }).join('');
     })()}
-    ${docDescontoValor(doc) ? `<tr class="tot st"><td></td><td class="lb">SUBTOTAL</td><td class="v">${money(docSubtotal(doc))}</td></tr>
-    <tr class="tot"><td></td><td class="lb">TOTAL (APLICADO DESCONTO DE ${doc.desconto.tipo === 'valor' ? money(doc.desconto.valor) : fmtPct(num(doc.desconto.valor))}${doc.desconto.motivo ? ' - ' + esc(doc.desconto.motivo.toUpperCase()) : ''})</td><td class="v">${money(total)}</td></tr>`
-    : `<tr class="tot"><td></td><td class="lb">TOTAL</td><td class="v">${money(total)}</td></tr>`}
+    ${docDescontoValor(doc) ? `<tr class="tot st"><td></td><td class="lb"${pdfUnit ? ' colspan="2"' : ''}>SUBTOTAL</td><td class="v">${money(docSubtotal(doc))}</td></tr>
+    <tr class="tot"><td></td><td class="lb"${pdfUnit ? ' colspan="2"' : ''}>TOTAL (APLICADO DESCONTO DE ${doc.desconto.tipo === 'valor' ? money(doc.desconto.valor) : fmtPct(num(doc.desconto.valor))}${doc.desconto.motivo ? ' - ' + esc(doc.desconto.motivo.toUpperCase()) : ''})</td><td class="v">${money(total)}</td></tr>`
+    : `<tr class="tot"><td></td><td class="lb"${pdfUnit ? ' colspan="2"' : ''}>TOTAL</td><td class="v">${money(total)}</td></tr>`}
   </tbody></table>
   ${paras(doc.pagamento)}
   ${(() => {
@@ -3027,7 +3047,7 @@ $('#btnSaveDefault').onclick = async () => {
 $('#btnResetDoc').onclick = () => {
   if(!confirm('Substituir forma de pagamento e cláusulas desta proposta pelas cláusulas padrão? (Objeto e itens são mantidos.)')) return;
   const d = readDoc(), p = docPadrao();
-  renderDocEditor({objeto: d.objeto, itens: d.itens, grupos: d.grupos, desconto: d.desconto, parcelas: d.parcelas, pagamentoAuto: d.pagamentoAuto, pagamento: p.pagamento, secoes: clone(p.secoes)});
+  renderDocEditor({objeto: d.objeto, itens: d.itens, grupos: d.grupos, qtdMult: !!d.qtdMult, desconto: d.desconto, parcelas: d.parcelas, pagamentoAuto: d.pagamentoAuto, pagamento: p.pagamento, secoes: clone(p.secoes)});
   syncTotals(); markDirty();
 };
 
@@ -3109,6 +3129,7 @@ $$('[data-preset]').forEach(b => b.onclick = () => {
   $('#parcRows').innerHTML = PRESETS[b.dataset.preset].map(parcRow).join(''); numberParcs(); syncTotals(); markDirty();
 });
 $('#d_descTipo').onchange = () => { syncTotals(); markDirty(); };
+$('#d_qtdMult').onchange = () => { syncTotals(); markDirty(); };
 $('#d_pagAuto').onchange = () => { $('#d_pagamento').readOnly = $('#d_pagAuto').checked; syncTotals(); markDirty(); };
 $('#f_captacao').addEventListener('change', () => renderFinTab());
 $('#f_excecao').addEventListener('change', () => renderFinTab());
