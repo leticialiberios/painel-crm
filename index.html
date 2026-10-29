@@ -401,12 +401,12 @@ input[data-combo]{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://
       <div class="grid">
         <label class="f">Código<input id="i_codigo"></label>
         <label class="f">Status<select id="i_status"></select></label>
-        <label class="f">Cliente (razão social)<input id="i_cliente" data-combo="dlCli" autocomplete="off" placeholder="Ex.: METRIX IMÓVEIS LTDA."></label>
+        <label class="f">Cliente (razão social de quem contrata)<input id="i_cliente" data-combo="dlCli" autocomplete="off" placeholder="Ex.: METRIX IMÓVEIS LTDA."></label>
+        <label class="f">Empreendimento<input id="i_empreendimento" data-combo="dlEmp" autocomplete="off" placeholder="Ex.: Afonso Celso"></label>
         <label class="f">CNPJ / CPF do cliente<input id="i_clienteCnpj" class="cnpj" inputmode="numeric" autocomplete="off" maxlength="18" placeholder="00.000.000/0000-00"></label>
         <label class="f">Contato<input id="i_contato" placeholder="Pessoa de contato"></label>
         <label class="f">E-mail do contato<input id="i_email" type="email"></label>
         <label class="f">Telefone / WhatsApp<input id="i_telefone"></label>
-        <label class="f">Empreendimento<input id="i_empreendimento" data-combo="dlEmp" autocomplete="off" placeholder="Ex.: Afonso Celso"></label>
         <label class="f">Tipo de serviço<input id="i_tipo" list="dlTipos"></label>
         <label class="f">Valor total (R$)<input id="i_valor" class="money" type="text" inputmode="decimal" autocomplete="off"></label>
         <label class="f">Data de entrada<input id="i_dataEntrada" type="date"></label>
@@ -415,6 +415,7 @@ input[data-combo]{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://
         <label class="f">Origem<input id="i_origem" placeholder="Indicação, site, edital…"></label>
         <label class="f full">Observações internas<textarea id="i_observacoes" rows="3"></textarea></label>
       </div>
+      <p class="hint" id="speHint" hidden style="background:var(--indigo-soft,#eef0ff);padding:8px 10px;border-radius:8px"></p>
       <p class="hint" id="cliHint" hidden></p>
     </div>
 
@@ -672,15 +673,22 @@ input[data-combo]{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://
     <section class="head"><h3 id="cTitle">Cliente</h3><button class="btn ghost" data-close>✕</button></section>
     <section>
       <div class="grid">
-        <label class="f full">Razão social / nome<input id="c_nome" placeholder="Ex.: MRV ENGENHARIA E PARTICIPAÇÕES S.A."></label>
+        <label class="f full">Cliente — razão social ou nome<input id="c_nome" placeholder="Ex.: MARQUISE INCORPORAÇÕES LTDA."></label>
         <label class="f">CNPJ / CPF<input id="c_cnpj" class="cnpj" inputmode="numeric" autocomplete="off" maxlength="18" placeholder="00.000.000/0000-00"></label>
-        <label class="f">Grupo<input id="c_grupo" list="dlGrupo" placeholder="Ex.: MRV (igual em todas as SPEs)"></label>
+        <label class="f">Grupo econômico<input id="c_grupo" list="dlGrupo" placeholder="Opcional — ex.: MARQUISE"></label>
         <label class="f">Contato<input id="c_contato" placeholder="Pessoa de contato"></label>
         <label class="f">E-mail do contato<input id="c_email" type="email"></label>
         <label class="f">Telefone / WhatsApp<input id="c_telefone"></label>
         <label class="f">E-mail financeiro (notas e ND)<input id="c_emailFinanceiro" type="email" placeholder="Se vazio, usa o e-mail do contato"></label>
         <label class="f full">Endereço<input id="c_endereco" placeholder="Rua, número, bairro, cidade/UF, CEP"></label>
-        <label class="f full">Empreendimentos <span class="sub" style="font-weight:400">(um por linha)</span><textarea id="c_empreendimentos" rows="3" class="inp" placeholder="Ex.: Reserva das Garças&#10;Flora das Carnaúbas"></textarea></label>
+      </div>
+      <div class="sect" style="margin-top:14px">
+        <h4>Empreendimentos</h4>
+        <p class="hint" style="margin:0 0 8px">Quando o empreendimento tem <b>CNPJ próprio (SPE)</b>, preencha a razão social e o CNPJ dele: a proposta e a cobrança desse empreendimento saem no nome da SPE. Deixe em branco quando for contratado no CNPJ do cliente.</p>
+        <table class="itens" id="c_empTable"><thead><tr><th>Empreendimento</th><th>Razão social da SPE</th><th style="width:170px">CNPJ da SPE</th><th style="width:40px"></th></tr></thead><tbody id="c_emps"></tbody></table>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px"><button class="btn sm" id="c_addEmp">+ Empreendimento</button><span id="c_merge"></span></div>
+      </div>
+      <div class="grid" style="margin-top:12px">
         <label class="f full">Observações<textarea id="c_obs" rows="2" class="inp"></textarea></label>
       </div>
       <div id="c_meta" class="hint" style="margin-top:10px"></div>
@@ -3254,18 +3262,49 @@ async function removeCad(t, id){
 }
 
 /* --- busca --- */
-const empsDe = c => !c ? [] : (Array.isArray(c.empreendimentos) ? c.empreendimentos : String(c.empreendimentos || '').split(/\r?\n/)).map(x => String(x).trim()).filter(Boolean);
+/* Empreendimentos do cliente: [{nome, razao, cnpj}] — razão/CNPJ preenchidos quando o empreendimento é uma SPE.
+   O campo antigo "empreendimentos" (só nomes) continua sendo gravado, para compatibilidade. */
+function spesDe(c){
+  if(!c) return [];
+  const out = [], vistos = new Set();
+  (Array.isArray(c.emps) ? c.emps : []).forEach(e => { const nome = String(e.nome || '').trim(); if(!nome && !e.razao) return; out.push({nome, razao: String(e.razao || '').trim(), cnpj: String(e.cnpj || '').trim()}); vistos.add(normNome(nome)); });
+  (Array.isArray(c.empreendimentos) ? c.empreendimentos : String(c.empreendimentos || '').split(/\r?\n/)).map(x => String(x).trim()).filter(Boolean)
+    .forEach(n => { if(!vistos.has(normNome(n))){ out.push({nome: n, razao: '', cnpj: ''}); vistos.add(normNome(n)); } });
+  return out;
+}
+const empsDe = c => spesDe(c).map(e => e.nome).filter(Boolean);
+const temSpe = e => !!(e && (e.razao || onlyDig(e.cnpj).length >= 11));
+/* procura uma SPE pela razão social ou pelo CNPJ → {cli, emp} */
+function findSpe(nome, cnpj){
+  const d = onlyDig(cnpj), n = normNome(nome);
+  for(const c of state.clientes){
+    for(const e of spesDe(c)){
+      if(!temSpe(e)) continue;
+      if((d.length >= 11 && onlyDig(e.cnpj) === d) || (n && e.razao && normNome(e.razao) === n)) return {cli: c, emp: e};
+    }
+  }
+  return null;
+}
+const findEmp = (c, nome) => { const n = normNome(nome); return n ? spesDe(c).find(e => normNome(e.nome) === n) || null : null; };
 function findCli(nome, cnpj){
   const d = onlyDig(cnpj);
   if(d.length >= 11){ const c = state.clientes.find(x => onlyDig(x.cnpj) === d); if(c) return c; }
   const n = normNome(nome);
-  return n ? state.clientes.find(x => normNome(x.nome) === n) || null : null;
+  const c = n ? state.clientes.find(x => normNome(x.nome) === n) || null : null;
+  if(c) return c;
+  const s = findSpe(nome, cnpj);
+  return s ? s.cli : null;
 }
 function findSrv(txt){
   const n = normNome(txt); if(!n) return null;
   return state.servicos.find(x => normNome(x.descricao) === n) || state.servicos.find(x => normNome(x.nome) === n) || null;
 }
-function propsDoCli(c){ const n = normNome(c.nome), d = onlyDig(c.cnpj); return state.items.filter(x => normNome(x.cliente) === n || (d.length >= 11 && onlyDig(x.clienteCnpj) === d)); }
+function propsDoCli(c){
+  const ns = new Set([normNome(c.nome)]), ds = new Set();
+  if(onlyDig(c.cnpj).length >= 11) ds.add(onlyDig(c.cnpj));
+  spesDe(c).forEach(e => { if(e.razao) ns.add(normNome(e.razao)); if(onlyDig(e.cnpj).length >= 11) ds.add(onlyDig(e.cnpj)); });
+  return state.items.filter(x => ns.has(normNome(x.cliente)) || ds.has(onlyDig(x.clienteCnpj)));
+}
 function propsDoSrv(v){
   const a = normNome(v.descricao), b = normNome(v.nome);
   return state.items.filter(x => ((x.doc && x.doc.itens) || []).some(i => { const d = normNome(i.descricao); return d && (d === a || d === b); }) || (b && normNome(x.fin && x.fin.servico) === b));
@@ -3273,11 +3312,13 @@ function propsDoSrv(v){
 
 /* --- listas de sugestão (datalists) --- */
 function setEmpList(cli){
-  const all = cli ? empsDe(cli) : [...new Set([...state.clientes.flatMap(empsDe), ...state.items.map(x => x.empreendimento).filter(Boolean)])];
+  if(cli){ $('#dlEmp').innerHTML = spesDe(cli).filter(e => e.nome).map(e => `<option value="${esc(e.nome)}" label="${esc(temSpe(e) ? 'SPE: ' + [e.razao, e.cnpj].filter(Boolean).join(' · ') : 'no CNPJ do cliente')}">`).join(''); return; }
+  const all = [...new Set([...state.clientes.flatMap(empsDe), ...state.items.map(x => x.empreendimento).filter(Boolean)])];
   $('#dlEmp').innerHTML = all.map(e => `<option value="${esc(e)}">`).join('');
 }
 function renderCadDatalists(){
-  $('#dlCli').innerHTML = state.clientes.map(c => `<option value="${esc(c.nome)}" label="${esc([c.cnpj, c.grupo].filter(Boolean).join(' · '))}">`).join('');
+  $('#dlCli').innerHTML = state.clientes.map(c => `<option value="${esc(c.nome)}" label="${esc([c.cnpj, c.grupo].filter(Boolean).join(' · '))}">`).join('') +
+    state.clientes.flatMap(c => spesDe(c).filter(e => temSpe(e) && e.razao).map(e => `<option value="${esc(e.razao)}" label="${esc(['SPE do ' + (e.nome || 'empreendimento'), e.cnpj, 'cliente ' + c.nome].filter(Boolean).join(' · '))}">`)).join('');
   $('#dlGrupo').innerHTML = [...new Set(state.clientes.map(c => c.grupo).filter(Boolean))].map(g => `<option value="${esc(g)}">`).join('');
   $('#dlSrvNome').innerHTML = state.servicos.map(v => `<option value="${esc(v.nome)}" label="${esc(v.valor !== '' && v.valor != null ? money(v.valor) : '')}">`).join('');
   $('#dlSrvDesc').innerHTML = state.servicos.map(v => `<option value="${esc(v.descricao || v.nome)}" label="${esc(v.nome + (v.valor !== '' && v.valor != null ? ' · ' + money(v.valor) : ''))}">`).join('');
@@ -3297,11 +3338,11 @@ function renderCad(){
   $('#cliGrupo').innerHTML = '<option value="">Todos os grupos</option>' + grupos.map(g => `<option ${g === state.cadQ.grupo ? 'selected' : ''}>${esc(g)}</option>`).join('');
   const q = normNome(state.cadQ.cli);
   const cl = state.clientes
-    .filter(c => (!state.cadQ.grupo || c.grupo === state.cadQ.grupo) && (!q || normNome([c.nome, c.cnpj, onlyDig(c.cnpj), c.grupo, c.contato, c.email, c.emailFinanceiro, empsDe(c).join(' ')].join(' ')).includes(q)))
+    .filter(c => (!state.cadQ.grupo || c.grupo === state.cadQ.grupo) && (!q || normNome([c.nome, c.cnpj, onlyDig(c.cnpj), c.grupo, c.contato, c.email, c.emailFinanceiro, spesDe(c).map(e => [e.nome, e.razao, e.cnpj, onlyDig(e.cnpj)].join(' ')).join(' ')].join(' ')).includes(q)))
     .sort((a, b) => String(a.grupo || a.nome || '').localeCompare(String(b.grupo || b.nome || ''), 'pt') || String(a.nome || '').localeCompare(String(b.nome || ''), 'pt'));
   $('#cliBody').innerHTML = cl.length ? cl.map(c => {
-    const e = empsDe(c), np = propsDoCli(c).length;
-    return `<tr data-cli="${esc(c.id)}" style="cursor:pointer"><td><b>${esc(c.nome)}</b>${c.emailFinanceiro || c.email ? `<div class="sub">${esc(c.emailFinanceiro || c.email)}</div>` : ''}</td><td>${esc(c.cnpj || '—')}</td><td>${esc(c.grupo || '—')}</td><td>${esc(c.contato || '—')}${c.telefone ? `<div class="sub">${esc(c.telefone)}</div>` : ''}</td><td>${e.length ? esc(e.slice(0, 3).join(', ')) + (e.length > 3 ? ` <span class="sub">+${e.length - 3}</span>` : '') : '—'}</td><td class="num">${np || '—'}</td></tr>`;
+    const e = empsDe(c), np = propsDoCli(c).length, ns = spesDe(c).filter(temSpe).length;
+    return `<tr data-cli="${esc(c.id)}" style="cursor:pointer"><td><b>${esc(c.nome)}</b>${c.emailFinanceiro || c.email ? `<div class="sub">${esc(c.emailFinanceiro || c.email)}</div>` : ''}</td><td>${esc(c.cnpj || '—')}</td><td>${esc(c.grupo || '—')}</td><td>${esc(c.contato || '—')}${c.telefone ? `<div class="sub">${esc(c.telefone)}</div>` : ''}</td><td>${e.length ? esc(e.slice(0, 3).join(', ')) + (e.length > 3 ? ` <span class="sub">+${e.length - 3}</span>` : '') : '—'}${ns ? `<div class="sub">${ns} com CNPJ próprio (SPE)</div>` : ''}</td><td class="num">${np || '—'}</td></tr>`;
   }).join('') : `<tr><td colspan="6" class="empty">${state.clientes.length ? 'Nada com esses filtros.' : 'Nenhum cliente cadastrado. Use “+ Novo cliente” ou “Importar das propostas”.'}</td></tr>`;
   const qs = normNome(state.cadQ.srv);
   const sv = state.servicos.filter(v => !qs || normNome([v.nome, v.descricao].join(' ')).includes(qs)).sort((a, b) => String(a.nome || '').localeCompare(String(b.nome || ''), 'pt'));
@@ -3312,14 +3353,24 @@ function renderCad(){
 /* --- cliente: modal --- */
 let cliEdit = null, cliDaProposta = false;
 const CLI_F = ['nome', 'cnpj', 'grupo', 'contato', 'email', 'telefone', 'emailFinanceiro', 'endereco', 'obs'];
-const novoCli = pre => Object.assign({id: uid(), nome:'', cnpj:'', grupo:'', contato:'', email:'', telefone:'', emailFinanceiro:'', endereco:'', empreendimentos:[], obs:'', versao:0, criadoEm: new Date().toISOString()}, pre || {});
+const novoCli = pre => Object.assign({id: uid(), nome:'', cnpj:'', grupo:'', contato:'', email:'', telefone:'', emailFinanceiro:'', endereco:'', empreendimentos:[], emps:[], obs:'', versao:0, criadoEm: new Date().toISOString()}, pre || {});
+const cEmpRow = e => `<tr><td><input class="inp ce_n" value="${esc(e.nome || '')}" placeholder="Ex.: Reserva das Garças"></td><td><input class="inp ce_r" value="${esc(e.razao || '')}" placeholder="Em branco = CNPJ do cliente"></td><td><input class="inp ce_c cnpj" inputmode="numeric" autocomplete="off" maxlength="18" value="${esc(e.cnpj || '')}" placeholder="00.000.000/0000-00"></td><td><button class="btn sm ghost" data-delce title="Remover">✕</button></td></tr>`;
+const readCEmps = () => $$('#c_emps tr').map(tr => ({nome: tr.querySelector('.ce_n').value.trim(), razao: tr.querySelector('.ce_r').value.trim(), cnpj: tr.querySelector('.ce_c').value.trim()})).filter(e => e.nome || e.razao || e.cnpj);
+/* outros cadastros do mesmo grupo (SPEs cadastradas como clientes separados) que podem virar empreendimentos deste */
+function irmaosDoGrupo(c){ const g = normNome(c.grupo); return g ? state.clientes.filter(x => x.id !== c.id && normNome(x.grupo) === g) : []; }
+function renderCMerge(){
+  const ir = cliEdit ? irmaosDoGrupo(Object.assign({}, cliEdit, {grupo: $('#c_grupo').value})) : [];
+  $('#c_merge').innerHTML = ir.length && state.clientes.some(x => x.id === cliEdit.id) ? `<button class="btn sm" id="c_mergeBtn" title="${esc(ir.map(x => x.nome).join(' · '))}">Trazer ${ir.length} cadastro(s) do grupo ${esc($('#c_grupo').value)} como empreendimentos</button>` : '';
+}
 function openCli(id, pre){
   const src = id ? state.clientes.find(x => x.id === id) : null;
   cliEdit = src ? clone(src) : novoCli(pre);
   cliDaProposta = !src && !!pre;
   $('#cTitle').textContent = src ? cliEdit.nome : 'Novo cliente';
   CLI_F.forEach(k => $('#c_' + k).value = cliEdit[k] || '');
-  $('#c_empreendimentos').value = empsDe(cliEdit).join('\n');
+  const es = spesDe(cliEdit);
+  $('#c_emps').innerHTML = (es.length ? es : [{nome:'', razao:'', cnpj:''}]).map(cEmpRow).join('');
+  renderCMerge();
   $('#c_del').hidden = !src;
   const ps = src ? propsDoCli(src) : [];
   $('#c_meta').innerHTML = src ? `${ps.length ? 'Propostas: ' + ps.map(x => esc(x.codigo || '—')).join(', ') + ' · ' : ''}Atualizado em ${fmtDT(cliEdit.atualizadoEm)}${cliEdit.atualizadoPor ? ' por ' + esc(cliEdit.atualizadoPor) : ''}` : '';
@@ -3328,13 +3379,23 @@ function openCli(id, pre){
 async function saveCliModal(){
   const c = cliEdit;
   CLI_F.forEach(k => c[k] = $('#c_' + k).value.trim());
-  c.empreendimentos = [...new Set($('#c_empreendimentos').value.split(/\r?\n/).map(x => x.trim()).filter(Boolean))];
+  const emps = readCEmps();
+  const semNome = emps.find(e => !e.nome); if(semNome){ toast('Dê um nome ao empreendimento da SPE ' + (semNome.razao || semNome.cnpj) + '.'); return; }
+  const vistos = new Set(); c.emps = emps.filter(e => { const k = normNome(e.nome); if(vistos.has(k)) return false; vistos.add(k); return true; });
+  c.empreendimentos = c.emps.map(e => e.nome);
   if(!c.nome){ toast('Informe a razão social.'); $('#c_nome').focus(); return; }
+  for(const e of c.emps){
+    const de = onlyDig(e.cnpj); if(de.length < 11) continue;
+    const outro = state.clientes.find(x => x.id !== c.id && (onlyDig(x.cnpj) === de || spesDe(x).some(y => onlyDig(y.cnpj) === de)));
+    if(outro && !irmaosDoGrupo(c).includes(outro) && !confirm(`O CNPJ ${e.cnpj} (${e.nome}) também está no cadastro de “${outro.nome}”. Salvar mesmo assim?`)) return;
+  }
   const d = onlyDig(c.cnpj);
   const dup = state.clientes.find(x => x.id !== c.id && ((d.length >= 11 && onlyDig(x.cnpj) === d) || normNome(x.nome) === normNome(c.nome)));
   if(dup && !confirm(`Já existe “${dup.nome}”${dup.cnpj ? ' (' + dup.cnpj + ')' : ''} no cadastro. Salvar mesmo assim?`)) return;
   try{
+    const juntar = c._juntar || []; delete c._juntar;
     const r = await persistCad('cli', c);
+    for(const id of juntar){ try{ await removeCad('cli', id); } catch(err){ toast('Não consegui excluir um cadastro antigo: ' + err.message, 5000); } }
     $('#cliModal').classList.remove('on'); renderCad();
     if(cliDaProposta && state.draft){ aplicaCliente(r); }
     toast('Cliente salvo');
@@ -3373,10 +3434,40 @@ function aplicaCliente(c){
   $('#i_cliente').value = c.nome;
   set('#i_clienteCnpj', c.cnpj); set('#i_contato', c.contato); set('#i_email', c.email || c.emailFinanceiro); set('#i_telefone', c.telefone);
   const e = empsDe(c); setEmpList(c);
-  if(e.length === 1) set('#i_empreendimento', e[0]);
+  if(e.length === 1 && !temSpe(findEmp(c, e[0]))) set('#i_empreendimento', e[0]);
   state.cliAuto = c;
-  syncTotals(); markDirty(); cliHint();
+  const e1 = e.length === 1 ? findEmp(c, e[0]) : null;
+  if(e1 && temSpe(e1) && !$('#i_empreendimento').value.trim()){ $('#i_empreendimento').value = e1.nome; aplicaEmp(c, e1); }
+  syncTotals(); markDirty(); cliHint(); speHint();
   if(state.draft) $('#dTitle').textContent = c.nome;
+}
+/* empreendimento escolhido: se tiver CNPJ próprio, a proposta sai no nome da SPE; se não, no do cliente */
+function aplicaEmp(c, e){
+  if(!c) return;
+  const ic = $('#i_cliente'), cn = $('#i_clienteCnpj');
+  const atualSpe = findSpe(ic.value, '');
+  if(e && temSpe(e)){
+    if(e.razao) ic.value = e.razao; cn.value = e.cnpj || '';
+  } else if(atualSpe && atualSpe.cli.id === c.id){
+    ic.value = c.nome; cn.value = c.cnpj || '';
+  }
+  if(state.draft) $('#dTitle').textContent = ic.value;
+  speHint(); syncTotals(); markDirty();
+}
+function speHint(){
+  const h = $('#speHint'); if(!h) return;
+  const s = findSpe($('#i_cliente').value, $('#i_clienteCnpj').value);
+  if(!s){ h.hidden = true; return; }
+  h.hidden = false;
+  h.innerHTML = `Contratante: <b>SPE ${esc(s.emp.razao || s.emp.nome)}</b>${s.emp.cnpj ? ' · CNPJ ' + esc(s.emp.cnpj) : ''} — empreendimento <b>${esc(s.emp.nome)}</b> do cliente <b>${esc(s.cli.nome)}</b>.`;
+}
+function aplicaSpe(s){
+  aplicaCliente(s.cli);
+  $('#i_cliente').value = s.emp.razao || s.cli.nome;
+  $('#i_clienteCnpj').value = s.emp.cnpj || '';
+  if(s.emp.nome) $('#i_empreendimento').value = s.emp.nome;
+  if(state.draft) $('#dTitle').textContent = $('#i_cliente').value;
+  speHint(); syncTotals(); markDirty(); cliHint();
 }
 function cliHint(){
   const h = $('#cliHint'); if(!h) return;
@@ -3390,9 +3481,9 @@ function soltaClienteAnterior(){
   const c = state.cliAuto; if(!c) return;
   [['#i_clienteCnpj', c.cnpj], ['#i_contato', c.contato], ['#i_email', c.email || c.emailFinanceiro], ['#i_telefone', c.telefone]].forEach(([id, v]) => { const el = $(id); if(el && v && el.value === v) el.value = ''; });
   const emp = $('#i_empreendimento'); if(emp && empsDe(c).includes(emp.value)) emp.value = '';
-  state.cliAuto = null;
+  state.cliAuto = null; speHint();
 }
-function prepClienteDrawer(){ state.cliAuto = findCli($('#i_cliente').value, '') || null; setEmpList(findCli($('#i_cliente').value, $('#i_clienteCnpj').value)); cliHint(); }
+function prepClienteDrawer(){ state.cliAuto = findCli($('#i_cliente').value, $('#i_clienteCnpj').value) || null; setEmpList(state.cliAuto); cliHint(); speHint(); }
 function aplicaServico(inp){
   const v = findSrv(inp.value); if(!v) return;
   if(v.descricao && normNome(inp.value) !== normNome(v.descricao)) inp.value = v.descricao;
@@ -3445,7 +3536,7 @@ async function importar(t){
 function exportCad(t){
   const c = v => '"' + String(v ?? '').replace(/"/g, '""') + '"';
   const rows = t === 'cli'
-    ? [['Razão social', 'CNPJ/CPF', 'Grupo', 'Contato', 'E-mail', 'Telefone', 'E-mail financeiro', 'Endereço', 'Empreendimentos', 'Observações'], ...state.clientes.map(x => [x.nome, x.cnpj, x.grupo, x.contato, x.email, x.telefone, x.emailFinanceiro, x.endereco, empsDe(x).join(' | '), x.obs])]
+    ? [['Razão social', 'CNPJ/CPF', 'Grupo', 'Contato', 'E-mail', 'Telefone', 'E-mail financeiro', 'Endereço', 'Empreendimentos (SPE · CNPJ)', 'Observações'], ...state.clientes.map(x => [x.nome, x.cnpj, x.grupo, x.contato, x.email, x.telefone, x.emailFinanceiro, x.endereco, spesDe(x).map(e => e.nome + (temSpe(e) ? ' (' + [e.razao, e.cnpj].filter(Boolean).join(' · ') + ')' : '')).join(' | '), x.obs])]
     : [['Serviço', 'Descrição', 'Valor de referência', 'Observações'], ...state.servicos.map(x => [x.nome, x.descricao, x.valor === '' || x.valor == null ? '' : String(x.valor).replace('.', ','), x.obs])];
   download(`${t === 'cli' ? 'clientes' : 'servicos'}-${today()}.csv`, '﻿' + rows.map(r => r.map(c).join(';')).join('\r\n'), 'text/csv;charset=utf-8');
 }
@@ -3464,6 +3555,27 @@ $('#srvImport').onclick = () => importar('srv');
 $('#cliCsv').onclick = () => exportCad('cli');
 $('#srvCsv').onclick = () => exportCad('srv');
 $('#c_save').onclick = saveCliModal;
+$('#c_addEmp').onclick = () => { $('#c_emps').insertAdjacentHTML('beforeend', cEmpRow({})); $$('#c_emps .ce_n').pop().focus(); };
+$('#c_emps').onclick = e => { if(e.target.closest('[data-delce]')){ e.target.closest('tr').remove(); if(!$('#c_emps tr')) $('#c_emps').innerHTML = cEmpRow({}); } };
+$('#c_grupo').addEventListener('input', renderCMerge);
+$('#c_merge').onclick = async e => {
+  if(!e.target.closest('#c_mergeBtn')) return;
+  const ir = irmaosDoGrupo(Object.assign({}, cliEdit, {grupo: $('#c_grupo').value}));
+  if(!confirm(`Juntar neste cliente os cadastros abaixo, como empreendimentos com CNPJ próprio?\n\n${ir.map(x => '• ' + x.nome + (x.cnpj ? ' (' + x.cnpj + ')' : '')).join('\n')}\n\nOs dados de cada um viram uma linha em “Empreendimentos” e os cadastros separados são excluídos ao salvar. As propostas não mudam.`)) return;
+  const atuais = readCEmps(), novos = [];
+  ir.forEach(x => {
+    const nomes = empsDe(x);
+    (nomes.length ? nomes : [x.nome]).forEach(n => {
+      const ja = atuais.find(a => normNome(a.nome) === normNome(n));
+      if(ja){ if(!ja.razao) ja.razao = x.nome; if(!ja.cnpj) ja.cnpj = x.cnpj || ''; }
+      else novos.push({nome: n, razao: x.nome, cnpj: x.cnpj || ''});
+    });
+    if(!cliEdit.email && x.email) $('#c_email').value = $('#c_email').value || x.email;
+  });
+  $('#c_emps').innerHTML = [...atuais, ...novos].map(cEmpRow).join('');
+  cliEdit._juntar = ir.map(x => x.id);
+  $('#c_merge').innerHTML = `<span class="sub">${ir.length} cadastro(s) serão juntados ao salvar.</span>`;
+};
 $('#v_save').onclick = saveSrvModal;
 $('#c_del').onclick = async () => {
   if(!confirm('Excluir este cliente do cadastro? As propostas e os lançamentos dele continuam como estão.')) return;
@@ -3475,24 +3587,30 @@ $('#v_del').onclick = async () => {
 };
 $('#drawer').addEventListener('input', e => {
   if(e.target.id === 'i_cliente'){
-    const c = findCli(e.target.value);
-    if(c){ if(state.cliAuto && state.cliAuto.id !== c.id) soltaClienteAnterior(); aplicaCliente(c); }
+    const s = findSpe(e.target.value, '');
+    const c = s ? s.cli : findCli(e.target.value);
+    if(s){ if(state.cliAuto && state.cliAuto.id !== s.cli.id) soltaClienteAnterior(); aplicaSpe(s); }
+    else if(c){ if(state.cliAuto && state.cliAuto.id !== c.id) soltaClienteAnterior(); aplicaCliente(c); }
     else { if(state.cliAuto && normNome(e.target.value) !== normNome(state.cliAuto.nome)) soltaClienteAnterior(); setEmpList(null); cliHint(); }
   }
   if(e.target.classList && e.target.classList.contains('idsc')) aplicaServico(e.target);
 });
-$('#drawer').addEventListener('change', e => { if(e.target.id === 'i_clienteCnpj'){ const c = findCli('', e.target.value); if(c) aplicaCliente(c); else cliHint(); } });
+$('#drawer').addEventListener('change', e => {
+  if(e.target.id === 'i_clienteCnpj'){ const s = findSpe('', e.target.value); if(s){ aplicaSpe(s); return; } const c = findCli('', e.target.value); if(c) aplicaCliente(c); else { cliHint(); speHint(); } }
+  if(e.target.id === 'i_empreendimento'){ const c = state.cliAuto || findCli($('#i_cliente').value, $('#i_clienteCnpj').value); if(c) aplicaEmp(c, findEmp(c, e.target.value)); }
+});
 $('#drawer').addEventListener('click', e => {
   if(e.target.id !== 'lnkCadCli') return;
   e.preventDefault();
   const emp = $('#i_empreendimento').value.trim();
-  openCli(null, {nome: $('#i_cliente').value.trim(), cnpj: $('#i_clienteCnpj').value.trim(), contato: $('#i_contato').value.trim(), email: $('#i_email').value.trim(), telefone: $('#i_telefone').value.trim(), empreendimentos: emp ? [emp] : []});
+  openCli(null, {nome: $('#i_cliente').value.trim(), cnpj: $('#i_clienteCnpj').value.trim(), contato: $('#i_contato').value.trim(), email: $('#i_email').value.trim(), telefone: $('#i_telefone').value.trim(), empreendimentos: emp ? [emp] : [], emps: emp ? [{nome: emp, razao: '', cnpj: ''}] : []});
 });
 $('#recModal').addEventListener('change', e => {
   if(e.target.id !== 'r_cliente') return;
-  const c = findCli(e.target.value); setEmpList(c);
+  const s = findSpe(e.target.value, ''), c = s ? s.cli : findCli(e.target.value); setEmpList(c);
   const em = empsDe(c);
-  if(c && em.length === 1 && !$('#r_empreendimento').value.trim()) $('#r_empreendimento').value = em[0];
+  if(s && s.emp.nome && !$('#r_empreendimento').value.trim()) $('#r_empreendimento').value = s.emp.nome;
+  else if(c && em.length === 1 && !$('#r_empreendimento').value.trim()) $('#r_empreendimento').value = em[0];
 });
 
 /* ================== Campos de valor (1.234,56), CNPJ/CPF e listas suspensas ================== */
